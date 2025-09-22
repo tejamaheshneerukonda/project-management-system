@@ -1,0 +1,44 @@
+# Minimal Requirements for Project Management System
+# Core Django Framework
+Django==5.2.6
+django-environ==0.11.2
+
+# Django REST Framework
+djangorestframework==3.16.1
+django-cors-headers==4.7.0
+
+# Real-time Features (WebSocket)
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0
+redis==6.2.0
+
+# Database Support
+psycopg2-binary==2.9.10
+dj-database-url==3.0.1
+
+# Authentication
+django-allauth==0.57.0
+argon2-cffi==21.3.0
+argon2-cffi-bindings==25.1.0
+
+# File Storage
+pillow==11.3.0
+
+# Background Tasks
+celery==5.3.4
+django-celery-beat==2.5.0
+kombu==5.5.4
+
+# Production Server
+gunicorn==23.0.0
+whitenoise==6.9.0
+
+# Utilities
+python-dateutil==2.9.0.post0
+pytz==2023.3
+
+# HTTP Requests
+requests==2.32.4
+urllib3==2.5.0
+certifi==2025.6.15
