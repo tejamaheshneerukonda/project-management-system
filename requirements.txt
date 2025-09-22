@@ -96,14 +96,8 @@ django-timezone-field==7.1
 django-taggit==6.1.0
 
 # Documentation
-markdown==3.8.2
+Markdown==3.8.2
 reportlab==4.4.3
-
-# Testing & Quality
-pytest==8.4.1
-pytest-django==4.11.1
-pytest-dotenv==0.5.2
-coverage==7.10.2
 
 # Additional Django Packages
 django-leaflet==0.32.0
@@ -112,10 +106,6 @@ django-js-asset==3.1.2
 # WebSocket & Real-time
 websocket-client==1.8.0
 websockets==15.0.1
-
-# Environment & Configuration
-python-decouple==3.8
-python-dotenv==1.1.1
 
 # File Processing
 lxml==6.0.0
@@ -147,31 +137,6 @@ service-identity==24.2.0
 # System & Process Management
 psutil==6.1.0
 schedule==1.2.2
-
-# GUI & Desktop (if needed)
-PySimpleGUI==5.0.8.3
-plyer==2.1.0
-
-# Audio Processing (if needed)
-PyAudio==0.2.14
-pyttsx3==2.99
-SpeechRecognition==3.14.3
-sounddevice==0.5.2
-
-# Machine Learning (if needed)
-scikit-learn==1.7.0
-scipy==1.16.0
-torch==2.7.1+cu118
-torchvision==0.22.1+cu118
-torchaudio==2.7.1+cu118
-
-# Computer Vision (if needed)
-opencv-python==4.8.1.78
-
-# Natural Language Processing (if needed)
-transformers==4.53.0
-tokenizers==0.21.2
-datasets==3.6.0
 
 # Additional Utilities
 click==8.2.1
