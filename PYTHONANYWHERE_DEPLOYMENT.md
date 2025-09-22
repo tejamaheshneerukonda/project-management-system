@@ -55,11 +55,14 @@ pip3.10 install --user -r requirements-pythonanywhere-minimal.txt
 ### 5. Configure Database
 
 ```bash
-# Run migrations
-python3.10 manage.py migrate
+# Run migrations (use PythonAnywhere-specific manage.py)
+python3.10 manage_pythonanywhere.py migrate
 
 # Create superuser
-python3.10 manage.py createsuperuser
+python3.10 manage_pythonanywhere.py createsuperuser
+
+# Collect static files
+python3.10 manage_pythonanywhere.py collectstatic --noinput
 ```
 
 ### 6. Configure Web App
@@ -163,9 +166,11 @@ pip3.10 install --user -r requirements-pythonanywhere-minimal.txt
 
 **2. ModuleNotFoundError: No module named 'channels'**
 ```bash
-# Use the PythonAnywhere settings that don't require channels:
-# In WSGI file, use: project_manager.settings_pythonanywhere
-# This disables WebSocket features for free tier compatibility
+# Use the PythonAnywhere-specific manage.py file:
+python3.10 manage_pythonanywhere.py migrate
+python3.10 manage_pythonanywhere.py createsuperuser
+
+# This uses settings_pythonanywhere.py which removes channels dependency
 ```
 
 **3. Import Errors**

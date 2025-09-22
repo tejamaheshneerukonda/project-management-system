@@ -68,11 +68,14 @@ CACHES = {
 # Remove channels from INSTALLED_APPS for PythonAnywhere free tier
 INSTALLED_APPS = [app for app in INSTALLED_APPS if app != 'channels']
 
-# Remove channels middleware
-MIDDLEWARE = [middleware for middleware in MIDDLEWARE if middleware != 'channels.middleware.WebSocketMiddleware']
+# Remove channels middleware if it exists
+if 'channels.middleware.WebSocketMiddleware' in MIDDLEWARE:
+    MIDDLEWARE = [middleware for middleware in MIDDLEWARE if middleware != 'channels.middleware.WebSocketMiddleware']
 
 # Disable ASGI application (use WSGI only)
-# ASGI_APPLICATION = None
+if hasattr(globals(), 'ASGI_APPLICATION'):
+    ASGI_APPLICATION = None
 
 # Remove channel layers configuration
-# CHANNEL_LAYERS = None
+if hasattr(globals(), 'CHANNEL_LAYERS'):
+    CHANNEL_LAYERS = None
