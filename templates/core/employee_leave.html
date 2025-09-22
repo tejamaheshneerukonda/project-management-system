@@ -353,6 +353,21 @@ function handleLeaveBalanceUpdate(data) {
             .catch(error => {
                 console.error('Error fetching updated pending count:', error);
             });
+    } else if (data.action === 'status_changed' && data.data) {
+        // Handle rejection - balance unchanged but show notification
+        showWarningToast(`Leave request rejected: ${data.data.message}`);
+        
+        // Update pending requests count
+        fetch('/employee/leave/?ajax=1')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updatePendingRequests(data.pending_requests);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching updated pending count:', error);
+            });
     }
 }
 

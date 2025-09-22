@@ -1,173 +1,186 @@
-# ProjectManager Pro
+# Project Management System
 
-A professional, offline project management system built with Django. Perfect for companies that value data privacy and security.
+A comprehensive Django-based project management system with real-time features, employee management, and leave tracking capabilities.
 
-## Features
+## 🚀 Features
 
-- **100% Offline**: Your data never leaves your server
-- **Enterprise Ready**: Scalable architecture for teams of any size
-- **Modern UI**: Beautiful, responsive interface built with Bootstrap 5
-- **User Authentication**: Secure login and registration system
-- **Project Management**: Complete project lifecycle management
-- **Team Collaboration**: Multi-user support with role-based permissions
-- **Analytics & Reporting**: Comprehensive project insights
-- **One-Time Purchase**: No monthly subscriptions
+### Core Functionality
+- **Company Management**: Multi-company support with admin dashboards
+- **Employee Management**: Complete employee lifecycle management
+- **Project Management**: Project creation, task assignment, and tracking
+- **Leave Management**: Real-time leave request and approval system
+- **Time Tracking**: Employee timesheet management
+- **Performance Goals**: Goal setting and tracking system
 
-## Quick Start
+### Real-Time Features
+- **Live Updates**: WebSocket-powered real-time notifications
+- **Leave Balance**: Automatic balance updates when requests are approved
+- **Cross-Browser Sync**: Updates across multiple browser sessions
+- **Instant Notifications**: Toast notifications for all actions
 
-### Prerequisites
+### Advanced Features
+- **Document Management**: File upload and sharing system
+- **Chat System**: Employee-to-employee communication
+- **Analytics Dashboard**: Performance insights and reporting
+- **Mobile Responsive**: Works seamlessly on all devices
 
-- Python 3.8 or higher
+## 🛠️ Technology Stack
+
+- **Backend**: Django 5.2.6, Django Channels
+- **Frontend**: Bootstrap 5, Chart.js, Font Awesome
+- **Real-time**: WebSocket (Django Channels)
+- **Database**: SQLite (development), PostgreSQL (production ready)
+- **Authentication**: Django's built-in authentication system
+
+## 📋 Prerequisites
+
+- Python 3.8+
 - pip (Python package installer)
+- Git
 
-### Installation
+## 🚀 Installation
 
-1. **Clone or download the project**
+1. **Clone the repository**
    ```bash
-   # If you have the project files, navigate to the project directory
-   cd "E:\project management system"
+   git clone https://github.com/tejamaheshneerukonda/project-management-system.git
+   cd project-management-system
    ```
 
-2. **Create a virtual environment**
+2. **Create virtual environment**
    ```bash
    python -m venv venv
-   ```
-
-3. **Activate the virtual environment**
-   ```bash
    # On Windows
    venv\Scripts\activate
-   
    # On macOS/Linux
    source venv/bin/activate
    ```
 
-4. **Install dependencies**
+3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-5. **Run database migrations**
+4. **Run migrations**
    ```bash
+   python manage.py makemigrations
    python manage.py migrate
    ```
 
-6. **Create a superuser (optional)**
+5. **Create superuser**
    ```bash
    python manage.py createsuperuser
    ```
 
-7. **Collect static files**
-   ```bash
-   python manage.py collectstatic
-   ```
-
-8. **Start the development server**
+6. **Run the development server**
    ```bash
    python manage.py runserver
    ```
 
-9. **Open your browser and visit**
-   ```
-   http://127.0.0.1:8000
-   ```
+7. **Access the application**
+   - Open your browser and go to `http://127.0.0.1:8000`
+   - Login with your superuser credentials
 
-## Default Login Credentials
+## 🎯 Usage
 
-- **Username**: admin
-- **Password**: admin123
+### Company Admin Dashboard
+- Manage employees and projects
+- Approve/reject leave requests
+- View analytics and reports
+- Handle document management
 
-## Project Structure
+### Employee Dashboard
+- Submit leave requests
+- Track time and tasks
+- View performance goals
+- Access company announcements
+
+### Real-Time Features
+- Leave requests update instantly across all browsers
+- Balance calculations happen automatically
+- Notifications appear without page refresh
+
+## 🔧 Configuration
+
+### Environment Variables
+Create a `.env` file in the project root:
+```env
+DEBUG=True
+SECRET_KEY=your-secret-key-here
+DATABASE_URL=sqlite:///db.sqlite3
+```
+
+### WebSocket Configuration
+The system uses Django Channels with InMemoryChannelLayer for development and RedisChannelLayer for production.
+
+## 📁 Project Structure
 
 ```
-project management system/
+project-management-system/
 ├── core/                    # Main application
-│   ├── migrations/         # Database migrations
-│   ├── templates/          # HTML templates
-│   ├── models.py          # Database models
-│   ├── views.py           # View functions
-│   └── urls.py            # URL patterns
+│   ├── models.py           # Database models
+│   ├── views.py            # View functions
+│   ├── api_views.py        # API endpoints
+│   ├── consumers.py        # WebSocket consumers
+│   └── urls.py             # URL patterns
+├── templates/              # HTML templates
+├── static/                 # Static files (CSS, JS, images)
 ├── project_manager/        # Django project settings
-│   ├── settings.py        # Project configuration
-│   ├── urls.py            # Main URL configuration
-│   └── wsgi.py            # WSGI configuration
-├── static/                # Static files (CSS, JS, images)
-│   ├── css/               # Stylesheets
-│   ├── js/                # JavaScript files
-│   └── images/            # Image assets
-├── templates/             # Global templates
-├── manage.py              # Django management script
-├── requirements.txt       # Python dependencies
-└── README.md              # This file
+└── requirements.txt        # Python dependencies
 ```
 
-## Features Overview
+## 🧪 Testing
 
-### Home Page
-- Professional landing page with modern design
-- Feature highlights and benefits
-- Call-to-action sections
-- Responsive design for all devices
+Run the test suite:
+```bash
+python manage.py test
+```
 
-### Authentication
-- Secure user registration and login
-- Password validation and security
-- Session management
-- User profile management
+Check system configuration:
+```bash
+python manage.py check
+```
 
-### Navigation
-- Fixed navigation bar with responsive design
-- User authentication status display
-- Dropdown menus for user actions
-- Mobile-friendly navigation
+## 🚀 Deployment
 
-## Customization
+### Production Settings
+1. Set `DEBUG=False` in settings
+2. Configure proper database (PostgreSQL recommended)
+3. Set up Redis for WebSocket channels
+4. Configure static file serving
+5. Set up SSL certificates
 
-### Styling
-- Modify `static/css/style.css` for custom styling
-- Bootstrap 5 framework for responsive design
-- Font Awesome icons for enhanced UI
-- Custom CSS variables for easy theming
+### Docker Deployment
+```bash
+docker-compose up -d
+```
 
-### Templates
-- Base template in `templates/base.html`
-- Page-specific templates in `templates/core/`
-- Django template inheritance for consistency
+## 🤝 Contributing
 
-## Production Deployment
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-For production deployment:
+## 📝 License
 
-1. **Update settings.py**
-   - Set `DEBUG = False`
-   - Configure `ALLOWED_HOSTS`
-   - Set up proper database (PostgreSQL recommended)
-   - Configure static file serving
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-2. **Security**
-   - Generate a new `SECRET_KEY`
-   - Set up HTTPS
-   - Configure proper file permissions
-   - Set up regular backups
+## 👨‍💻 Author
 
-3. **Performance**
-   - Use a production WSGI server (Gunicorn)
-   - Set up reverse proxy (Nginx)
-   - Configure caching
-   - Optimize static file serving
+**Teja Mahesh Neerukonda**
+- GitHub: [@tejamaheshneerukonda](https://github.com/tejamaheshneerukonda)
 
-## Support
+## 🙏 Acknowledgments
 
-For technical support or questions:
-- Email: support@projectmanagerpro.com
-- Documentation: Available in the admin panel
-- Updates: Regular updates provided
+- Django community for the excellent framework
+- Bootstrap team for the responsive UI components
+- Chart.js for data visualization capabilities
 
-## License
+## 📞 Support
 
-This software is proprietary. All rights reserved.
+If you have any questions or need help, please open an issue on GitHub or contact the author.
 
-## Version
+---
 
-Current Version: 1.0.0
-Last Updated: January 2025
+**Made with ❤️ using Django and modern web technologies**

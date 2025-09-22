@@ -1863,6 +1863,38 @@ def reject_leave(request, request_id):
         
         channel_layer = get_channel_layer()
         if channel_layer:
+            # Calculate updated leave balance for the employee (rejection doesn't change balance)
+            def calculate_employee_leave_balance(emp):
+                annual_allocation = 20
+                sick_allocation = 10
+                personal_allocation = 5
+                
+                approved_annual = LeaveRequest.objects.filter(
+                    employee=emp,
+                    leave_type='VACATION',
+                    status='APPROVED'
+                ).aggregate(total=Sum('total_days'))['total'] or 0
+                
+                approved_sick = LeaveRequest.objects.filter(
+                    employee=emp,
+                    leave_type='SICK_LEAVE',
+                    status='APPROVED'
+                ).aggregate(total=Sum('total_days'))['total'] or 0
+                
+                approved_personal = LeaveRequest.objects.filter(
+                    employee=emp,
+                    leave_type='PERSONAL',
+                    status='APPROVED'
+                ).aggregate(total=Sum('total_days'))['total'] or 0
+                
+                return {
+                    'annual': float(annual_allocation - approved_annual),
+                    'sick': float(sick_allocation - approved_sick),
+                    'personal': float(personal_allocation - approved_personal),
+                }
+            
+            updated_balance = calculate_employee_leave_balance(leave_request.employee)
+            
             async_to_sync(channel_layer.group_send)(
                 f'leave_requests_company_{company.id}',
                 {
@@ -1873,6 +1905,23 @@ def reject_leave(request, request_id):
                         'status': 'REJECTED',
                         'reviewed_by': request.user.username,
                         'reviewed_at': leave_request.reviewed_at.strftime('%Y-%m-%d %H:%M'),
+                    }
+                }
+            )
+            
+            # Send balance update to employee-specific room (balance unchanged for rejection)
+            async_to_sync(channel_layer.group_send)(
+                f'employee_balance_{leave_request.employee.id}',
+                {
+                    'type': 'leave_balance_update',
+                    'action': 'status_changed',
+                    'data': {
+                        'employee_id': leave_request.employee.id,
+                        'leave_balance': updated_balance,
+                        'leave_type': leave_request.get_leave_type_display(),
+                        'days_requested': str(leave_request.total_days),
+                        'status': 'REJECTED',
+                        'message': 'Leave request rejected - balance unchanged'
                     }
                 }
             )
