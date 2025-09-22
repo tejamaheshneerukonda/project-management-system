@@ -1,0 +1,324 @@
+{% extends 'base_company_admin.html' %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'core:company_dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'core:leave_management' %}">Leave Management</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Request Details</li>
+                        </ol>
+                    </nav>
+                    <h2 class="mb-1">
+                        <i class="fas fa-calendar-times me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Detailed information about the leave request</p>
+                </div>
+                <div>
+                    <a href="{% url 'core:leave_management' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to List
+                    </a>
+                    {% if leave_request.status == "PENDING" %}
+                        <button class="btn btn-success me-2" onclick="approveLeave({{ leave_request.id }})">
+                            <i class="fas fa-check me-1"></i>Approve
+                        </button>
+                        <button class="btn btn-danger" onclick="rejectLeave({{ leave_request.id }})">
+                            <i class="fas fa-times me-1"></i>Reject
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Request Details -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Request Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Employee</label>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                        {{ leave_request.employee.first_name|first|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ leave_request.employee.first_name }} {{ leave_request.employee.last_name }}</div>
+                                        <small class="text-muted">{{ leave_request.employee.employee_id }} • {{ leave_request.employee.department }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Leave Type</label>
+                                <div>
+                                    <span class="badge bg-info fs-6">
+                                        {% if leave_request.leave_type == "SICK_LEAVE" %}
+                                            <i class="fas fa-thermometer-half me-1"></i>Sick Leave
+                                        {% elif leave_request.leave_type == "VACATION" %}
+                                            <i class="fas fa-umbrella-beach me-1"></i>Vacation
+                                        {% elif leave_request.leave_type == "PERSONAL" %}
+                                            <i class="fas fa-user me-1"></i>Personal Leave
+                                        {% elif leave_request.leave_type == "MATERNITY" %}
+                                            <i class="fas fa-baby me-1"></i>Maternity Leave
+                                        {% elif leave_request.leave_type == "PATERNITY" %}
+                                            <i class="fas fa-baby-carriage me-1"></i>Paternity Leave
+                                        {% else %}
+                                            <i class="fas fa-calendar me-1"></i>{{ leave_request.get_leave_type_display }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Start Date</label>
+                                <div class="fs-5">{{ leave_request.start_date|date:"F d, Y" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">End Date</label>
+                                <div class="fs-5">{{ leave_request.end_date|date:"F d, Y" }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Duration</label>
+                                <div class="fs-5">{{ leave_request.total_days }} day{{ leave_request.total_days|pluralize }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Status</label>
+                                <div>
+                                    {% if leave_request.status == "PENDING" %}
+                                        <span class="badge bg-warning fs-6">
+                                            <i class="fas fa-clock me-1"></i>Pending
+                                        </span>
+                                    {% elif leave_request.status == "APPROVED" %}
+                                        <span class="badge bg-success fs-6">
+                                            <i class="fas fa-check me-1"></i>Approved
+                                        </span>
+                                    {% elif leave_request.status == "REJECTED" %}
+                                        <span class="badge bg-danger fs-6">
+                                            <i class="fas fa-times me-1"></i>Rejected
+                                        </span>
+                                    {% elif leave_request.status == "CANCELLED" %}
+                                        <span class="badge bg-secondary fs-6">
+                                            <i class="fas fa-ban me-1"></i>Cancelled
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Reason</label>
+                                <div class="border rounded p-3 bg-light">
+                                    {{ leave_request.reason|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                        {% if leave_request.emergency_contact %}
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Emergency Contact</label>
+                                <div>{{ leave_request.emergency_contact }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if leave_request.emergency_phone %}
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Emergency Phone</label>
+                                <div>{{ leave_request.emergency_phone }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Request Timeline -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Request Timeline
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Request Submitted</div>
+                                <div class="timeline-text">{{ leave_request.requested_at|date:"M d, Y" }} at {{ leave_request.requested_at|time:"g:i A" }}</div>
+                            </div>
+                        </div>
+                        {% if leave_request.reviewed_at %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Request {{ leave_request.get_status_display }}</div>
+                                <div class="timeline-text">{{ leave_request.reviewed_at|date:"M d, Y" }} at {{ leave_request.reviewed_at|time:"g:i A" }}</div>
+                                {% if leave_request.reviewed_by %}
+                                    <div class="timeline-text">by {{ leave_request.reviewed_by.get_full_name|default:leave_request.reviewed_by.username }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if leave_request.status == "PENDING" %}
+                            <button class="btn btn-success" onclick="approveLeave({{ leave_request.id }})">
+                                <i class="fas fa-check me-2"></i>Approve Request
+                            </button>
+                            <button class="btn btn-danger" onclick="rejectLeave({{ leave_request.id }})">
+                                <i class="fas fa-times me-2"></i>Reject Request
+                            </button>
+                        {% endif %}
+                        <button class="btn btn-outline-primary" onclick="editLeave({{ leave_request.id }})">
+                            <i class="fas fa-edit me-2"></i>Edit Request
+                        </button>
+                        <a href="{% url 'core:leave_management' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #007bff;
+}
+
+.timeline-title {
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.timeline-text {
+    margin-bottom: 5px;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+</style>
+
+{% block extra_js %}
+<script>
+function approveLeave(requestId) {
+    if (confirm('Are you sure you want to approve this leave request?')) {
+        fetch(`/api/leave/${requestId}/approve/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessToast('Leave request approved successfully!');
+                location.reload();
+            } else {
+                showErrorToast('Error approving leave request: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('Error approving leave request. Please try again.');
+        });
+    }
+}
+
+function rejectLeave(requestId) {
+    if (confirm('Are you sure you want to reject this leave request?')) {
+        fetch(`/api/leave/${requestId}/reject/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessToast('Leave request rejected successfully!');
+                location.reload();
+            } else {
+                showErrorToast('Error rejecting leave request: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('Error rejecting leave request. Please try again.');
+        });
+    }
+}
+
+function editLeave(requestId) {
+    window.location.href = `/company/leave-management/${requestId}/edit/`;
+}
+</script>
+{% endblock %}
+{% endblock %}

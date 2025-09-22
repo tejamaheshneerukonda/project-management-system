@@ -1,0 +1,361 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block page_title %}Notifications{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="markAllAsRead()">
+        <i class="fas fa-check-double me-2"></i>Mark All Read
+    </button>
+    <button type="button" class="btn btn-outline-secondary" onclick="refreshNotifications()">
+        <i class="fas fa-sync me-2"></i>Refresh
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Notification Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="notificationFilter" id="all" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary" for="all">All</label>
+                            
+                            <input type="radio" class="btn-check" name="notificationFilter" id="unread" autocomplete="off">
+                            <label class="btn btn-outline-warning" for="unread">Unread</label>
+                            
+                            <input type="radio" class="btn-check" name="notificationFilter" id="tasks" autocomplete="off">
+                            <label class="btn btn-outline-info" for="tasks">Tasks</label>
+                            
+                            <input type="radio" class="btn-check" name="notificationFilter" id="projects" autocomplete="off">
+                            <label class="btn btn-outline-success" for="projects">Projects</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoRefresh" checked>
+                            <label class="form-check-label" for="autoRefresh">
+                                Auto-refresh
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Notifications</h6>
+                <span class="badge bg-primary" id="notificationCount">{{ notifications|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if notifications %}
+                <div class="list-group list-group-flush">
+                    {% for notification in notifications %}
+                    <div class="list-group-item list-group-item-action notification-item {% if not notification.is_read %}unread{% endif %}" 
+                         data-notification-id="{{ notification.id }}">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <div class="notification-icon">
+                                    {% if notification.type == 'TASK' %}
+                                        <i class="fas fa-tasks text-info"></i>
+                                    {% elif notification.type == 'PROJECT' %}
+                                        <i class="fas fa-project-diagram text-success"></i>
+                                    {% elif notification.type == 'MEETING' %}
+                                        <i class="fas fa-calendar text-warning"></i>
+                                    {% elif notification.type == 'SYSTEM' %}
+                                        <i class="fas fa-cog text-secondary"></i>
+                                    {% else %}
+                                        <i class="fas fa-bell text-primary"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 notification-title">{{ notification.title }}</h6>
+                                    <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                                </div>
+                                <p class="mb-1 notification-message">{{ notification.message }}</p>
+                                {% if notification.action_url %}
+                                <small>
+                                    <a href="{{ notification.action_url }}" class="text-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>View Details
+                                    </a>
+                                </small>
+                                {% endif %}
+                            </div>
+                            <div class="col-auto">
+                                <div class="btn-group-vertical" role="group">
+                                    {% if not notification.is_read %}
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            onclick="markAsRead({{ notification.id }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                            onclick="deleteNotification({{ notification.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No notifications</h5>
+                    <p class="text-muted">You're all caught up! New notifications will appear here.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Settings -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Notification Preferences</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Email Notifications</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="emailTasks" checked>
+                            <label class="form-check-label" for="emailTasks">
+                                Task assignments and updates
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="emailProjects" checked>
+                            <label class="form-check-label" for="emailProjects">
+                                Project updates and deadlines
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="emailMeetings">
+                            <label class="form-check-label" for="emailMeetings">
+                                Meeting reminders
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Push Notifications</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="pushUrgent" checked>
+                            <label class="form-check-label" for="pushUrgent">
+                                Urgent notifications only
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="pushDeadlines" checked>
+                            <label class="form-check-label" for="pushDeadlines">
+                                Deadline reminders
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="pushSystem">
+                            <label class="form-check-label" for="pushSystem">
+                                System announcements
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-primary" onclick="saveNotificationPreferences()">
+                            <i class="fas fa-save me-2"></i>Save Preferences
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh functionality
+    let autoRefreshInterval;
+    
+    function startAutoRefresh() {
+        if (document.getElementById('autoRefresh').checked) {
+            autoRefreshInterval = setInterval(refreshNotifications, 30000); // 30 seconds
+        } else {
+            clearInterval(autoRefreshInterval);
+        }
+    }
+    
+    document.getElementById('autoRefresh').addEventListener('change', startAutoRefresh);
+    startAutoRefresh();
+    
+    // Filter functionality
+    document.querySelectorAll('input[name="notificationFilter"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            filterNotifications(this.id);
+        });
+    });
+});
+
+function markAsRead(notificationId) {
+    fetch(`/api/notifications/${notificationId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            notificationItem.classList.remove('unread');
+            updateNotificationCount();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function markAllAsRead() {
+    fetch('/api/notifications/mark-all-read/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelectorAll('.notification-item').forEach(item => {
+                item.classList.remove('unread');
+            });
+            updateNotificationCount();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function deleteNotification(notificationId) {
+    if (confirm('Are you sure you want to delete this notification?')) {
+        fetch(`/api/notifications/${notificationId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                notificationItem.remove();
+                updateNotificationCount();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+function refreshNotifications() {
+    location.reload();
+}
+
+function filterNotifications(filter) {
+    const notifications = document.querySelectorAll('.notification-item');
+    
+    notifications.forEach(notification => {
+        const type = notification.querySelector('.notification-icon i').className;
+        let show = true;
+        
+        switch(filter) {
+            case 'unread':
+                show = notification.classList.contains('unread');
+                break;
+            case 'tasks':
+                show = type.includes('fa-tasks');
+                break;
+            case 'projects':
+                show = type.includes('fa-project-diagram');
+                break;
+        }
+        
+        notification.style.display = show ? 'block' : 'none';
+    });
+}
+
+function updateNotificationCount() {
+    const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+    document.getElementById('notificationCount').textContent = unreadCount;
+}
+
+function saveNotificationPreferences() {
+    const preferences = {
+        emailTasks: document.getElementById('emailTasks').checked,
+        emailProjects: document.getElementById('emailProjects').checked,
+        emailMeetings: document.getElementById('emailMeetings').checked,
+        pushUrgent: document.getElementById('pushUrgent').checked,
+        pushDeadlines: document.getElementById('pushDeadlines').checked,
+        pushSystem: document.getElementById('pushSystem').checked,
+    };
+    
+    fetch('/api/notifications/preferences/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(preferences),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Preferences saved successfully!', 'success');
+        } else {
+            showAlert('Error saving preferences', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error saving preferences', 'error');
+    });
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.row'));
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_notifications.css' %}">
+{% endblock %}
+{% endblock %}

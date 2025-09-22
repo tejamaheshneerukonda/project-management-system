@@ -1,0 +1,343 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block page_title %}Analytics Dashboard{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+        <i class="fas fa-calendar me-2"></i>Time Range
+    </button>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="#" onclick="changeTimeRange('week')">This Week</a></li>
+        <li><a class="dropdown-item" href="#" onclick="changeTimeRange('month')">This Month</a></li>
+        <li><a class="dropdown-item" href="#" onclick="changeTimeRange('year')">This Year</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Productivity Metrics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tasks Today</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ productivity_metrics.tasks_completed_today }}</div>
+                        <div class="small text-muted">Completed today</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tasks This Week</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ productivity_metrics.tasks_completed_week }}</div>
+                        <div class="small text-muted">Completed this week</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-week fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks This Month</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ productivity_metrics.tasks_completed_month }}</div>
+                        <div class="small text-muted">Completed this month</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Overdue Tasks</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ productivity_metrics.overdue_tasks }}</div>
+                        <div class="small text-muted">Need attention</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Task Completion Trends -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Task Completion Trends (Last 30 Days)</h6>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportChart('taskTrends')">PNG</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportChart('taskTrends', 'pdf')">PDF</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="taskTrendsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Time Distribution -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Weekly Time Distribution</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="weeklyHoursChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Project Contributions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Project Contributions</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="projectContributionsTable">
+                        <thead>
+                            <tr>
+                                <th>Project Name</th>
+                                <th>Total Tasks</th>
+                                <th>Completed</th>
+                                <th>Completion Rate</th>
+                                <th>Hours Logged</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in project_contributions %}
+                            <tr>
+                                <td>{{ project.project_name }}</td>
+                                <td>{{ project.total_tasks }}</td>
+                                <td>{{ project.completed_tasks }}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ project.completion_rate }}%"
+                                             aria-valuenow="{{ project.completion_rate }}" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                            {{ project.completion_rate|floatformat:1 }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ project.hours_logged|floatformat:1 }}h</td>
+                                <td>
+                                    <span class="badge badge-{{ project.status|lower }}">
+                                        {{ project.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No project contributions found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Productivity Insights -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Productivity Insights</h6>
+            </div>
+            <div class="card-body">
+                <div class="insight-item mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-lightbulb text-warning me-3"></i>
+                        <div>
+                            <h6 class="mb-1">Peak Productivity Hours</h6>
+                            <p class="text-muted mb-0">Based on your task completion patterns, you're most productive between 10 AM - 12 PM.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="insight-item mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-chart-line text-success me-3"></i>
+                        <div>
+                            <h6 class="mb-1">Weekly Trend</h6>
+                            <p class="text-muted mb-0">Your productivity has increased by 15% compared to last week.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-target text-info me-3"></i>
+                        <div>
+                            <h6 class="mb-1">Goal Progress</h6>
+                            <p class="text-muted mb-0">You're on track to exceed your monthly task completion goal by 20%.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <a href="{% url 'core:employee_tasks' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-tasks fa-2x mb-2"></i><br>
+                            View Tasks
+                        </a>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <a href="{% url 'core:employee_timesheet' %}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-clock fa-2x mb-2"></i><br>
+                            Time Tracking
+                        </a>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <a href="{% url 'core:employee_projects' %}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-project-diagram fa-2x mb-2"></i><br>
+                            Projects
+                        </a>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <a href="{% url 'core:employee_goals' %}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-bullseye fa-2x mb-2"></i><br>
+                            Goals
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Task Trends Chart
+    const taskTrendsData = {{ task_trends|safe }};
+    const taskTrendsCtx = document.getElementById('taskTrendsChart').getContext('2d');
+    
+    new Chart(taskTrendsCtx, {
+        type: 'line',
+        data: {
+            labels: taskTrendsData.map(item => item.date),
+            datasets: [{
+                label: 'Tasks Completed',
+                data: taskTrendsData.map(item => item.completed),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Daily Task Completion'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Weekly Hours Chart
+    const weeklyHoursData = {{ weekly_hours|safe }};
+    const weeklyHoursCtx = document.getElementById('weeklyHoursChart').getContext('2d');
+    
+    new Chart(weeklyHoursCtx, {
+        type: 'doughnut',
+        data: {
+            labels: weeklyHoursData.map(item => item.day),
+            datasets: [{
+                data: weeklyHoursData.map(item => item.hours),
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF',
+                    '#FF9F40',
+                    '#FF6384'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Hours by Day'
+                }
+            }
+        }
+    });
+});
+
+function changeTimeRange(range) {
+    // Implement time range change functionality
+    console.log('Changing time range to:', range);
+}
+
+function exportChart(chartId, format = 'png') {
+    // Implement chart export functionality
+    console.log('Exporting chart:', chartId, 'as', format);
+}
+</script>
+{% endblock %}

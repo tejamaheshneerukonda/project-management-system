@@ -1,0 +1,779 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/notification_preferences.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid notification-preferences-wrapper">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-1">{{ title }}</h1>
+                <p class="text-muted mb-0">Customize how and when you receive notifications</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'core:notification_center' %}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Notifications
+                </a>
+                <button class="btn btn-primary" onclick="resetToDefaults()">
+                    <i class="fas fa-undo me-1"></i>Reset to Defaults
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preferences Form -->
+    <form method="POST" id="preferencesForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <!-- Channel Preferences -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-broadcast-tower me-2"></i>Delivery Channels
+                        </h5>
+                        <p class="card-subtitle text-muted mb-0">Choose how you want to receive notifications</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="preference-group">
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Email Notifications</h6>
+                                            <p class="preference-description">Receive notifications via email</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="email_enabled" name="email_enabled" {% if preferences.email_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="email_enabled"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">SMS Notifications</h6>
+                                            <p class="preference-description">Receive notifications via text message</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="sms_enabled" name="sms_enabled" {% if preferences.sms_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="sms_enabled"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-bell"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Push Notifications</h6>
+                                            <p class="preference-description">Receive push notifications on mobile devices</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="push_enabled" name="push_enabled" {% if preferences.push_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="push_enabled"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-globe"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Browser Notifications</h6>
+                                            <p class="preference-description">Receive browser-based notifications</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="browser_enabled" name="browser_enabled" {% if preferences.browser_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="browser_enabled"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-desktop"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">In-App Notifications</h6>
+                                            <p class="preference-description">Receive notifications within the application</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="in_app_enabled" name="in_app_enabled" {% if preferences.in_app_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="in_app_enabled"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Types -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list me-2"></i>Notification Types
+                        </h5>
+                        <p class="card-subtitle text-muted mb-0">Choose which types of notifications you want to receive</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="preference-group">
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-cog"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">System Notifications</h6>
+                                            <p class="preference-description">System updates and maintenance alerts</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="system_notifications" name="system_notifications" {% if preferences.system_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="system_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Performance Notifications</h6>
+                                            <p class="preference-description">Performance reviews and updates</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="performance_notifications" name="performance_notifications" {% if preferences.performance_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="performance_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Attendance Notifications</h6>
+                                            <p class="preference-description">Attendance alerts and reminders</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="attendance_notifications" name="attendance_notifications" {% if preferences.attendance_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="attendance_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-calendar-times"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Leave Notifications</h6>
+                                            <p class="preference-description">Leave requests and approvals</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="leave_notifications" name="leave_notifications" {% if preferences.leave_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="leave_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-stopwatch"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Timesheet Notifications</h6>
+                                            <p class="preference-description">Timesheet reminders and updates</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="timesheet_notifications" name="timesheet_notifications" {% if preferences.timesheet_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="timesheet_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Shift Notifications</h6>
+                                            <p class="preference-description">Shift changes and assignments</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="shift_notifications" name="shift_notifications" {% if preferences.shift_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="shift_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-project-diagram"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Project Notifications</h6>
+                                            <p class="preference-description">Project updates and milestones</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="project_notifications" name="project_notifications" {% if preferences.project_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="project_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-tasks"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Task Notifications</h6>
+                                            <p class="preference-description">Task assignments and updates</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="task_notifications" name="task_notifications" {% if preferences.task_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="task_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Deadline Notifications</h6>
+                                            <p class="preference-description">Deadline reminders and alerts</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="deadline_notifications" name="deadline_notifications" {% if preferences.deadline_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="deadline_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-birthday-cake"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Birthday Notifications</h6>
+                                            <p class="preference-description">Employee birthday reminders</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="birthday_notifications" name="birthday_notifications" {% if preferences.birthday_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="birthday_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-gift"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Anniversary Notifications</h6>
+                                            <p class="preference-description">Work anniversary celebrations</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="anniversary_notifications" name="anniversary_notifications" {% if preferences.anniversary_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="anniversary_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-graduation-cap"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Training Notifications</h6>
+                                            <p class="preference-description">Training reminders and updates</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="training_notifications" name="training_notifications" {% if preferences.training_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="training_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Meeting Notifications</h6>
+                                            <p class="preference-description">Meeting reminders and updates</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="meeting_notifications" name="meeting_notifications" {% if preferences.meeting_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="meeting_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Payroll Notifications</h6>
+                                            <p class="preference-description">Payroll updates and reminders</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="payroll_notifications" name="payroll_notifications" {% if preferences.payroll_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="payroll_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-heart"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Benefits Notifications</h6>
+                                            <p class="preference-description">Benefits updates and reminders</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="benefits_notifications" name="benefits_notifications" {% if preferences.benefits_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="benefits_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-file-alt"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Policy Notifications</h6>
+                                            <p class="preference-description">Policy changes and updates</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="policy_notifications" name="policy_notifications" {% if preferences.policy_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="policy_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preference-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="preference-info">
+                                        <div class="preference-icon">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        </div>
+                                        <div class="preference-details">
+                                            <h6 class="preference-title">Emergency Notifications</h6>
+                                            <p class="preference-description">Emergency alerts and urgent communications</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="emergency_notifications" name="emergency_notifications" {% if preferences.emergency_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="emergency_notifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Settings -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cog me-2"></i>Delivery Settings
+                        </h5>
+                        <p class="card-subtitle text-muted mb-0">Configure how often you receive notifications</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="digest_frequency" class="form-label">Digest Frequency</label>
+                            <select class="form-select" id="digest_frequency" name="digest_frequency">
+                                {% for value, label in digest_frequency_choices %}
+                                <option value="{{ value }}" {% if preferences.digest_frequency == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Choose how often you want to receive notification digests</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-moon me-2"></i>Quiet Hours
+                        </h5>
+                        <p class="card-subtitle text-muted mb-0">Set times when you don't want to receive notifications</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="quiet_hours_enabled" name="quiet_hours_enabled" {% if preferences.quiet_hours_enabled %}checked{% endif %}>
+                                <label class="form-check-label" for="quiet_hours_enabled">
+                                    Enable Quiet Hours
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="quiet_hours_start" class="form-label">Start Time</label>
+                                    <input type="time" class="form-control" id="quiet_hours_start" name="quiet_hours_start" value="{{ preferences.quiet_hours_start|default:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="quiet_hours_end" class="form-label">End Time</label>
+                                    <input type="time" class="form-control" id="quiet_hours_end" name="quiet_hours_end" value="{{ preferences.quiet_hours_end|default:'' }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Emergency notifications will still be sent during quiet hours
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Save Preferences
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="resetToDefaults()">
+                                <i class="fas fa-undo me-2"></i>Reset to Defaults
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-lg" onclick="previewSettings()">
+                                <i class="fas fa-eye me-2"></i>Preview Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Notification Preferences Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="previewContent">
+                <!-- Preview content will be generated here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitForm()">Save Preferences</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-fix readability on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply universal readability fix
+    if (typeof applyUniversalReadabilityFix === 'function') {
+        applyUniversalReadabilityFix();
+    }
+    
+    // Initialize quiet hours toggle
+    initializeQuietHours();
+    
+    // Add form change tracking
+    trackFormChanges();
+});
+
+// Initialize quiet hours functionality
+function initializeQuietHours() {
+    const quietHoursEnabled = document.getElementById('quiet_hours_enabled');
+    const startTime = document.getElementById('quiet_hours_start');
+    const endTime = document.getElementById('quiet_hours_end');
+    
+    function toggleQuietHours() {
+        const isEnabled = quietHoursEnabled.checked;
+        startTime.disabled = !isEnabled;
+        endTime.disabled = !isEnabled;
+        
+        if (!isEnabled) {
+            startTime.value = '';
+            endTime.value = '';
+        }
+    }
+    
+    quietHoursEnabled.addEventListener('change', toggleQuietHours);
+    toggleQuietHours(); // Initial call
+}
+
+// Track form changes
+function trackFormChanges() {
+    const form = document.getElementById('preferencesForm');
+    const inputs = form.querySelectorAll('input, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Add visual indicator that form has changes
+            form.classList.add('form-changed');
+        });
+    });
+}
+
+// Reset to default preferences
+function resetToDefaults() {
+    if (confirm('Are you sure you want to reset all preferences to their default values?')) {
+        // Reset channel preferences
+        document.getElementById('email_enabled').checked = true;
+        document.getElementById('sms_enabled').checked = false;
+        document.getElementById('push_enabled').checked = true;
+        document.getElementById('browser_enabled').checked = true;
+        document.getElementById('in_app_enabled').checked = true;
+        
+        // Reset type preferences
+        const typeCheckboxes = [
+            'system_notifications', 'performance_notifications', 'attendance_notifications',
+            'leave_notifications', 'timesheet_notifications', 'shift_notifications',
+            'project_notifications', 'task_notifications', 'deadline_notifications',
+            'birthday_notifications', 'anniversary_notifications', 'training_notifications',
+            'meeting_notifications', 'payroll_notifications', 'benefits_notifications',
+            'policy_notifications', 'emergency_notifications'
+        ];
+        
+        typeCheckboxes.forEach(id => {
+            document.getElementById(id).checked = true;
+        });
+        
+        // Reset delivery settings
+        document.getElementById('digest_frequency').value = 'IMMEDIATE';
+        
+        // Reset quiet hours
+        document.getElementById('quiet_hours_enabled').checked = false;
+        document.getElementById('quiet_hours_start').value = '';
+        document.getElementById('quiet_hours_end').value = '';
+        
+        showNotification('Preferences reset to defaults', 'success');
+    }
+}
+
+// Preview current settings
+function previewSettings() {
+    const form = document.getElementById('preferencesForm');
+    const formData = new FormData(form);
+    
+    // Generate preview content
+    let previewContent = '<div class="preview-summary">';
+    
+    // Channel preferences
+    previewContent += '<h6 class="mb-3"><i class="fas fa-broadcast-tower me-2"></i>Delivery Channels</h6>';
+    previewContent += '<ul class="list-unstyled mb-4">';
+    
+    const channels = [
+        { id: 'email_enabled', name: 'Email', icon: 'fas fa-envelope' },
+        { id: 'sms_enabled', name: 'SMS', icon: 'fas fa-mobile-alt' },
+        { id: 'push_enabled', name: 'Push', icon: 'fas fa-bell' },
+        { id: 'browser_enabled', name: 'Browser', icon: 'fas fa-globe' },
+        { id: 'in_app_enabled', name: 'In-App', icon: 'fas fa-desktop' }
+    ];
+    
+    channels.forEach(channel => {
+        const isEnabled = formData.get(channel.id) === 'on';
+        previewContent += `<li class="mb-2">
+            <i class="${channel.icon} me-2"></i>
+            ${channel.name}: <span class="badge bg-${isEnabled ? 'success' : 'secondary'}">${isEnabled ? 'Enabled' : 'Disabled'}</span>
+        </li>`;
+    });
+    
+    previewContent += '</ul>';
+    
+    // Notification types
+    previewContent += '<h6 class="mb-3"><i class="fas fa-list me-2"></i>Notification Types</h6>';
+    previewContent += '<div class="row">';
+    
+    const types = [
+        { id: 'system_notifications', name: 'System', icon: 'fas fa-cog' },
+        { id: 'performance_notifications', name: 'Performance', icon: 'fas fa-chart-line' },
+        { id: 'attendance_notifications', name: 'Attendance', icon: 'fas fa-clock' },
+        { id: 'leave_notifications', name: 'Leave', icon: 'fas fa-calendar-times' },
+        { id: 'timesheet_notifications', name: 'Timesheet', icon: 'fas fa-stopwatch' },
+        { id: 'shift_notifications', name: 'Shift', icon: 'fas fa-exchange-alt' },
+        { id: 'project_notifications', name: 'Project', icon: 'fas fa-project-diagram' },
+        { id: 'task_notifications', name: 'Task', icon: 'fas fa-tasks' },
+        { id: 'deadline_notifications', name: 'Deadline', icon: 'fas fa-exclamation-triangle' },
+        { id: 'birthday_notifications', name: 'Birthday', icon: 'fas fa-birthday-cake' },
+        { id: 'anniversary_notifications', name: 'Anniversary', icon: 'fas fa-gift' },
+        { id: 'training_notifications', name: 'Training', icon: 'fas fa-graduation-cap' },
+        { id: 'meeting_notifications', name: 'Meeting', icon: 'fas fa-users' },
+        { id: 'payroll_notifications', name: 'Payroll', icon: 'fas fa-dollar-sign' },
+        { id: 'benefits_notifications', name: 'Benefits', icon: 'fas fa-heart' },
+        { id: 'policy_notifications', name: 'Policy', icon: 'fas fa-file-alt' },
+        { id: 'emergency_notifications', name: 'Emergency', icon: 'fas fa-exclamation-circle' }
+    ];
+    
+    types.forEach(type => {
+        const isEnabled = formData.get(type.id) === 'on';
+        previewContent += `<div class="col-md-6 mb-2">
+            <i class="${type.icon} me-2"></i>
+            ${type.name}: <span class="badge bg-${isEnabled ? 'success' : 'secondary'}">${isEnabled ? 'Enabled' : 'Disabled'}</span>
+        </div>`;
+    });
+    
+    previewContent += '</div>';
+    
+    // Delivery settings
+    previewContent += '<h6 class="mb-3 mt-4"><i class="fas fa-cog me-2"></i>Delivery Settings</h6>';
+    previewContent += `<p><strong>Digest Frequency:</strong> ${document.getElementById('digest_frequency').selectedOptions[0].text}</p>`;
+    
+    // Quiet hours
+    const quietHoursEnabled = formData.get('quiet_hours_enabled') === 'on';
+    previewContent += '<h6 class="mb-3"><i class="fas fa-moon me-2"></i>Quiet Hours</h6>';
+    if (quietHoursEnabled) {
+        const startTime = formData.get('quiet_hours_start') || 'Not set';
+        const endTime = formData.get('quiet_hours_end') || 'Not set';
+        previewContent += `<p><strong>Enabled:</strong> Yes</p>`;
+        previewContent += `<p><strong>Start Time:</strong> ${startTime}</p>`;
+        previewContent += `<p><strong>End Time:</strong> ${endTime}</p>`;
+    } else {
+        previewContent += '<p><strong>Enabled:</strong> No</p>';
+    }
+    
+    previewContent += '</div>';
+    
+    document.getElementById('previewContent').innerHTML = previewContent;
+    
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+}
+
+// Submit form
+function submitForm() {
+    document.getElementById('preferencesForm').submit();
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Apply readability fixes when modals are shown
+document.addEventListener('shown.bs.modal', function(event) {
+    if (typeof applyUniversalReadabilityFix === 'function') {
+        applyUniversalReadabilityFix();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,288 @@
+/* Employee Verification Specific Styles */
+
+.verification-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.verification-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.verification-header {
+    background: linear-gradient(135deg, var(--primary-color), #1e40af);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.verification-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.verification-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.verification-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+.verification-body {
+    padding: 2rem;
+}
+
+/* Form Styles */
+.verification-form {
+    margin-bottom: 1.5rem;
+}
+
+.verification-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.verification-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.verification-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.verification-input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--gray-400);
+    z-index: 2;
+}
+
+.verification-input-group input {
+    padding-left: 3rem;
+    border: 2px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.verification-input-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+/* Help Text */
+.verification-help-text {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: 0.5rem;
+}
+
+/* Info Box */
+.verification-info-box {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.verification-info-title {
+    color: var(--info-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.verification-info-list {
+    margin-bottom: 0;
+    padding-left: 1.5rem;
+}
+
+.verification-info-list li {
+    margin-bottom: 0.5rem;
+    color: var(--gray-700);
+}
+
+/* Button Styles */
+.verification-button {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary-color), #1e40af);
+    border: none;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.verification-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+}
+
+.verification-button:active {
+    transform: translateY(0);
+}
+
+/* Footer */
+.verification-footer {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.verification-footer-text {
+    color: var(--gray-600);
+    margin-bottom: 0;
+    font-size: 0.875rem;
+}
+
+.verification-login-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.verification-login-link:hover {
+    text-decoration: underline;
+}
+
+/* Form Validation */
+.was-validated .form-control:valid {
+    border-color: var(--success-color);
+}
+
+.was-validated .form-control:invalid {
+    border-color: var(--danger-color);
+}
+
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--danger-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .verification-container {
+        padding: 1rem 0;
+    }
+    
+    .verification-card {
+        margin: 0 1rem;
+    }
+    
+    .verification-header {
+        padding: 1.5rem;
+    }
+    
+    .verification-body {
+        padding: 1.5rem;
+    }
+    
+    .verification-icon {
+        font-size: 2.5rem;
+    }
+    
+    .verification-title {
+        font-size: 1.5rem;
+    }
+    
+    .verification-info-box {
+        padding: 1rem;
+    }
+}
+
+/* Loading State */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success Animation */
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.success-checkmark {
+    animation: checkmark 0.6s ease-in-out;
+}
+
+/* Pulse animation for verification */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.verification-button:focus {
+    animation: pulse 0.6s ease-in-out;
+}

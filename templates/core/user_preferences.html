@@ -1,0 +1,423 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/user_preferences.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid user-preferences-wrapper">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-1">{{ title }}</h1>
+                <p class="text-muted mb-0">Manage your personal preferences and settings</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'core:company_profile' %}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Profile
+                </a>
+                <button class="btn btn-primary" onclick="savePreferences()">
+                    <i class="fas fa-save me-1"></i>Save Preferences
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-users text-primary"></i>
+                    </div>
+                    <h4 class="stat-number">{{ total_users }}</h4>
+                    <p class="stat-label">Total Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-cog text-success"></i>
+                    </div>
+                    <h4 class="stat-number">{{ users_with_preferences }}</h4>
+                    <p class="stat-label">Users with Preferences</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-palette text-info"></i>
+                    </div>
+                    <h4 class="stat-number">{{ preferences.theme }}</h4>
+                    <p class="stat-label">Current Theme</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-globe text-warning"></i>
+                    </div>
+                    <h4 class="stat-number">{{ preferences.language|upper }}</h4>
+                    <p class="stat-label">Language</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Personal Preferences Form -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-cog me-2"></i>Personal Preferences
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="preferencesForm">
+                        {% csrf_token %}
+                        
+                        <!-- Theme Settings -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="theme" class="form-label">
+                                        <i class="fas fa-palette me-1"></i>Theme
+                                    </label>
+                                    <select class="form-select" id="theme" name="theme">
+                                        {% for value, label in theme_choices %}
+                                        <option value="{{ value }}" {% if preferences.theme == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">Choose your preferred color theme</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="language" class="form-label">
+                                        <i class="fas fa-language me-1"></i>Language
+                                    </label>
+                                    <select class="form-select" id="language" name="language">
+                                        {% for value, label in language_choices %}
+                                        <option value="{{ value }}" {% if preferences.language == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">Select your preferred language</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timezone Settings -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="timezone" class="form-label">
+                                        <i class="fas fa-clock me-1"></i>Timezone
+                                    </label>
+                                    <select class="form-select" id="timezone" name="timezone">
+                                        {% for value, label in timezone_choices %}
+                                        <option value="{{ value }}" {% if preferences.timezone == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">Set your local timezone</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-envelope me-1"></i>Email Notifications
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="email_notifications" 
+                                               name="email_notifications" {% if preferences.email_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="email_notifications">
+                                            Receive email notifications
+                                        </label>
+                                    </div>
+                                    <div class="form-text">Enable or disable email notifications</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dashboard Layout -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="dashboard_layout" class="form-label">
+                                        <i class="fas fa-th-large me-1"></i>Dashboard Layout
+                                    </label>
+                                    <textarea class="form-control" id="dashboard_layout" name="dashboard_layout" 
+                                              rows="4" placeholder='{"widgets": ["overview", "recent_activity", "notifications"]}'>{{ preferences.dashboard_layout|default:"{}" }}</textarea>
+                                    <div class="form-text">Customize your dashboard layout (JSON format)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Button -->
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Preferences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Users Overview -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i>Company Users
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="user-list">
+                        {% for user in company_users %}
+                        <div class="user-item">
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-details">
+                                    <h6 class="user-name">{{ user.get_full_name|default:user.username }}</h6>
+                                    <p class="user-email">{{ user.email }}</p>
+                                </div>
+                            </div>
+                            <div class="user-status">
+                                {% if user.preferences %}
+                                <span class="badge bg-success">Configured</span>
+                                {% else %}
+                                <span class="badge bg-warning">Default</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-muted py-3">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <p>No users found</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="resetToDefaults()">
+                            <i class="fas fa-undo me-1"></i>Reset to Defaults
+                        </button>
+                        <button class="btn btn-outline-info" onclick="exportPreferences()">
+                            <i class="fas fa-download me-1"></i>Export Preferences
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="previewTheme()">
+                            <i class="fas fa-eye me-1"></i>Preview Theme
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-fix readability on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply universal readability fix
+    if (typeof applyUniversalReadabilityFix === 'function') {
+        applyUniversalReadabilityFix();
+    }
+    
+    // Initialize form validation
+    initializeFormValidation();
+    
+    // Initialize theme preview
+    initializeThemePreview();
+});
+
+// Form validation
+function initializeFormValidation() {
+    const form = document.getElementById('preferencesForm');
+    const dashboardLayout = document.getElementById('dashboard_layout');
+    
+    // Validate JSON format for dashboard layout
+    dashboardLayout.addEventListener('blur', function() {
+        const value = this.value.trim();
+        if (value && value !== '{}') {
+            try {
+                JSON.parse(value);
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } catch (e) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+                showNotification('Invalid JSON format for dashboard layout', 'error');
+            }
+        }
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        savePreferences();
+    });
+}
+
+// Save preferences
+function savePreferences() {
+    const form = document.getElementById('preferencesForm');
+    const formData = new FormData(form);
+    
+    // Validate dashboard layout JSON
+    const dashboardLayout = formData.get('dashboard_layout');
+    if (dashboardLayout && dashboardLayout !== '{}') {
+        try {
+            JSON.parse(dashboardLayout);
+        } catch (e) {
+            showNotification('Invalid JSON format for dashboard layout', 'error');
+            return;
+        }
+    }
+    
+    showNotification('Saving preferences...', 'info');
+    
+    // Submit form
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Preferences saved successfully!', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification('Error saving preferences: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error saving preferences: ' + error.message, 'error');
+    });
+}
+
+// Reset to defaults
+function resetToDefaults() {
+    if (confirm('Are you sure you want to reset all preferences to default values?')) {
+        document.getElementById('theme').value = 'LIGHT';
+        document.getElementById('language').value = 'en';
+        document.getElementById('timezone').value = 'UTC';
+        document.getElementById('email_notifications').checked = true;
+        document.getElementById('dashboard_layout').value = '{}';
+        
+        showNotification('Preferences reset to defaults', 'info');
+    }
+}
+
+// Export preferences
+function exportPreferences() {
+    const preferences = {
+        theme: document.getElementById('theme').value,
+        language: document.getElementById('language').value,
+        timezone: document.getElementById('timezone').value,
+        email_notifications: document.getElementById('email_notifications').checked,
+        dashboard_layout: document.getElementById('dashboard_layout').value
+    };
+    
+    const blob = new Blob([JSON.stringify(preferences, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `user_preferences_${new Date().toISOString().split('T')[0]}.json`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification('Preferences exported successfully!', 'success');
+}
+
+// Theme preview
+function initializeThemePreview() {
+    const themeSelect = document.getElementById('theme');
+    themeSelect.addEventListener('change', function() {
+        previewTheme();
+    });
+}
+
+function previewTheme() {
+    const theme = document.getElementById('theme').value;
+    const body = document.body;
+    
+    // Remove existing theme classes
+    body.classList.remove('dark-theme', 'light-theme');
+    
+    // Add preview class
+    if (theme === 'DARK') {
+        body.classList.add('dark-theme');
+    } else {
+        body.classList.add('light-theme');
+    }
+    
+    showNotification(`Previewing ${theme.toLowerCase()} theme`, 'info');
+    
+    // Reset after 3 seconds
+    setTimeout(() => {
+        body.classList.remove('dark-theme', 'light-theme');
+        showNotification('Theme preview ended', 'info');
+    }, 3000);
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

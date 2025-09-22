@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Test</title>
+</head>
+<body>
+    <h1>Payment Form Test</h1>
+    
+    <form method="post" action="/payment-test/">
+        {% csrf_token %}
+        
+        <h3>Select Plan:</h3>
+        <input type="radio" name="plan_selection" value="36" checked> Starter Monthly ($19)<br>
+        <input type="radio" name="plan_selection" value="37"> Starter Yearly ($190)<br>
+        <input type="radio" name="plan_selection" value="38"> Professional Monthly ($49)<br>
+        
+        <!-- Hidden field for selected plan -->
+        <input type="hidden" id="selected_plan_id" name="selected_plan_id" value="36">
+        
+        <h3>Payment Details:</h3>
+        <p>Card Number: <input type="text" name="cardNumber" value="4111 1111 1111 1111" required></p>
+        <p>Cardholder Name: <input type="text" name="cardholderName" value="Test User" required></p>
+        <p>Expiry Date: <input type="text" name="expiryDate" value="12/25" required></p>
+        <p>CVV: <input type="text" name="cvv" value="123" required></p>
+        <p>Billing Address: <textarea name="billingAddress" required>123 Test Street, Test City, TC 12345</textarea></p>
+        
+        <p><input type="checkbox" name="termsCheck" checked required> I agree to terms</p>
+        
+        <button type="submit">Submit Payment</button>
+    </form>
+    
+    <script>
+        // Simple plan selection handler
+        document.querySelectorAll('input[name="plan_selection"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    document.getElementById('selected_plan_id').value = this.value;
+                    console.log('Plan selected:', this.value);
+                }
+            });
+        });
+        
+        // Form submission handler
+        document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('Form submitting...');
+            console.log('Selected plan ID:', document.getElementById('selected_plan_id').value);
+            
+            // Let the form submit normally
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Document Management{% endblock %}
+
+{% block page_title %}Document Management{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="uploadDocument()">
+        <i class="fas fa-upload me-2"></i>Upload
+    </button>
+    <button type="button" class="btn btn-outline-secondary" onclick="createFolder()">
+        <i class="fas fa-folder-plus me-2"></i>New Folder
+    </button>
+    <button type="button" class="btn btn-outline-info" onclick="shareDocument()">
+        <i class="fas fa-share me-2"></i>Share
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Search and Filter -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search documents...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select class="form-select" id="categoryFilter">
+                                    <option value="">All Categories</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.name }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select" id="typeFilter">
+                                    <option value="">All Types</option>
+                                    <option value="PDF">PDF</option>
+                                    <option value="DOCX">Word</option>
+                                    <option value="XLSX">Excel</option>
+                                    <option value="PPTX">PowerPoint</option>
+                                    <option value="TXT">Text</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document Categories -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Document Categories</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for category in categories %}
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <div class="card border-left-{{ category.color }} h-100 category-card" onclick="filterByCategory('{{ category.name }}')">
+                            <div class="card-body text-center">
+                                <i class="{{ category.icon }} fa-2x text-{{ category.color }} mb-2"></i>
+                                <h6 class="card-title">{{ category.name }}</h6>
+                                <small class="text-muted">{{ forloop.counter|add:"2" }} documents</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Documents -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Documents</h6>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary" onclick="toggleView('grid')">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="toggleView('list')">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if documents %}
+                <div class="table-responsive" id="documentsTable">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAll">
+                                        <label class="form-check-label" for="selectAll"></label>
+                                    </div>
+                                </th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Uploaded</th>
+                                <th>Downloads</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documents %}
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="{{ doc.name }}">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file-{{ doc.type|lower }} text-primary me-2"></i>
+                                        <div>
+                                            <div class="fw-bold">{{ doc.name }}</div>
+                                            <small class="text-muted">Shared by {{ doc.shared_by }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ doc.category }}</span>
+                                </td>
+                                <td>{{ doc.type }}</td>
+                                <td>{{ doc.size }}</td>
+                                <td>{{ doc.uploaded_date }}</td>
+                                <td>{{ doc.downloads }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary" onclick="viewDocument('{{ doc.name }}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success" onclick="downloadDocument('{{ doc.name }}')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info" onclick="shareDocument('{{ doc.name }}')">
+                                            <i class="fas fa-share"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning" onclick="editDocument('{{ doc.name }}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No documents found</h5>
+                    <p class="text-muted">Upload your first document to get started.</p>
+                    <button type="button" class="btn btn-primary" onclick="uploadDocument()">
+                        <i class="fas fa-upload me-2"></i>Upload Document
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Storage Usage -->
+<div class="row mb-4">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Storage Used</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">2.4 GB</div>
+                        <div class="small text-muted">of 10 GB</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-hdd fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Documents</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ documents|length }}</div>
+                        <div class="small text-muted">files</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Shared Documents</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ documents|length }}</div>
+                        <div class="small text-muted">with team</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-share-alt fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-primary w-100" onclick="uploadDocument()">
+                            <i class="fas fa-upload fa-2x mb-2"></i><br>
+                            Upload Document
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-success w-100" onclick="createFolder()">
+                            <i class="fas fa-folder-plus fa-2x mb-2"></i><br>
+                            New Folder
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-info w-100" onclick="shareDocument()">
+                            <i class="fas fa-share fa-2x mb-2"></i><br>
+                            Share Document
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-warning w-100" onclick="viewRecent()">
+                            <i class="fas fa-history fa-2x mb-2"></i><br>
+                            Recent Activity
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/employee_documents.js' %}"></script>
+{% endblock %}

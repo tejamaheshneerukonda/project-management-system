@@ -1,0 +1,248 @@
+/* Register Page Specific Styles */
+
+.register-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
+    padding: 2rem 0;
+}
+
+.register-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--shadow-xl);
+    background: white;
+    overflow: hidden;
+    width: 100%;
+    max-width: 500px;
+}
+
+.register-header {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.register-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.register-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.register-subtitle {
+    font-size: 1rem;
+    opacity: 0.8;
+    margin-bottom: 0;
+}
+
+.register-body {
+    padding: 2.5rem;
+}
+
+.register-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.register-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.register-input-group {
+    position: relative;
+}
+
+.register-input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-500);
+    z-index: 2;
+}
+
+.register-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 2px solid var(--gray-200);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.register-input:focus {
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    outline: none;
+}
+
+.register-input.is-valid {
+    border-color: var(--success-color);
+}
+
+.register-input.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.register-help-text {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+    margin-top: 0.5rem;
+}
+
+.register-checkbox-group {
+    margin-bottom: 2rem;
+}
+
+.register-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.register-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--success-color);
+    margin-top: 0.125rem;
+}
+
+.register-checkbox label {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.register-checkbox a {
+    color: var(--success-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.register-checkbox a:hover {
+    text-decoration: underline;
+}
+
+.register-button {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.register-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.register-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.register-footer {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.register-footer-text {
+    color: var(--gray-600);
+    margin-bottom: 0;
+}
+
+.register-login-link {
+    color: var(--success-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.register-login-link:hover {
+    color: #059669;
+    text-decoration: underline;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    margin-top: 0.5rem;
+    height: 4px;
+    background: var(--gray-200);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.password-strength-weak .password-strength-bar {
+    width: 25%;
+    background: var(--danger-color);
+}
+
+.password-strength-fair .password-strength-bar {
+    width: 50%;
+    background: var(--warning-color);
+}
+
+.password-strength-good .password-strength-bar {
+    width: 75%;
+    background: var(--info-color);
+}
+
+.password-strength-strong .password-strength-bar {
+    width: 100%;
+    background: var(--success-color);
+}
+
+/* Register Responsive Design */
+@media (max-width: 576px) {
+    .register-container {
+        padding: 1rem;
+    }
+    
+    .register-card {
+        margin: 0;
+    }
+    
+    .register-header {
+        padding: 1.5rem;
+    }
+    
+    .register-body {
+        padding: 2rem;
+    }
+    
+    .register-icon {
+        font-size: 2.5rem;
+    }
+    
+    .register-title {
+        font-size: 1.5rem;
+    }
+}

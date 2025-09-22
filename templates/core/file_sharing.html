@@ -1,0 +1,416 @@
+{% extends 'base_company_admin.html' %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-share-alt me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Share and manage company files</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadFileModal">
+                        <i class="fas fa-upload me-1"></i>Upload File
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_files }}</h4>
+                            <p class="mb-0">Total Files</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ recent_files }}</h4>
+                            <p class="mb-0">Recent Files</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ files.paginator.count }}</h4>
+                            <p class="mb-0">Showing</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-eye fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ files.paginator.num_pages }}</h4>
+                            <p class="mb-0">Pages</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="search" class="form-label">Search Files</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ search_query }}" placeholder="Search by filename or description">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="file_type" class="form-label">Filter by File Type</label>
+                            <select class="form-select" id="file_type" name="file_type">
+                                <option value="">All File Types</option>
+                                <option value="pdf" {% if file_type_filter == 'pdf' %}selected{% endif %}>PDF</option>
+                                <option value="doc" {% if file_type_filter == 'doc' %}selected{% endif %}>Word Document</option>
+                                <option value="xls" {% if file_type_filter == 'xls' %}selected{% endif %}>Excel Spreadsheet</option>
+                                <option value="ppt" {% if file_type_filter == 'ppt' %}selected{% endif %}>PowerPoint</option>
+                                <option value="jpg" {% if file_type_filter == 'jpg' %}selected{% endif %}>Image (JPG)</option>
+                                <option value="png" {% if file_type_filter == 'png' %}selected{% endif %}>Image (PNG)</option>
+                                <option value="txt" {% if file_type_filter == 'txt' %}selected{% endif %}>Text File</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-search me-1"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Shared Files
+                        {% if search_query or file_type_filter %}
+                            <span class="badge bg-secondary ms-2">Filtered Results</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if files %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>File</th>
+                                        <th>Type</th>
+                                        <th>Size</th>
+                                        <th>Uploaded By</th>
+                                        <th>Upload Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for file in files %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="file-icon me-3">
+                                                        {% if file.content|slice:":3" == "pdf" %}
+                                                            <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                                        {% elif file.content|slice:":3" == "doc" %}
+                                                            <i class="fas fa-file-word fa-2x text-primary"></i>
+                                                        {% elif file.content|slice:":3" == "xls" %}
+                                                            <i class="fas fa-file-excel fa-2x text-success"></i>
+                                                        {% elif file.content|slice:":3" == "ppt" %}
+                                                            <i class="fas fa-file-powerpoint fa-2x text-warning"></i>
+                                                        {% elif file.content|slice:":3" == "jpg" or file.content|slice:":3" == "png" %}
+                                                            <i class="fas fa-file-image fa-2x text-info"></i>
+                                                        {% else %}
+                                                            <i class="fas fa-file fa-2x text-secondary"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ file.title }}</strong>
+                                                        {% if file.content %}
+                                                            <br><small class="text-muted">{{ file.content|truncatechars:50 }}</small>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ file.content|slice:":3"|upper|default:"Unknown" }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted">2.5 MB</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                        {{ file.created_by.username|first|upper }}
+                                                    </div>
+                                                    <div>
+                                                        <small>{{ file.created_by.username }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small>{{ file.created_at|date:"M d, Y H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" onclick="downloadFile({{ file.id }})" title="Download">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary" onclick="viewFile({{ file.id }})" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-info" onclick="shareFile({{ file.id }})" title="Share">
+                                                        <i class="fas fa-share"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" onclick="deleteFile({{ file.id }})" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if files.has_other_pages %}
+                            <div class="card-footer">
+                                <nav aria-label="File pagination">
+                                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                                        {% if files.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if file_type_filter %}&file_type={{ file_type_filter }}{% endif %}">First</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ files.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if file_type_filter %}&file_type={{ file_type_filter }}{% endif %}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        
+                                        <li class="page-item active">
+                                            <span class="page-link">
+                                                Page {{ files.number }} of {{ files.paginator.num_pages }}
+                                            </span>
+                                        </li>
+                                        
+                                        {% if files.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ files.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if file_type_filter %}&file_type={{ file_type_filter }}{% endif %}">Next</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ files.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if file_type_filter %}&file_type={{ file_type_filter }}{% endif %}">Last</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-share-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No files found</h5>
+                            <p class="text-muted">
+                                {% if search_query or file_type_filter %}
+                                    Try adjusting your search criteria or filters.
+                                {% else %}
+                                    Upload your first file to get started.
+                                {% endif %}
+                            </p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadFileModal">
+                                <i class="fas fa-upload me-1"></i>Upload First File
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload File Modal -->
+<div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadFileModalLabel">
+                    <i class="fas fa-upload me-2"></i>Upload File
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadFileForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Select File *</label>
+                        <input type="file" class="form-control" id="file" name="file" required>
+                        <div class="form-text">Supported formats: PDF, DOC, XLS, PPT, JPG, PNG, TXT (Max 10MB)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="filename" class="form-label">File Name</label>
+                        <input type="text" class="form-control" id="filename" name="filename" placeholder="Leave empty to use original filename">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Optional description of the file"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file_type" class="form-label">File Type</label>
+                        <select class="form-select" id="file_type" name="file_type">
+                            <option value="document">Document</option>
+                            <option value="spreadsheet">Spreadsheet</option>
+                            <option value="presentation">Presentation</option>
+                            <option value="image">Image</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="public" name="public">
+                            <label class="form-check-label" for="public">
+                                Make file publicly accessible
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="uploadFile()">
+                    <i class="fas fa-upload me-1"></i>Upload File
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+}
+
+.file-icon {
+    width: 40px;
+    text-align: center;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script>
+function uploadFile() {
+    const form = document.getElementById('uploadFileForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "api:upload_file" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            showErrorToast('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showErrorToast('An error occurred while uploading the file.');
+    });
+}
+
+function downloadFile(fileId) {
+    // TODO: Implement file download
+    showErrorToast('Download file with ID: ' + fileId);
+}
+
+function viewFile(fileId) {
+    // TODO: Implement file viewer
+    showErrorToast('View file with ID: ' + fileId);
+}
+
+function shareFile(fileId) {
+    // TODO: Implement file sharing
+    showErrorToast('Share file with ID: ' + fileId);
+}
+
+function deleteFile(fileId) {
+    if (confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
+        // TODO: Implement file deletion
+        showErrorToast('Delete file with ID: ' + fileId);
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,1596 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/employee_directory.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Beautiful Background with Gradient -->
+<div class="employee-directory-wrapper">
+    <!-- Animated Background Elements -->
+    <div class="bg-animation">
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+            <div class="shape shape-6"></div>
+        </div>
+    </div>
+    
+    <div class="container-fluid main-container">
+        <!-- Modern Header Card -->
+        <div class="header-card">
+            <div class="header-content">
+                <div class="header-main">
+                    <div class="header-info">
+                        <div class="header-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="header-text">
+                            <h2>{{ title }}</h2>
+                            <p>Manage and view all employees in your organization</p>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                            <i class="fas fa-plus me-2"></i>Add Employee
+                        </button>
+                    </div>
+                </div>
+                <div class="header-decoration"></div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Card -->
+        <!-- Hidden CSRF token for JavaScript operations -->
+        <div style="display: none;">
+            {% csrf_token %}
+        </div>
+        
+        <div class="search-filter-card">
+            <div class="search-section">
+                <form method="GET">
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="search" value="{{ search_query }}" 
+                               placeholder="Search by name, email, ID, department, or position">
+                        <button type="button" class="btn btn-outline-primary btn-sm ms-2" onclick="openAdvancedSearch()">
+                            <i class="fas fa-filter"></i> Advanced
+                        </button>
+                    </div>
+                    
+                    <!-- Bulk Operations Bar -->
+                    <div class="bulk-operations-bar" id="bulkOperationsBar" style="display: none;">
+                        <div class="bulk-info">
+                            <span id="selectedCount">0</span> employees selected
+                        </div>
+                        <div class="bulk-actions">
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="bulkVerify()">
+                                <i class="fas fa-check me-1"></i>Verify Selected
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm" onclick="bulkExport()">
+                                <i class="fas fa-download me-1"></i>Export Selected
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="bulkDelete()">
+                                <i class="fas fa-trash me-1"></i>Delete Selected
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearSelection()">
+                                <i class="fas fa-times me-1"></i>Clear Selection
+                            </button>
+                        </div>
+                    </div>
+                    <div class="filter-buttons">
+                        <button type="button" class="filter-btn {% if not department_filter %}active{% endif %}" 
+                                onclick="filterByDepartment('')">All Departments</button>
+                        {% for dept in departments %}
+                        <button type="button" class="filter-btn {% if dept == department_filter %}active{% endif %}" 
+                                onclick="filterByDepartment('{{ dept }}')">{{ dept }}</button>
+                        {% endfor %}
+                    </div>
+                    <div class="filter-buttons">
+                        <button type="button" class="filter-btn {% if not status_filter %}active{% endif %}" 
+                                onclick="filterByStatus('')">All Status</button>
+                        <button type="button" class="filter-btn {% if status_filter == 'verified' %}active{% endif %}" 
+                                onclick="filterByStatus('verified')">Verified</button>
+                        <button type="button" class="filter-btn {% if status_filter == 'pending' %}active{% endif %}" 
+                                onclick="filterByStatus('pending')">Pending</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    <!-- Employee Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ employees.paginator.count }}</h4>
+                            <p class="mb-0">Total Employees</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ employees|length }}</h4>
+                            <p class="mb-0">Showing</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-eye fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ departments|length }}</h4>
+                            <p class="mb-0">Departments</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-building fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ employees.paginator.num_pages }}</h4>
+                            <p class="mb-0">Pages</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Employee Directory
+                        {% if search_query or department_filter %}
+                            <span class="badge bg-secondary ms-2">Filtered Results</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if employees %}
+                        <div class="employee-grid">
+                            <!-- Select All Header -->
+                            <div class="select-all-header">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                    <label class="form-check-label" for="selectAll">
+                                        Select All
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            {% for employee in employees %}
+                            <div class="employee-card">
+                                <div class="employee-checkbox">
+                                    <input type="checkbox" class="form-check-input employee-checkbox-input" 
+                                           value="{{ employee.id }}" onchange="updateSelection()">
+                                </div>
+                                <div class="employee-header">
+                                    <div class="employee-avatar">
+                                        {% if employee.photo %}
+                                            <img src="{{ employee.photo.url }}" alt="{{ employee.first_name }} {{ employee.last_name }}" class="avatar-image">
+                                        {% else %}
+                                            <span class="avatar-initials">{{ employee.get_initials }}</span>
+                                        {% endif %}
+                                        <div class="photo-upload-overlay" onclick="openPhotoUpload({{ employee.id }})">
+                                            <i class="fas fa-camera"></i>
+                                        </div>
+                                    </div>
+                                    <div class="employee-info">
+                                        <h5>{{ employee.first_name }} {{ employee.last_name }}</h5>
+                                        <p>{{ employee.email }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="employee-details">
+                                    <div class="detail-item">
+                                        <i class="fas fa-id-badge"></i>
+                                        <span><strong>ID:</strong> {{ employee.employee_id }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-building"></i>
+                                        <span><strong>Department:</strong> {{ employee.department|default:"N/A" }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-briefcase"></i>
+                                        <span><strong>Position:</strong> {{ employee.position|default:"N/A" }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span><strong>Joined:</strong> {{ employee.created_at|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="employee-status">
+                                    <span class="status-badge status-{{ employee.is_verified|yesno:'verified,pending' }}">
+                                        {{ employee.is_verified|yesno:'Verified,Pending' }}
+                                    </span>
+                                    {% if employee.user_account %}
+                                        <span class="status-badge" style="background: #bee3f8; color: #2b6cb0;">Registered</span>
+                                    {% endif %}
+                                    <div class="employee-actions">
+                                        <button class="action-btn" onclick="viewEmployee({{ employee.id }})" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="action-btn" onclick="editEmployee({{ employee.id }})" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <a href="{% url 'core:employee_profile' employee.id %}" class="action-btn" title="Profile">
+                                            <i class="fas fa-user"></i>
+                                        </a>
+                                        <button class="action-btn" onclick="deleteEmployee({{ employee.id }})" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if employees.has_other_pages %}
+                            <div class="pagination-wrapper">
+                                <nav aria-label="Employee pagination">
+                                    <ul class="pagination">
+                                        {% if employees.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">First</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ employees.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        
+                                        <li class="page-item active">
+                                            <span class="page-link">
+                                                Page {{ employees.number }} of {{ employees.paginator.num_pages }}
+                                            </span>
+                                        </li>
+                                        
+                                        {% if employees.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ employees.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ employees.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>No employees found</h3>
+                            <p>
+                                {% if search_query or department_filter %}
+                                    Try adjusting your search criteria or filters.
+                                {% else %}
+                                    Start by adding employees to your organization.
+                                {% endif %}
+                            </p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                                <i class="fas fa-plus me-2"></i>Add First Employee
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+console.log('Employee directory JavaScript loaded successfully');
+
+// Filter functions
+function filterByDepartment(department) {
+    const url = new URL(window.location);
+    if (department) {
+        url.searchParams.set('department', department);
+    } else {
+        url.searchParams.delete('department');
+    }
+    window.location.href = url.toString();
+}
+
+function filterByStatus(status) {
+    const url = new URL(window.location);
+    if (status) {
+        url.searchParams.set('status', status);
+    } else {
+        url.searchParams.delete('status');
+    }
+    window.location.href = url.toString();
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const form = searchInput.closest('form');
+                if (form) {
+                    form.submit();
+                }
+            }, 500);
+        });
+    }
+});
+
+// Employee management functions
+function addEmployee() {
+    const form = document.getElementById('addEmployeeForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "api:create_employee" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+            } else {
+                showErrorToast('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('An error occurred while adding the employee.');
+        });
+}
+
+function viewEmployee(employeeId) {
+    console.log('View employee function called with ID:', employeeId);
+    
+    // Fetch employee data
+    fetch(`{% url "api:get_employee" employee_id=0 %}`.replace('0', employeeId), {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showEmployeeDetails(data.employee);
+        } else {
+            showNotification('Error loading employee details: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('An error occurred while loading employee details', 'error');
+    });
+}
+
+function editEmployee(employeeId) {
+    console.log('Edit employee function called with ID:', employeeId);
+    console.log('Current function definition:', editEmployee.toString());
+    console.log('showEditEmployeeModal function exists:', typeof showEditEmployeeModal !== 'undefined');
+    
+    // Check if the new modal functions exist
+    if (typeof showEditEmployeeModal === 'undefined') {
+        console.error('showEditEmployeeModal function not found!');
+        showErrorToast('Edit functionality is not properly loaded. Please refresh the page.');
+        return;
+    }
+    
+    // Fetch employee data
+    fetch(`{% url "api:get_employee" employee_id=0 %}`.replace('0', employeeId), {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        }
+    })
+    .then(response => {
+        console.log('Response received:', response);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Data received:', data);
+        if (data.success) {
+            showEditEmployeeModal(data.employee);
+        } else {
+            showNotification('Error loading employee details: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('An error occurred while loading employee details', 'error');
+    });
+}
+
+function deleteEmployee(employeeId) {
+    console.log('Delete employee function called with ID:', employeeId);
+    
+    if (confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
+        console.log('User confirmed deletion');
+        
+        // Show loading state
+        const deleteBtn = event.target.closest('.action-btn');
+        const originalContent = deleteBtn.innerHTML;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        deleteBtn.disabled = true;
+        
+        // Create and submit form
+        const deleteUrl = `{% url "api:delete_employee" employee_id=0 %}`.replace('0', employeeId);
+        console.log('Delete URL:', deleteUrl);
+        
+        // Get CSRF token from the form in the page
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        console.log('CSRF Token:', csrfToken ? csrfToken.value : 'Not found');
+        
+        if (!csrfToken) {
+            console.error('CSRF token not found!');
+            showNotification('Security error: CSRF token not found', 'error');
+            deleteBtn.innerHTML = originalContent;
+            deleteBtn.disabled = false;
+            return;
+        }
+        
+        // Try fetch with proper CSRF handling
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', csrfToken.value);
+        
+        fetch(deleteUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken.value,
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (response.ok) {
+                // Success - redirect will happen automatically
+                console.log('Deletion successful, redirecting...');
+                return response.text();
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            // The response should be a redirect, so we'll reload the page
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            showNotification('Error deleting employee: ' + error.message, 'error');
+            // Restore button state
+            deleteBtn.innerHTML = originalContent;
+            deleteBtn.disabled = false;
+        });
+    }
+}
+
+// Show employee details modal
+function showEmployeeDetails(employee) {
+    const modalHtml = `
+        <div class="modal fade" id="employeeDetailsModal" tabindex="-1" aria-labelledby="employeeDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="employeeDetailsModalLabel">
+                            <i class="fas fa-user me-2"></i>Employee Details
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Employee ID</label>
+                                    <p class="form-control-plaintext">${employee.employee_id}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">First Name</label>
+                                    <p class="form-control-plaintext">${employee.first_name}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Last Name</label>
+                                    <p class="form-control-plaintext">${employee.last_name}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Email</label>
+                                    <p class="form-control-plaintext">${employee.email}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Phone</label>
+                                    <p class="form-control-plaintext">${employee.phone || 'Not provided'}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Department</label>
+                                    <p class="form-control-plaintext">${employee.department || 'Not assigned'}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Position</label>
+                                    <p class="form-control-plaintext">${employee.position || 'Not assigned'}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Status</label>
+                                    <span class="badge ${employee.is_verified ? 'bg-success' : 'bg-warning'}">
+                                        ${employee.is_verified ? 'Verified' : 'Pending'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Hire Date</label>
+                                    <p class="form-control-plaintext">${employee.hire_date ? new Date(employee.hire_date).toLocaleDateString() : 'Not provided'}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Created</label>
+                                    <p class="form-control-plaintext">${new Date(employee.created_at).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="editEmployee(${employee.id}); bootstrap.Modal.getInstance(document.getElementById('employeeDetailsModal')).hide();">
+                            <i class="fas fa-edit me-1"></i>Edit Employee
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('employeeDetailsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('employeeDetailsModal'));
+    modal.show();
+}
+
+// Show edit employee modal
+function showEditEmployeeModal(employee) {
+    console.log('showEditEmployeeModal called with employee:', employee);
+    
+    // Check if Bootstrap is available
+    if (typeof bootstrap === 'undefined') {
+        console.error('Bootstrap is not loaded!');
+        showErrorToast('Bootstrap is required for modals. Please refresh the page.');
+        return;
+    }
+    
+    const modalHtml = `
+        <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-labelledby="editEmployeeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editEmployeeModalLabel">
+                            <i class="fas fa-user-edit me-2"></i>Edit Employee
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editEmployeeForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="edit_first_name" class="form-label">First Name *</label>
+                                        <input type="text" class="form-control" id="edit_first_name" name="first_name" value="${employee.first_name}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit_last_name" class="form-label">Last Name *</label>
+                                        <input type="text" class="form-control" id="edit_last_name" name="last_name" value="${employee.last_name}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit_email" class="form-label">Email *</label>
+                                        <input type="email" class="form-control" id="edit_email" name="email" value="${employee.email}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit_phone" class="form-label">Phone</label>
+                                        <input type="tel" class="form-control" id="edit_phone" name="phone" value="${employee.phone || ''}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="edit_department" class="form-label">Department</label>
+                                        <input type="text" class="form-control" id="edit_department" name="department" value="${employee.department || ''}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit_position" class="form-label">Position</label>
+                                        <input type="text" class="form-control" id="edit_position" name="position" value="${employee.position || ''}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit_hire_date" class="form-label">Hire Date</label>
+                                        <input type="date" class="form-control" id="edit_hire_date" name="hire_date" value="${employee.hire_date || ''}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="edit_is_verified" name="is_verified" ${employee.is_verified ? 'checked' : ''}>
+                                            <label class="form-check-label" for="edit_is_verified">
+                                                Verified Employee
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="updateEmployee(${employee.id})">
+                            <i class="fas fa-save me-1"></i>Update Employee
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('editEmployeeModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    console.log('Modal HTML added to body');
+    
+    // Show modal
+    const modalElement = document.getElementById('editEmployeeModal');
+    console.log('Modal element found:', modalElement);
+    
+    if (!modalElement) {
+        console.error('Modal element not found after creation!');
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(modalElement);
+    console.log('Bootstrap modal instance created:', modal);
+    modal.show();
+    console.log('Modal show() called');
+}
+
+// Update employee function
+function updateEmployee(employeeId) {
+    const form = document.getElementById('editEmployeeForm');
+    const formData = new FormData(form);
+    
+    // Add is_verified checkbox value
+    const isVerified = document.getElementById('edit_is_verified').checked;
+    formData.append('is_verified', isVerified);
+    
+    fetch(`{% url "api:update_employee" employee_id=0 %}`.replace('0', employeeId), {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message || 'Employee updated successfully', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('editEmployeeModal')).hide();
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.error || 'Failed to update employee', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('An error occurred while updating the employee', 'error');
+    });
+}
+
+// Notification function for better user feedback
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show`;
+    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        const bsAlert = new bootstrap.Alert(notification);
+        bsAlert.close();
+    }, 5000);
+}
+
+// Test that all functions are loaded
+console.log('All functions loaded:', {
+    editEmployee: typeof editEmployee !== 'undefined',
+    viewEmployee: typeof viewEmployee !== 'undefined',
+    deleteEmployee: typeof deleteEmployee !== 'undefined',
+    showEditEmployeeModal: typeof showEditEmployeeModal !== 'undefined',
+    showEmployeeDetails: typeof showEmployeeDetails !== 'undefined',
+    updateEmployee: typeof updateEmployee !== 'undefined'
+});
+
+// Override any existing editEmployee function to prevent old alerts
+window.editEmployee = function(employeeId) {
+    console.log('NEW editEmployee function called with ID:', employeeId);
+    
+    // Check if the new modal functions exist
+    if (typeof showEditEmployeeModal === 'undefined') {
+        console.error('showEditEmployeeModal function not found!');
+        showErrorToast('Edit functionality is not properly loaded. Please refresh the page.');
+        return;
+    }
+    
+    // Fetch employee data
+    const url = `{% url "api:get_employee" employee_id=0 %}`.replace('0', employeeId);
+    console.log('Fetching employee data from URL:', url);
+    
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        }
+    })
+    .then(response => {
+        console.log('Response received:', response);
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Data received:', data);
+        if (data.success) {
+            console.log('Success! Calling showEditEmployeeModal');
+            showEditEmployeeModal(data.employee);
+        } else {
+            console.error('API returned error:', data.error);
+            showNotification('Error loading employee details: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        showNotification('An error occurred while loading employee details', 'error');
+    });
+};
+
+console.log('editEmployee function overridden successfully');
+
+// Bulk Operations Functions
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const employeeCheckboxes = document.querySelectorAll('.employee-checkbox-input');
+    
+    employeeCheckboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+    
+    updateSelection();
+}
+
+function updateSelection() {
+    const selectedCheckboxes = document.querySelectorAll('.employee-checkbox-input:checked');
+    const selectedCount = selectedCheckboxes.length;
+    const totalCheckboxes = document.querySelectorAll('.employee-checkbox-input').length;
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const bulkOperationsBar = document.getElementById('bulkOperationsBar');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    
+    // Update select all checkbox state
+    if (selectedCount === 0) {
+        selectAllCheckbox.indeterminate = false;
+        selectAllCheckbox.checked = false;
+    } else if (selectedCount === totalCheckboxes) {
+        selectAllCheckbox.indeterminate = false;
+        selectAllCheckbox.checked = true;
+    } else {
+        selectAllCheckbox.indeterminate = true;
+        selectAllCheckbox.checked = false;
+    }
+    
+    // Show/hide bulk operations bar
+    if (selectedCount > 0) {
+        bulkOperationsBar.style.display = 'flex';
+        selectedCountSpan.textContent = selectedCount;
+    } else {
+        bulkOperationsBar.style.display = 'none';
+    }
+}
+
+function clearSelection() {
+    const employeeCheckboxes = document.querySelectorAll('.employee-checkbox-input');
+    const selectAllCheckbox = document.getElementById('selectAll');
+    
+    employeeCheckboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = false;
+    
+    updateSelection();
+}
+
+function getSelectedEmployeeIds() {
+    const selectedCheckboxes = document.querySelectorAll('.employee-checkbox-input:checked');
+    return Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+}
+
+function bulkVerify() {
+    const selectedIds = getSelectedEmployeeIds();
+    if (selectedIds.length === 0) {
+        showNotification('Please select employees to verify', 'warning');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to verify ${selectedIds.length} employee(s)?`)) {
+        performBulkOperation('verify', selectedIds);
+    }
+}
+
+function bulkDelete() {
+    const selectedIds = getSelectedEmployeeIds();
+    if (selectedIds.length === 0) {
+        showNotification('Please select employees to delete', 'warning');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} employee(s)? This action cannot be undone!`)) {
+        performBulkOperation('delete', selectedIds);
+    }
+}
+
+function bulkExport() {
+    const selectedIds = getSelectedEmployeeIds();
+    if (selectedIds.length === 0) {
+        showNotification('Please select employees to export', 'warning');
+        return;
+    }
+    
+    performBulkOperation('export', selectedIds);
+}
+
+function performBulkOperation(operation, employeeIds) {
+    const formData = new FormData();
+    formData.append('operation', operation);
+    formData.append('employee_ids', JSON.stringify(employeeIds));
+    
+    fetch('{% url "api:bulk_employee_operations" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message || `Bulk ${operation} completed successfully`, 'success');
+            if (operation === 'export' && data.download_url) {
+                // Create download link for export
+                const link = document.createElement('a');
+                link.href = data.download_url;
+                link.download = `employees_export_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else if (operation === 'delete' || operation === 'verify') {
+                // Reload page to show updated data
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }
+        } else {
+            showNotification(data.error || `Failed to perform bulk ${operation}`, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification(`An error occurred during bulk ${operation}`, 'error');
+    });
+}
+
+// Advanced Search Functions
+function openAdvancedSearch() {
+    const modal = new bootstrap.Modal(document.getElementById('advancedSearchModal'));
+    modal.show();
+}
+
+function clearAdvancedSearch() {
+    const form = document.getElementById('advancedSearchForm');
+    form.reset();
+}
+
+function saveSearchCriteria() {
+    const form = document.getElementById('advancedSearchForm');
+    const formData = new FormData(form);
+    const searchCriteria = {};
+    
+    for (let [key, value] of formData.entries()) {
+        if (value.trim() !== '') {
+            searchCriteria[key] = value;
+        }
+    }
+    
+    const searchName = prompt('Enter a name for this search:');
+    if (searchName) {
+        localStorage.setItem(`saved_search_${searchName}`, JSON.stringify(searchCriteria));
+        showNotification(`Search "${searchName}" saved successfully!`, 'success');
+    }
+}
+
+function loadSavedSearch(searchName) {
+    const savedSearch = localStorage.getItem(`saved_search_${searchName}`);
+    if (savedSearch) {
+        const criteria = JSON.parse(savedSearch);
+        const form = document.getElementById('advancedSearchForm');
+        
+        // Clear form first
+        form.reset();
+        
+        // Populate form with saved criteria
+        Object.keys(criteria).forEach(key => {
+            const field = form.querySelector(`[name="${key}"]`);
+            if (field) {
+                if (field.type === 'checkbox') {
+                    field.checked = criteria[key] === 'on';
+                } else {
+                    field.value = criteria[key];
+                }
+            }
+        });
+        
+        showNotification(`Loaded search "${searchName}"`, 'info');
+    }
+}
+
+function applyAdvancedSearch() {
+    const form = document.getElementById('advancedSearchForm');
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    // Add all non-empty form values to URL parameters
+    for (let [key, value] of formData.entries()) {
+        if (value.trim() !== '') {
+            params.append(key, value);
+        }
+    }
+    
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('advancedSearchModal')).hide();
+    
+    // Redirect to search results
+    const currentUrl = new URL(window.location);
+    const newUrl = `${currentUrl.pathname}?${params.toString()}`;
+    window.location.href = newUrl;
+}
+
+// Load saved searches on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Add saved searches dropdown if any exist
+    const savedSearches = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('saved_search_')) {
+            savedSearches.push(key.replace('saved_search_', ''));
+        }
+    }
+    
+    if (savedSearches.length > 0) {
+        // Add saved searches dropdown to the search section
+        const searchSection = document.querySelector('.search-section');
+        if (searchSection) {
+            const savedSearchesDiv = document.createElement('div');
+            savedSearchesDiv.className = 'saved-searches mb-3';
+            savedSearchesDiv.innerHTML = `
+                <label class="form-label">Saved Searches</label>
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="savedSearchesSelect">
+                        <option value="">Select a saved search...</option>
+                        ${savedSearches.map(search => `<option value="${search}">${search}</option>`).join('')}
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="loadSavedSearch(document.getElementById('savedSearchesSelect').value)">
+                        <i class="fas fa-folder-open"></i> Load
+                    </button>
+                </div>
+            `;
+            searchSection.appendChild(savedSearchesDiv);
+        }
+    }
+});
+
+// Photo Upload Functions
+let currentEmployeeId = null;
+let selectedFile = null;
+
+function openPhotoUpload(employeeId) {
+    currentEmployeeId = employeeId;
+    
+    // Get employee data to show current photo
+    fetch(`{% url "api:get_employee" employee_id=0 %}`.replace('0', employeeId), {
+        method: 'GET',
+        headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayCurrentPhoto(data.employee);
+        }
+    })
+    .catch(error => {
+        console.error('Error loading employee data:', error);
+    });
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('photoUploadModal'));
+    modal.show();
+    
+    // Setup drag and drop
+    setupDragAndDrop();
+}
+
+function displayCurrentPhoto(employee) {
+    const container = document.getElementById('currentPhotoContainer');
+    const photoActions = document.getElementById('photoActions');
+    
+    if (employee.photo_url) {
+        container.innerHTML = `
+            <div class="current-photo-display">
+                <img src="${employee.photo_url}" alt="${employee.first_name} ${employee.last_name}" class="current-photo-img">
+                <div class="photo-info">
+                    <h6>Current Photo</h6>
+                    <p>${employee.first_name} ${employee.last_name}</p>
+                </div>
+            </div>
+        `;
+        photoActions.style.display = 'block';
+    } else {
+        container.innerHTML = `
+            <div class="no-photo-display">
+                <i class="fas fa-user-circle"></i>
+                <p>No photo uploaded</p>
+            </div>
+        `;
+        photoActions.style.display = 'none';
+    }
+}
+
+function setupDragAndDrop() {
+    const uploadArea = document.getElementById('uploadArea');
+    const photoInput = document.getElementById('photoInput');
+    
+    // Click to browse
+    uploadArea.addEventListener('click', () => {
+        photoInput.click();
+    });
+    
+    // File input change
+    photoInput.addEventListener('change', handleFileSelect);
+    
+    // Drag and drop events
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('drag-over');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('drag-over');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+}
+
+function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) {
+        handleFile(file);
+    }
+}
+
+function handleFile(file) {
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        showNotification('Invalid file type. Only JPEG, PNG, and GIF files are allowed.', 'error');
+        return;
+    }
+    
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('File too large. Maximum size is 5MB.', 'error');
+        return;
+    }
+    
+    selectedFile = file;
+    
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const preview = document.getElementById('photoPreview');
+        const previewImage = document.getElementById('previewImage');
+        
+        previewImage.src = e.target.result;
+        preview.style.display = 'block';
+        
+        // Hide upload area
+        document.getElementById('uploadArea').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+function uploadPhoto() {
+    if (!selectedFile || !currentEmployeeId) {
+        showNotification('No file selected', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('photo', selectedFile);
+    
+    fetch(`{% url "api:upload_employee_photo" employee_id=0 %}`.replace('0', currentEmployeeId), {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('photoUploadModal')).hide();
+            
+            // Update the avatar in the employee card
+            updateEmployeeAvatar(currentEmployeeId, data.photo_url);
+            
+            // Reset form
+            resetPhotoUpload();
+        } else {
+            showNotification(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('An error occurred while uploading the photo', 'error');
+    });
+}
+
+function deletePhoto() {
+    if (!currentEmployeeId) {
+        showNotification('No employee selected', 'error');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to delete this photo?')) {
+        fetch(`{% url "api:delete_employee_photo" employee_id=0 %}`.replace('0', currentEmployeeId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('photoUploadModal')).hide();
+                
+                // Update the avatar in the employee card
+                updateEmployeeAvatar(currentEmployeeId, null);
+                
+                // Reset form
+                resetPhotoUpload();
+            } else {
+                showNotification(data.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred while deleting the photo', 'error');
+        });
+    }
+}
+
+function cancelUpload() {
+    resetPhotoUpload();
+}
+
+function resetPhotoUpload() {
+    selectedFile = null;
+    document.getElementById('photoInput').value = '';
+    document.getElementById('photoPreview').style.display = 'none';
+    document.getElementById('uploadArea').style.display = 'block';
+}
+
+function updateEmployeeAvatar(employeeId, photoUrl) {
+    // Find the employee card and update the avatar
+    const employeeCards = document.querySelectorAll('.employee-card');
+    employeeCards.forEach(card => {
+        const checkbox = card.querySelector('.employee-checkbox-input');
+        if (checkbox && checkbox.value == employeeId) {
+            const avatar = card.querySelector('.employee-avatar');
+            if (photoUrl) {
+                avatar.innerHTML = `
+                    <img src="${photoUrl}" alt="Employee Photo" class="avatar-image">
+                    <div class="photo-upload-overlay" onclick="openPhotoUpload(${employeeId})">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                `;
+            } else {
+                // Get initials from the employee name
+                const nameElement = card.querySelector('.employee-info h5');
+                const name = nameElement ? nameElement.textContent.trim() : '';
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+                
+                avatar.innerHTML = `
+                    <span class="avatar-initials">${initials}</span>
+                    <div class="photo-upload-overlay" onclick="openPhotoUpload(${employeeId})">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                `;
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
+
+<!-- Photo Upload Modal -->
+<div class="modal fade" id="photoUploadModal" tabindex="-1" aria-labelledby="photoUploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="photoUploadModalLabel">
+                    <i class="fas fa-camera"></i> Upload Employee Photo
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="photo-upload-container">
+                    <div class="current-photo" id="currentPhotoContainer">
+                        <!-- Current photo will be displayed here -->
+                    </div>
+                    
+                    <div class="upload-section">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop photo here or click to browse</p>
+                            <small>Supported formats: JPEG, PNG, GIF (Max 5MB)</small>
+                        </div>
+                        
+                        <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                        
+                        <div class="photo-preview" id="photoPreview" style="display: none;">
+                            <img id="previewImage" src="" alt="Preview">
+                            <div class="preview-actions">
+                                <button type="button" class="btn btn-success btn-sm" onclick="uploadPhoto()">
+                                    <i class="fas fa-check"></i> Upload
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="cancelUpload()">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="photo-actions" id="photoActions" style="display: none;">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="deletePhoto()">
+                            <i class="fas fa-trash"></i> Delete Photo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Advanced Search Modal -->
+<div class="modal fade" id="advancedSearchModal" tabindex="-1" aria-labelledby="advancedSearchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="advancedSearchModalLabel">
+                    <i class="fas fa-search-plus"></i> Advanced Search
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="advancedSearchForm">
+                    <div class="row">
+                        <!-- Basic Information -->
+                        <div class="col-md-6">
+                            <div class="search-section">
+                                <h6 class="section-title">
+                                    <i class="fas fa-user"></i> Basic Information
+                                </h6>
+                                <div class="mb-3">
+                                    <label for="search_first_name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="search_first_name" name="first_name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_last_name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="search_last_name" name="last_name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="search_email" name="email">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_employee_id" class="form-label">Employee ID</label>
+                                    <input type="text" class="form-control" id="search_employee_id" name="employee_id">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Employment Information -->
+                        <div class="col-md-6">
+                            <div class="search-section">
+                                <h6 class="section-title">
+                                    <i class="fas fa-briefcase"></i> Employment Information
+                                </h6>
+                                <div class="mb-3">
+                                    <label for="search_department" class="form-label">Department</label>
+                                    <select class="form-select" id="search_department" name="department">
+                                        <option value="">All Departments</option>
+                                        {% for dept in departments %}
+                                        <option value="{{ dept }}">{{ dept }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_position" class="form-label">Position</label>
+                                    <input type="text" class="form-control" id="search_position" name="position">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_position_level" class="form-label">Position Level</label>
+                                    <select class="form-select" id="search_position_level" name="position_level">
+                                        <option value="">All Levels</option>
+                                        <option value="entry">Entry Level</option>
+                                        <option value="mid">Mid Level</option>
+                                        <option value="senior">Senior Level</option>
+                                        <option value="lead">Lead/Manager</option>
+                                        <option value="executive">Executive</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_status" class="form-label">Status</label>
+                                    <select class="form-select" id="search_status" name="status">
+                                        <option value="">All Status</option>
+                                        <option value="verified">Verified</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Date Filters -->
+                        <div class="col-md-6">
+                            <div class="search-section">
+                                <h6 class="section-title">
+                                    <i class="fas fa-calendar"></i> Date Filters
+                                </h6>
+                                <div class="mb-3">
+                                    <label for="search_hire_date_from" class="form-label">Hire Date From</label>
+                                    <input type="date" class="form-control" id="search_hire_date_from" name="hire_date_from">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_hire_date_to" class="form-label">Hire Date To</label>
+                                    <input type="date" class="form-control" id="search_hire_date_to" name="hire_date_to">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_created_from" class="form-label">Created Date From</label>
+                                    <input type="date" class="form-control" id="search_created_from" name="created_from">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_created_to" class="form-label">Created Date To</label>
+                                    <input type="date" class="form-control" id="search_created_to" name="created_to">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Filters -->
+                        <div class="col-md-6">
+                            <div class="search-section">
+                                <h6 class="section-title">
+                                    <i class="fas fa-sliders-h"></i> Additional Filters
+                                </h6>
+                                <div class="mb-3">
+                                    <label for="search_experience_years" class="form-label">Experience (Years)</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="search_experience_min" name="experience_min" placeholder="Min" min="0">
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="search_experience_max" name="experience_max" placeholder="Max" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_location" class="form-label">Location</label>
+                                    <input type="text" class="form-control" id="search_location" name="location">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="search_skills" class="form-label">Skills (comma-separated)</label>
+                                    <input type="text" class="form-control" id="search_skills" name="skills" placeholder="JavaScript, Python, React">
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="search_new_employees" name="new_employees">
+                                        <label class="form-check-label" for="search_new_employees">
+                                            New Employees (Last 30 days)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Search Actions -->
+                    <div class="search-actions">
+                        <button type="button" class="btn btn-secondary" onclick="clearAdvancedSearch()">
+                            <i class="fas fa-eraser"></i> Clear All
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="saveSearchCriteria()">
+                            <i class="fas fa-save"></i> Save Search
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="applyAdvancedSearch()">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addEmployeeModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>Add New Employee
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addEmployeeForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="employee_id" class="form-label">Employee ID *</label>
+                                <input type="text" class="form-control" id="employee_id" name="employee_id" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="department" class="form-label">Department</label>
+                                <input type="text" class="form-control" id="department" name="department">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="position" class="form-label">Position</label>
+                                <input type="text" class="form-control" id="position" name="position">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="hire_date" class="form-label">Hire Date</label>
+                                <input type="date" class="form-control" id="hire_date" name="hire_date">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addEmployee()">
+                    <i class="fas fa-plus me-1"></i>Add Employee
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

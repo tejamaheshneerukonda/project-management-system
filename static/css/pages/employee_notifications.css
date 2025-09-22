@@ -1,0 +1,274 @@
+/**
+ * Employee Notifications CSS
+ * Styles for notification management and display functionality
+ */
+
+/* Notification Item Styles */
+.notification-item.unread {
+    background-color: #f8f9fa;
+    border-left: 4px solid #007bff;
+}
+
+.notification-item.read {
+    background-color: #fff;
+    border-left: 4px solid #e9ecef;
+}
+
+.notification-item {
+    transition: all 0.2s ease-in-out;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.notification-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Notification Icon Styles */
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease-in-out;
+}
+
+.notification-icon:hover {
+    transform: scale(1.1);
+}
+
+.notification-icon.task {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.notification-icon.project {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.notification-icon.announcement {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+.notification-icon.meeting {
+    background-color: #e8f5e8;
+    color: #388e3c;
+}
+
+.notification-icon.deadline {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+/* Notification Content Styles */
+.notification-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.notification-message {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.notification-time {
+    color: #adb5bd;
+    font-size: 0.8rem;
+}
+
+/* Notification Actions Styles */
+.notification-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.notification-action-btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 15px;
+    transition: all 0.2s ease-in-out;
+}
+
+.notification-action-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Filter Button Styles */
+.notification-filter-btn {
+    margin: 0 0.25rem;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.notification-filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.notification-filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Auto-refresh Indicator */
+.auto-refresh-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #28a745;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.auto-refresh-indicator.show {
+    opacity: 1;
+}
+
+/* Notification Badge Styles */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* Priority Styles */
+.notification-priority-high {
+    border-left-color: #dc3545 !important;
+}
+
+.notification-priority-medium {
+    border-left-color: #ffc107 !important;
+}
+
+.notification-priority-low {
+    border-left-color: #28a745 !important;
+}
+
+/* Notification Types */
+.notification-type-task {
+    border-left-color: #007bff !important;
+}
+
+.notification-type-project {
+    border-left-color: #6f42c1 !important;
+}
+
+.notification-type-announcement {
+    border-left-color: #fd7e14 !important;
+}
+
+.notification-type-meeting {
+    border-left-color: #20c997 !important;
+}
+
+.notification-type-deadline {
+    border-left-color: #dc3545 !important;
+}
+
+/* Empty State Styles */
+.notifications-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.notifications-empty i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Loading State Styles */
+.notifications-loading {
+    text-align: center;
+    padding: 2rem;
+}
+
+.notifications-loading .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .notification-item {
+        margin-bottom: 0.75rem;
+    }
+    
+    .notification-icon {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .notification-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .notification-action-btn {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+    }
+    
+    .auto-refresh-indicator {
+        top: 10px;
+        right: 10px;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.75rem;
+    }
+}
+
+/* Animation for new notifications */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-item.new {
+    animation: slideInRight 0.3s ease-out;
+}
+
+/* Mark as read animation */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.7;
+    }
+}
+
+.notification-item.marking-read {
+    animation: fadeOut 0.3s ease-out;
+}

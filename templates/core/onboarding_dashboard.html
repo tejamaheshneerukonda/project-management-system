@@ -1,0 +1,359 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/onboarding_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-user-plus"></i>
+                Onboarding Dashboard
+            </h1>
+            <p class="page-subtitle">Manage employee onboarding workflows and track progress</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="createWorkflow()">
+                <i class="fas fa-plus"></i> Create Workflow
+            </button>
+            <button class="btn btn-success" onclick="assignWorkflow()">
+                <i class="fas fa-user-plus"></i> Assign Workflow
+            </button>
+        </div>
+    </div>
+
+    <!-- Onboarding Statistics -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="onboarding-stat-card workflows">
+                <div class="stat-icon">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ onboarding_stats.total_workflows }}</h3>
+                    <p>Total Workflows</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="onboarding-stat-card active">
+                <div class="stat-icon">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ onboarding_stats.active_assignments }}</h3>
+                    <p>Active Assignments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="onboarding-stat-card completed">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ onboarding_stats.completed_assignments }}</h3>
+                    <p>Completed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="onboarding-stat-card overdue">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ onboarding_stats.overdue_assignments }}</h3>
+                    <p>Overdue</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Performance -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="workflow-performance-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Workflow Performance</h5>
+                </div>
+                <div class="card-content">
+                    {% if workflow_performance %}
+                        <div class="workflow-performance-list">
+                            {% for perf in workflow_performance %}
+                                <div class="workflow-performance-item">
+                                    <div class="workflow-info">
+                                        <h6>{{ perf.workflow.name }}</h6>
+                                        <p>{{ perf.workflow.get_workflow_type_display }}</p>
+                                        <small class="text-muted">{{ perf.avg_duration }} days estimated</small>
+                                    </div>
+                                    <div class="workflow-stats">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Total Assigned:</span>
+                                            <span class="stat-value">{{ perf.total_assigned }}</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-label">Completed:</span>
+                                            <span class="stat-value">{{ perf.completed }}</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-label">Completion Rate:</span>
+                                            <span class="stat-value">{{ perf.completion_rate|floatformat:1 }}%</span>
+                                        </div>
+                                    </div>
+                                    <div class="workflow-progress">
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ perf.completion_rate }}%" 
+                                                 aria-valuenow="{{ perf.completion_rate }}" aria-valuemin="0" aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-chart-bar"></i>
+                            <p>No workflow performance data available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-lg-6 mb-3">
+            <div class="recent-activity-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Recent Assignments</h5>
+                    <a href="{% url 'core:onboarding_assignments' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-content">
+                    {% if recent_assignments %}
+                        <div class="activity-list">
+                            {% for assignment in recent_assignments %}
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        {% if assignment.status == 'COMPLETED' %}
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        {% elif assignment.status == 'IN_PROGRESS' %}
+                                            <i class="fas fa-play-circle text-info"></i>
+                                        {% elif assignment.status == 'PENDING_APPROVAL' %}
+                                            <i class="fas fa-clock text-warning"></i>
+                                        {% elif assignment.status == 'OVERDUE' %}
+                                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                                        {% else %}
+                                            <i class="fas fa-circle text-secondary"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="activity-content">
+                                        <h6>{{ assignment.employee.first_name }} {{ assignment.employee.last_name }}</h6>
+                                        <p>{{ assignment.workflow.name }}</p>
+                                        <small>{{ assignment.assigned_at|timesince }} ago</small>
+                                    </div>
+                                    <div class="activity-status">
+                                        <span class="status-badge status-{{ assignment.status|lower }}">{{ assignment.get_status_display }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-history"></i>
+                            <p>No recent assignments</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-3">
+            <div class="recent-activity-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock"></i> Pending Approvals</h5>
+                    <a href="{% url 'core:onboarding_assignments' %}?status=PENDING_APPROVAL" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-content">
+                    {% if pending_approvals %}
+                        <div class="activity-list">
+                            {% for approval in pending_approvals %}
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-clock text-warning"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h6>{{ approval.task.name }}</h6>
+                                        <p>{{ approval.onboarding_assignment.employee.first_name }} {{ approval.onboarding_assignment.employee.last_name }}</p>
+                                        <small>{{ approval.created_at|timesince }} ago</small>
+                                    </div>
+                                    <div class="activity-status">
+                                        <span class="status-badge status-pending_approval">{{ approval.get_status_display }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-clock"></i>
+                            <p>No pending approvals</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Documents -->
+    <div class="row">
+        <div class="col-12">
+            <div class="recent-activity-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-alt"></i> Pending Document Reviews</h5>
+                    <a href="{% url 'core:onboarding_documents' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-content">
+                    {% if pending_documents %}
+                        <div class="activity-list">
+                            {% for doc in pending_documents %}
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-file-alt text-info"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h6>{{ doc.document.name }}</h6>
+                                        <p>{{ doc.employee.first_name }} {{ doc.employee.last_name }}</p>
+                                        <small>{{ doc.submitted_at|timesince }} ago</small>
+                                    </div>
+                                    <div class="activity-status">
+                                        <span class="status-badge status-pending">{{ doc.get_status_display }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-file-alt"></i>
+                            <p>No pending document reviews</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Modal -->
+<div class="modal fade" id="quickActionsModal" tabindex="-1" aria-labelledby="quickActionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickActionsModalLabel">
+                    <i class="fas fa-bolt"></i> Quick Actions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="quick-action-item" onclick="createWorkflow()">
+                            <div class="action-icon">
+                                <i class="fas fa-sitemap"></i>
+                            </div>
+                            <div class="action-content">
+                                <h6>Create Workflow</h6>
+                                <p>Create a new onboarding workflow template</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="quick-action-item" onclick="assignWorkflow()">
+                            <div class="action-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="action-content">
+                                <h6>Assign Workflow</h6>
+                                <p>Assign an onboarding workflow to an employee</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="quick-action-item" onclick="window.location.href='{% url 'core:onboarding_workflows' %}'">
+                            <div class="action-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="action-content">
+                                <h6>Manage Workflows</h6>
+                                <p>View and edit existing workflows</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="quick-action-item" onclick="window.location.href='{% url 'core:onboarding_tasks' %}'">
+                            <div class="action-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <div class="action-content">
+                                <h6>Manage Tasks</h6>
+                                <p>View and edit onboarding tasks</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function createWorkflow() {
+    // Redirect to create workflow page
+    window.location.href = "{% url 'core:onboarding_workflows' %}";
+}
+
+function assignWorkflow() {
+    // Redirect to assign workflow page
+    window.location.href = "{% url 'core:onboarding_assign_workflow' %}";
+}
+
+// Auto-refresh dashboard every 30 seconds
+setInterval(function() {
+    // Only refresh if no modal is open and user is on this page
+    if (!document.querySelector('.modal.show') && window.location.pathname.includes('onboarding-dashboard')) {
+        // You could implement auto-refresh here if needed
+    }
+}, 30000);
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for activity items
+    document.querySelectorAll('.activity-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Don't trigger if clicking on buttons or badges
+            if (e.target.closest('.btn') || e.target.closest('.status-badge')) {
+                return;
+            }
+            
+            // You could implement navigation to detail pages here
+        });
+    });
+    
+    // Add click handlers for workflow performance items
+    document.querySelectorAll('.workflow-performance-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Navigate to workflow detail page
+            // You could implement this navigation here
+        });
+    });
+});
+</script>
+{% endblock %}

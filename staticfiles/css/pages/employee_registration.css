@@ -1,0 +1,397 @@
+/* Employee Registration Specific Styles */
+
+.registration-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.registration-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.registration-header {
+    background: linear-gradient(135deg, var(--primary-color), #1e40af);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.registration-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.registration-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.registration-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+.registration-body {
+    padding: 2rem;
+}
+
+/* Employee Info Box */
+.employee-info-box {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 1px solid #bae6fd;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.employee-info-title {
+    color: var(--info-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.employee-info-box p {
+    margin-bottom: 0.5rem;
+    color: var(--gray-700);
+}
+
+.employee-info-box code {
+    background-color: var(--gray-100);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+}
+
+/* Form Styles */
+.registration-form {
+    margin-bottom: 1.5rem;
+}
+
+.registration-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.registration-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.registration-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.registration-input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--gray-400);
+    z-index: 2;
+}
+
+.registration-input-group input {
+    padding-left: 3rem;
+    padding-right: 3rem;
+    border: 2px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.registration-input-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--gray-400);
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: var(--primary-color);
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    margin-top: 0.5rem;
+}
+
+.password-strength-bar {
+    height: 4px;
+    background-color: var(--gray-200);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+}
+
+.password-strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.password-strength-fill.weak {
+    width: 25%;
+    background-color: var(--danger-color);
+}
+
+.password-strength-fill.fair {
+    width: 50%;
+    background-color: var(--warning-color);
+}
+
+.password-strength-fill.good {
+    width: 75%;
+    background-color: var(--info-color);
+}
+
+.password-strength-fill.strong {
+    width: 100%;
+    background-color: var(--success-color);
+}
+
+.password-strength-text {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+
+.password-strength-text.weak {
+    color: var(--danger-color);
+}
+
+.password-strength-text.fair {
+    color: var(--warning-color);
+}
+
+.password-strength-text.good {
+    color: var(--info-color);
+}
+
+.password-strength-text.strong {
+    color: var(--success-color);
+}
+
+/* Help Text */
+.registration-help-text {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: 0.5rem;
+}
+
+/* Checkbox Group */
+.registration-checkbox-group {
+    margin-bottom: 2rem;
+}
+
+.form-check {
+    padding-left: 2rem;
+}
+
+.form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.125rem;
+    margin-left: -2rem;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-label {
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    line-height: 1.4;
+}
+
+.registration-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.registration-link:hover {
+    text-decoration: underline;
+}
+
+/* Button Styles */
+.registration-button {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary-color), #1e40af);
+    border: none;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.registration-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+}
+
+.registration-button:active {
+    transform: translateY(0);
+}
+
+/* Footer */
+.registration-footer {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.registration-footer-text {
+    color: var(--gray-600);
+    margin-bottom: 0;
+    font-size: 0.875rem;
+}
+
+.registration-login-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.registration-login-link:hover {
+    text-decoration: underline;
+}
+
+/* Form Validation */
+.was-validated .form-control:valid {
+    border-color: var(--success-color);
+}
+
+.was-validated .form-control:invalid {
+    border-color: var(--danger-color);
+}
+
+.invalid-feedback {
+    display: block;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--danger-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .registration-container {
+        padding: 1rem 0;
+    }
+    
+    .registration-card {
+        margin: 0 1rem;
+    }
+    
+    .registration-header {
+        padding: 1.5rem;
+    }
+    
+    .registration-body {
+        padding: 1.5rem;
+    }
+    
+    .registration-icon {
+        font-size: 2.5rem;
+    }
+    
+    .registration-title {
+        font-size: 1.5rem;
+    }
+    
+    .employee-info-box {
+        padding: 1rem;
+    }
+    
+    .employee-info-box .row {
+        margin: 0;
+    }
+    
+    .employee-info-box .col-md-6 {
+        padding: 0;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Loading State */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success Animation */
+@keyframes checkmark {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.success-checkmark {
+    animation: checkmark 0.6s ease-in-out;
+}

@@ -1,0 +1,454 @@
+{% extends 'base_company_admin.html' %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-users me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Manage customer relationships and track sales activities</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+                        <i class="fas fa-plus me-1"></i>Add Customer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CRM Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_customers }}</h4>
+                            <p class="mb-0">Total Customers</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ active_customers }}</h4>
+                            <p class="mb-0">Active Customers</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ new_customers }}</h4>
+                            <p class="mb-0">New This Month</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-plus fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ recent_activities|length }}</h4>
+                            <p class="mb-0">Recent Activities</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-primary w-100" onclick="createSupportTicket()">
+                                <i class="fas fa-ticket-alt fa-2x mb-2"></i><br>
+                                <small>Support Ticket</small>
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-success w-100" onclick="scheduleMeeting()">
+                                <i class="fas fa-calendar-plus fa-2x mb-2"></i><br>
+                                <small>Schedule Meeting</small>
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-info w-100" onclick="sendEmail()">
+                                <i class="fas fa-envelope fa-2x mb-2"></i><br>
+                                <small>Send Email</small>
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-warning w-100" onclick="createQuote()">
+                                <i class="fas fa-file-invoice fa-2x mb-2"></i><br>
+                                <small>Create Quote</small>
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-secondary w-100" onclick="viewReports()">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i><br>
+                                <small>View Reports</small>
+                            </button>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-dark w-100" onclick="exportData()">
+                                <i class="fas fa-download fa-2x mb-2"></i><br>
+                                <small>Export Data</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Recent Customer Activities
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_activities %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Activity</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for activity in recent_activities %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                        {{ activity.title|first|upper }}
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ activity.title }}</strong>
+                                                        <br><small class="text-muted">{{ activity.created_by.username }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    {% if activity.announcement_type == 'CUSTOMER' %}
+                                                        <i class="fas fa-user me-1"></i>Customer
+                                                    {% elif activity.announcement_type == 'SUPPORT' %}
+                                                        <i class="fas fa-headset me-1"></i>Support
+                                                    {% elif activity.announcement_type == 'SALE' %}
+                                                        <i class="fas fa-dollar-sign me-1"></i>Sale
+                                                    {% else %}
+                                                        <i class="fas fa-circle me-1"></i>{{ activity.announcement_type }}
+                                                    {% endif %}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small>{{ activity.created_at|date:"M d, Y H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                {% if activity.is_active %}
+                                                    <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" onclick="viewActivity({{ activity.id }})" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary" onclick="editActivity({{ activity.id }})" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No recent activities found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Insights -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Customer Insights
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary">Customer Satisfaction</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 85%" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">85%</div>
+                        </div>
+                        <small class="text-muted">Based on recent feedback</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-info">Response Time</h6>
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">2.5 hours</span>
+                            <span class="text-success">
+                                <i class="fas fa-arrow-down me-1"></i>15% faster
+                            </span>
+                        </div>
+                        <small class="text-muted">Average support response time</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-warning">Conversion Rate</h6>
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">12.5%</span>
+                            <span class="text-success">
+                                <i class="fas fa-arrow-up me-1"></i>3% higher
+                            </span>
+                        </div>
+                        <small class="text-muted">Lead to customer conversion</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-success">Retention Rate</h6>
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">94%</span>
+                            <span class="text-success">
+                                <i class="fas fa-arrow-up me-1"></i>2% higher
+                            </span>
+                        </div>
+                        <small class="text-muted">Customer retention rate</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCustomerModalLabel">
+                    <i class="fas fa-plus me-2"></i>Add New Customer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCustomerForm">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="customer_name" class="form-label">Customer Name *</label>
+                            <input type="text" class="form-control" id="customer_name" name="customer_name" 
+                                   placeholder="e.g., ABC Corporation" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="contact_person" class="form-label">Contact Person</label>
+                            <input type="text" class="form-control" id="contact_person" name="contact_person" 
+                                   placeholder="e.g., John Smith">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="contact@abccorp.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   placeholder="+1 (555) 123-4567">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="company_size" class="form-label">Company Size</label>
+                            <select class="form-select" id="company_size" name="company_size">
+                                <option value="">Select Size</option>
+                                <option value="startup">Startup (1-10)</option>
+                                <option value="small">Small (11-50)</option>
+                                <option value="medium">Medium (51-200)</option>
+                                <option value="large">Large (201-1000)</option>
+                                <option value="enterprise">Enterprise (1000+)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="industry" class="form-label">Industry</label>
+                            <select class="form-select" id="industry" name="industry">
+                                <option value="">Select Industry</option>
+                                <option value="technology">Technology</option>
+                                <option value="healthcare">Healthcare</option>
+                                <option value="finance">Finance</option>
+                                <option value="education">Education</option>
+                                <option value="retail">Retail</option>
+                                <option value="manufacturing">Manufacturing</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="Additional notes about the customer"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addCustomer()">
+                    <i class="fas fa-plus me-1"></i>Add Customer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script>
+function addCustomer() {
+    const form = document.getElementById('addCustomerForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "api:create_customer" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            showErrorToast('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showErrorToast('An error occurred while adding the customer.');
+    });
+}
+
+function createSupportTicket() {
+    // TODO: Implement support ticket creation
+    showErrorToast('Create support ticket functionality will be implemented soon.');
+}
+
+function scheduleMeeting() {
+    // TODO: Implement meeting scheduling
+    showErrorToast('Schedule meeting functionality will be implemented soon.');
+}
+
+function sendEmail() {
+    // TODO: Implement email sending
+    showErrorToast('Send email functionality will be implemented soon.');
+}
+
+function createQuote() {
+    // TODO: Implement quote creation
+    showErrorToast('Create quote functionality will be implemented soon.');
+}
+
+function viewReports() {
+    // TODO: Implement reports view
+    showErrorToast('View reports functionality will be implemented soon.');
+}
+
+function exportData() {
+    // TODO: Implement data export
+    showErrorToast('Export data functionality will be implemented soon.');
+}
+
+function viewActivity(activityId) {
+    // TODO: Implement activity details view
+    showErrorToast('View activity with ID: ' + activityId);
+}
+
+function editActivity(activityId) {
+    // TODO: Implement activity edit
+    showErrorToast('Edit activity with ID: ' + activityId);
+}
+</script>
+{% endblock %}
+{% endblock %}

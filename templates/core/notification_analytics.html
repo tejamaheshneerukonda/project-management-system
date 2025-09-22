@@ -1,0 +1,857 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/notification_analytics.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid notification-analytics-wrapper">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-1">{{ title }}</h1>
+                <p class="text-muted mb-0">Comprehensive analytics and insights for notification performance</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'core:notification_center' %}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Notifications
+                </a>
+                <button class="btn btn-primary" onclick="exportAnalytics()">
+                    <i class="fas fa-download me-1"></i>Export Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-bell text-primary"></i>
+                    </div>
+                    <h4 class="stat-number">{{ total_notifications }}</h4>
+                    <p class="stat-label">Total Notifications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
+                    <h4 class="stat-number">{{ read_notifications }}</h4>
+                    <p class="stat-label">Read Notifications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock text-warning"></i>
+                    </div>
+                    <h4 class="stat-number">{{ unread_notifications }}</h4>
+                    <p class="stat-label">Unread Notifications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line text-info"></i>
+                    </div>
+                    <h4 class="stat-number">
+                        {% if total_notifications > 0 %}
+                            {% widthratio read_notifications total_notifications 100 %}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </h4>
+                    <p class="stat-label">Read Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Notification Types Distribution -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Notification Types Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="typeDistributionChart"></canvas>
+                    </div>
+                    <div class="chart-legend mt-3">
+                        {% for item in type_distribution %}
+                        <div class="legend-item">
+                            <div class="legend-color" data-type="{{ item.notification_type }}"></div>
+                            <span class="legend-label">{{ item.notification_type }}</span>
+                            <span class="legend-value">{{ item.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Priority Distribution -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Priority Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="priorityDistributionChart"></canvas>
+                    </div>
+                    <div class="chart-legend mt-3">
+                        {% for item in priority_distribution %}
+                        <div class="legend-item">
+                            <div class="legend-color priority-{{ item.priority|lower }}"></div>
+                            <span class="legend-label">{{ item.priority }}</span>
+                            <span class="legend-value">{{ item.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Channel Distribution and Monthly Trends -->
+    <div class="row mb-4">
+        <!-- Channel Distribution -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-broadcast-tower me-2"></i>Delivery Channel Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="channelDistributionChart"></canvas>
+                    </div>
+                    <div class="chart-legend mt-3">
+                        {% for item in channel_distribution %}
+                        <div class="legend-item">
+                            <div class="legend-color channel-{{ item.channel|lower }}"></div>
+                            <span class="legend-label">{{ item.channel }}</span>
+                            <span class="legend-value">{{ item.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Trends -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Monthly Trends
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="monthlyTrendsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Read Rate Analysis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-eye me-2"></i>Read Rate Analysis by Type
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Notification Type</th>
+                                    <th>Total Sent</th>
+                                    <th>Read</th>
+                                    <th>Unread</th>
+                                    <th>Read Rate</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in read_rate_by_type %}
+                                <tr>
+                                    <td>
+                                        <div class="type-info">
+                                            <div class="type-icon">
+                                                <i class="fas fa-bell"></i>
+                                            </div>
+                                            <span class="type-name">{{ item.type }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="metric-value">{{ item.total }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="metric-value text-success">{{ item.read }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="metric-value text-warning">{{ item.total|add:item.read|add:"-"|add:item.read }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress">
+                                                <div class="progress-bar" role="progressbar" style="width: {{ item.read_rate }}%" aria-valuenow="{{ item.read_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <span class="progress-text">{{ item.read_rate|floatformat:1 }}%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if item.read_rate >= 80 %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Excellent
+                                        </span>
+                                        {% elif item.read_rate >= 60 %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-thumbs-up me-1"></i>Good
+                                        </span>
+                                        {% elif item.read_rate >= 40 %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Fair
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>Poor
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights and Recommendations -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Insights & Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="insights-list">
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-chart-line text-primary"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h6>Overall Performance</h6>
+                                <p>Your notification read rate is 
+                                    {% if total_notifications > 0 %}
+                                        {% widthratio read_notifications total_notifications 100 as read_percentage %}
+                                        {{ read_percentage }}%
+                                        {% if read_percentage >= 80 %}
+                                        , which is excellent! Keep up the good work.
+                                        {% elif read_percentage >= 60 %}
+                                        , which is good. Consider optimizing timing and content.
+                                        {% elif read_percentage >= 40 %}
+                                        , which could be improved. Focus on notification relevance and timing.
+                                        {% else %}
+                                        , which needs attention. Review notification strategy and user preferences.
+                                        {% endif %}
+                                    {% else %}
+                                        0%, which needs attention. Review notification strategy and user preferences.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-clock text-warning"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h6>Timing Optimization</h6>
+                                <p>Consider analyzing peak engagement times and adjusting notification schedules accordingly. Users are more likely to read notifications during business hours.</p>
+                            </div>
+                        </div>
+
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-bell text-info"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h6>Channel Effectiveness</h6>
+                                <p>Monitor which delivery channels perform best for different notification types. Email notifications typically have higher read rates than in-app notifications.</p>
+                            </div>
+                        </div>
+
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-target text-success"></i>
+                            </div>
+                            <div class="insight-content">
+                                <h6>Content Optimization</h6>
+                                <p>Focus on creating clear, actionable notification content. Notifications with specific calls-to-action tend to have higher engagement rates.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cog me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" onclick="refreshAnalytics()">
+                            <i class="fas fa-sync me-2"></i>Refresh Data
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="exportAnalytics()">
+                            <i class="fas fa-download me-2"></i>Export Report
+                        </button>
+                        <button class="btn btn-outline-info" onclick="scheduleReport()">
+                            <i class="fas fa-calendar me-2"></i>Schedule Report
+                        </button>
+                        <a href="{% url 'core:notification_preferences' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-cog me-2"></i>Manage Preferences
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Auto-fix readability on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply universal readability fix
+    if (typeof applyUniversalReadabilityFix === 'function') {
+        applyUniversalReadabilityFix();
+    }
+    
+    // Initialize charts
+    initializeCharts();
+    
+    // Apply colors and icons to legend items
+    applyLegendStyling();
+    
+    // Apply icons to type items in table
+    applyTypeIcons();
+});
+
+// Chart data
+const chartData = {
+    typeDistribution: {
+        labels: [
+            {% for item in type_distribution %}
+            '{{ item.notification_type }}',
+            {% endfor %}
+        ],
+        data: [
+            {% for item in type_distribution %}
+            {{ item.count }},
+            {% endfor %}
+        ],
+        types: [
+            {% for item in type_distribution %}
+            '{{ item.notification_type }}',
+            {% endfor %}
+        ]
+    },
+    priorityDistribution: {
+        labels: [
+            {% for item in priority_distribution %}
+            '{{ item.priority }}',
+            {% endfor %}
+        ],
+        data: [
+            {% for item in priority_distribution %}
+            {{ item.count }},
+            {% endfor %}
+        ],
+        priorities: [
+            {% for item in priority_distribution %}
+            '{{ item.priority }}',
+            {% endfor %}
+        ]
+    },
+    channelDistribution: {
+        labels: [
+            {% for item in channel_distribution %}
+            '{{ item.channel }}',
+            {% endfor %}
+        ],
+        data: [
+            {% for item in channel_distribution %}
+            {{ item.count }},
+            {% endfor %}
+        ],
+        channels: [
+            {% for item in channel_distribution %}
+            '{{ item.channel }}',
+            {% endfor %}
+        ]
+    },
+    monthlyTrends: {
+        labels: [
+            {% for item in monthly_trends %}
+            '{{ item.month|date:"M Y" }}',
+            {% endfor %}
+        ],
+        data: [
+            {% for item in monthly_trends %}
+            {{ item.count }},
+            {% endfor %}
+        ]
+    }
+};
+
+// Initialize all charts
+function initializeCharts() {
+    // Type Distribution Chart
+    const typeCtx = document.getElementById('typeDistributionChart').getContext('2d');
+    const typeColors = chartData.typeDistribution.types.map(type => getTypeColor(type));
+    const typeLabels = chartData.typeDistribution.types.map(type => getTypeDisplay(type));
+    
+    new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: typeLabels,
+            datasets: [{
+                data: chartData.typeDistribution.data,
+                backgroundColor: typeColors,
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Priority Distribution Chart
+    const priorityCtx = document.getElementById('priorityDistributionChart').getContext('2d');
+    const priorityColors = chartData.priorityDistribution.priorities.map(priority => getPriorityColor(priority));
+    const priorityLabels = chartData.priorityDistribution.priorities.map(priority => getPriorityDisplay(priority));
+    
+    new Chart(priorityCtx, {
+        type: 'bar',
+        data: {
+            labels: priorityLabels,
+            datasets: [{
+                data: chartData.priorityDistribution.data,
+                backgroundColor: priorityColors,
+                borderWidth: 1,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Channel Distribution Chart
+    const channelCtx = document.getElementById('channelDistributionChart').getContext('2d');
+    const channelColors = chartData.channelDistribution.channels.map(channel => getChannelColor(channel));
+    const channelLabels = chartData.channelDistribution.channels.map(channel => getChannelDisplay(channel));
+    
+    new Chart(channelCtx, {
+        type: 'pie',
+        data: {
+            labels: channelLabels,
+            datasets: [{
+                data: chartData.channelDistribution.data,
+                backgroundColor: channelColors,
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Monthly Trends Chart
+    const monthlyCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: chartData.monthlyTrends.labels,
+            datasets: [{
+                label: 'Notifications',
+                data: chartData.monthlyTrends.data,
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Apply legend styling
+function applyLegendStyling() {
+    // Apply colors to type distribution legend
+    const typeLegendItems = document.querySelectorAll('.chart-legend .legend-color[data-type]');
+    typeLegendItems.forEach(item => {
+        const type = item.dataset.type;
+        item.style.backgroundColor = getTypeColor(type);
+    });
+}
+
+// Apply type icons to table
+function applyTypeIcons() {
+    const typeIcons = document.querySelectorAll('.type-icon i');
+    typeIcons.forEach(icon => {
+        const typeName = icon.closest('.type-info').querySelector('.type-name').textContent.trim();
+        // Find the type code from the type name
+        const typeCode = getTypeCodeFromName(typeName);
+        if (typeCode) {
+            icon.className = getTypeIcon(typeCode);
+        }
+    });
+}
+
+// Get type code from display name
+function getTypeCodeFromName(displayName) {
+    const typeMap = {
+        'System Notification': 'SYSTEM',
+        'Security Alert': 'SECURITY',
+        'Backup Notification': 'BACKUP',
+        'Maintenance Alert': 'MAINTENANCE',
+        'User Action': 'USER_ACTION',
+        'Company Action': 'COMPANY_ACTION',
+        'Employee Action': 'EMPLOYEE_ACTION',
+        'Company Announcement': 'ANNOUNCEMENT',
+        'Performance Update': 'PERFORMANCE',
+        'Attendance Alert': 'ATTENDANCE',
+        'Leave Request': 'LEAVE',
+        'Timesheet Update': 'TIMESHEET',
+        'Shift Change': 'SHIFT',
+        'Project Update': 'PROJECT',
+        'Task Assignment': 'TASK',
+        'Deadline Reminder': 'DEADLINE',
+        'Birthday Reminder': 'BIRTHDAY',
+        'Work Anniversary': 'ANNIVERSARY',
+        'Training Reminder': 'TRAINING',
+        'Meeting Reminder': 'MEETING',
+        'Payroll Update': 'PAYROLL',
+        'Benefits Update': 'BENEFITS',
+        'Policy Change': 'POLICY',
+        'Emergency Alert': 'EMERGENCY'
+    };
+    return typeMap[displayName] || null;
+}
+
+// Action functions
+function refreshAnalytics() {
+    showNotification('Refreshing analytics data...', 'info');
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+function exportAnalytics() {
+    showNotification('Exporting analytics report...', 'info');
+    
+    // Create CSV data
+    const csvData = generateCSVData();
+    
+    // Create and download CSV file
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `notification_analytics_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification('Analytics report exported successfully!', 'success');
+}
+
+function generateCSVData() {
+    const headers = [
+        'Metric',
+        'Value',
+        'Percentage',
+        'Description'
+    ];
+    
+    const rows = [
+        ['Total Notifications', '{{ total_notifications }}', '100%', 'Total number of notifications sent'],
+        ['Read Notifications', '{{ read_notifications }}', '{% if total_notifications > 0 %}{% widthratio read_notifications total_notifications 100 %}%{% else %}0%{% endif %}', 'Number of notifications that have been read'],
+        ['Unread Notifications', '{{ unread_notifications }}', '{% if total_notifications > 0 %}{% widthratio unread_notifications total_notifications 100 %}%{% else %}0%{% endif %}', 'Number of notifications that have not been read'],
+        ['Read Rate', '{% if total_notifications > 0 %}{% widthratio read_notifications total_notifications 100 %}%{% else %}0%{% endif %}', '', 'Percentage of notifications that have been read']
+    ];
+    
+    // Add type distribution
+    {% for item in type_distribution %}
+    rows.push(['{{ item.notification_type }} Notifications', '{{ item.count }}', '{% if total_notifications > 0 %}{% widthratio item.count total_notifications 100 %}%{% else %}0%{% endif %}', 'Number of {{ item.notification_type|lower }} notifications']);
+    {% endfor %}
+    
+    // Add priority distribution
+    {% for item in priority_distribution %}
+    rows.push(['{{ item.priority }} Priority Notifications', '{{ item.count }}', '{% if total_notifications > 0 %}{% widthratio item.count total_notifications 100 %}%{% else %}0%{% endif %}', 'Number of {{ item.priority|lower }} priority notifications']);
+    {% endfor %}
+    
+    // Add channel distribution
+    {% for item in channel_distribution %}
+    rows.push(['{{ item.channel }} Channel Notifications', '{{ item.count }}', '{% if total_notifications > 0 %}{% widthratio item.count total_notifications 100 %}%{% else %}0%{% endif %}', 'Number of notifications sent via {{ item.channel|lower }}']);
+    {% endfor %}
+    
+    // Convert to CSV format
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    return csvContent;
+}
+
+function scheduleReport() {
+    showNotification('Scheduling report functionality coming soon!', 'info');
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Apply readability fixes when modals are shown
+document.addEventListener('shown.bs.modal', function(event) {
+    if (typeof applyUniversalReadabilityFix === 'function') {
+        applyUniversalReadabilityFix();
+    }
+});
+</script>
+
+<!-- Template Filters -->
+<script>
+// Template filter functions
+function getTypeDisplay(type) {
+    const typeMap = {
+        'SYSTEM': 'System Notification',
+        'SECURITY': 'Security Alert',
+        'BACKUP': 'Backup Notification',
+        'MAINTENANCE': 'Maintenance Alert',
+        'USER_ACTION': 'User Action',
+        'COMPANY_ACTION': 'Company Action',
+        'EMPLOYEE_ACTION': 'Employee Action',
+        'ANNOUNCEMENT': 'Company Announcement',
+        'PERFORMANCE': 'Performance Update',
+        'ATTENDANCE': 'Attendance Alert',
+        'LEAVE': 'Leave Request',
+        'TIMESHEET': 'Timesheet Update',
+        'SHIFT': 'Shift Change',
+        'PROJECT': 'Project Update',
+        'TASK': 'Task Assignment',
+        'DEADLINE': 'Deadline Reminder',
+        'BIRTHDAY': 'Birthday Reminder',
+        'ANNIVERSARY': 'Work Anniversary',
+        'TRAINING': 'Training Reminder',
+        'MEETING': 'Meeting Reminder',
+        'PAYROLL': 'Payroll Update',
+        'BENEFITS': 'Benefits Update',
+        'POLICY': 'Policy Change',
+        'EMERGENCY': 'Emergency Alert'
+    };
+    return typeMap[type] || type;
+}
+
+function getTypeColor(type) {
+    const colorMap = {
+        'SYSTEM': '#6c757d',
+        'SECURITY': '#dc3545',
+        'BACKUP': '#17a2b8',
+        'MAINTENANCE': '#ffc107',
+        'USER_ACTION': '#28a745',
+        'COMPANY_ACTION': '#007bff',
+        'EMPLOYEE_ACTION': '#6f42c1',
+        'ANNOUNCEMENT': '#fd7e14',
+        'PERFORMANCE': '#20c997',
+        'ATTENDANCE': '#e83e8c',
+        'LEAVE': '#6f42c1',
+        'TIMESHEET': '#17a2b8',
+        'SHIFT': '#ffc107',
+        'PROJECT': '#28a745',
+        'TASK': '#007bff',
+        'DEADLINE': '#dc3545',
+        'BIRTHDAY': '#fd7e14',
+        'ANNIVERSARY': '#e83e8c',
+        'TRAINING': '#20c997',
+        'MEETING': '#6c757d',
+        'PAYROLL': '#28a745',
+        'BENEFITS': '#17a2b8',
+        'POLICY': '#6f42c1',
+        'EMERGENCY': '#dc3545'
+    };
+    return colorMap[type] || '#6c757d';
+}
+
+function getTypeIcon(type) {
+    const iconMap = {
+        'SYSTEM': 'fas fa-cog',
+        'SECURITY': 'fas fa-shield-alt',
+        'BACKUP': 'fas fa-database',
+        'MAINTENANCE': 'fas fa-tools',
+        'USER_ACTION': 'fas fa-user',
+        'COMPANY_ACTION': 'fas fa-building',
+        'EMPLOYEE_ACTION': 'fas fa-users',
+        'ANNOUNCEMENT': 'fas fa-bullhorn',
+        'PERFORMANCE': 'fas fa-chart-line',
+        'ATTENDANCE': 'fas fa-clock',
+        'LEAVE': 'fas fa-calendar-times',
+        'TIMESHEET': 'fas fa-stopwatch',
+        'SHIFT': 'fas fa-exchange-alt',
+        'PROJECT': 'fas fa-project-diagram',
+        'TASK': 'fas fa-tasks',
+        'DEADLINE': 'fas fa-exclamation-triangle',
+        'BIRTHDAY': 'fas fa-birthday-cake',
+        'ANNIVERSARY': 'fas fa-gift',
+        'TRAINING': 'fas fa-graduation-cap',
+        'MEETING': 'fas fa-users',
+        'PAYROLL': 'fas fa-dollar-sign',
+        'BENEFITS': 'fas fa-heart',
+        'POLICY': 'fas fa-file-alt',
+        'EMERGENCY': 'fas fa-exclamation-circle'
+    };
+    return iconMap[type] || 'fas fa-bell';
+}
+
+function getPriorityDisplay(priority) {
+    const priorityMap = {
+        'LOW': 'Low',
+        'MEDIUM': 'Medium',
+        'HIGH': 'High',
+        'CRITICAL': 'Critical'
+    };
+    return priorityMap[priority] || priority;
+}
+
+function getPriorityColor(priority) {
+    const colorMap = {
+        'LOW': '#28a745',
+        'MEDIUM': '#ffc107',
+        'HIGH': '#fd7e14',
+        'CRITICAL': '#dc3545'
+    };
+    return colorMap[priority] || '#6c757d';
+}
+
+function getChannelDisplay(channel) {
+    const channelMap = {
+        'IN_APP': 'In-App',
+        'EMAIL': 'Email',
+        'SMS': 'SMS',
+        'PUSH': 'Push',
+        'BROWSER': 'Browser'
+    };
+    return channelMap[channel] || channel;
+}
+
+function getChannelColor(channel) {
+    const colorMap = {
+        'IN_APP': '#007bff',
+        'EMAIL': '#28a745',
+        'SMS': '#ffc107',
+        'PUSH': '#6f42c1',
+        'BROWSER': '#17a2b8'
+    };
+    return colorMap[channel] || '#6c757d';
+}
+</script>
+{% endblock %}

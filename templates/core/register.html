@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register - Project Management System{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/register.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="register-card">
+                    <div class="register-header">
+                        <i class="fas fa-user-plus register-icon"></i>
+                        <h3 class="register-title">Create Account</h3>
+                        <p class="register-subtitle">Join ProjectManager Pro today</p>
+                    </div>
+                    
+                    <div class="register-body">
+                        <form method="post" class="register-form needs-validation" novalidate>
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="register-form-group">
+                                        <label for="username" class="register-label">Username</label>
+                                        <div class="register-input-group">
+                                            <i class="fas fa-user register-input-icon"></i>
+                                            <input type="text" class="register-input" id="username" name="username" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="register-form-group">
+                                        <label for="email" class="register-label">Email</label>
+                                        <div class="register-input-group">
+                                            <i class="fas fa-envelope register-input-icon"></i>
+                                            <input type="email" class="register-input" id="email" name="email" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="register-form-group">
+                                <label for="password" class="register-label">Password</label>
+                                <div class="register-input-group">
+                                    <i class="fas fa-lock register-input-icon"></i>
+                                    <input type="password" class="register-input" id="password" name="password" required>
+                                </div>
+                                <div class="password-strength">
+                                    <div class="password-strength-bar"></div>
+                                </div>
+                                <div class="register-help-text">
+                                    Password must be at least 8 characters long.
+                                </div>
+                            </div>
+                            
+                            <div class="register-form-group">
+                                <label for="confirm_password" class="register-label">Confirm Password</label>
+                                <div class="register-input-group">
+                                    <i class="fas fa-lock register-input-icon"></i>
+                                    <input type="password" class="register-input" id="confirm_password" name="confirm_password" required>
+                                </div>
+                            </div>
+                            
+                            <div class="register-checkbox-group">
+                                <div class="register-checkbox">
+                                    <input type="checkbox" id="terms" required>
+                                    <label for="terms">
+                                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="register-button">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </button>
+                        </form>
+                        
+                        <div class="register-footer">
+                            <p class="register-footer-text">Already have an account? 
+                                <a href="{% url 'core:login' %}" class="register-login-link">Sign in here</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/register.js' %}"></script>
+{% endblock %}

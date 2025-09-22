@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Company Verification - Project Management System{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/employee_verification.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="verification-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="verification-card">
+                    <div class="verification-header">
+                        <a href="{% url 'core:registration_selection' %}" class="btn btn-outline-light mb-3">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Registration Options
+                        </a>
+                        <i class="fas fa-building verification-icon"></i>
+                        <h3 class="verification-title">Company Verification</h3>
+                        <p class="verification-subtitle">Enter your company's email domain to continue</p>
+                    </div>
+                    
+                    <div class="verification-body">
+                        <form method="post" class="verification-form needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="verification-form-group">
+                                <label for="email_domain" class="verification-label">
+                                    <i class="fas fa-at me-1"></i>Company Email Domain *
+                                </label>
+                                <div class="verification-input-group">
+                                    <i class="fas fa-at verification-input-icon"></i>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="email_domain" 
+                                           name="email_domain" 
+                                           placeholder="example.com" 
+                                           required>
+                                </div>
+                                <div class="verification-help-text">
+                                    Enter your company's email domain (e.g., "example.com" for "john@example.com")
+                                </div>
+                            </div>
+                            
+                            <!-- Information Box -->
+                            <div class="verification-info-box">
+                                <h6 class="verification-info-title">
+                                    <i class="fas fa-info-circle me-2"></i>How it works
+                                </h6>
+                                <ol class="verification-info-list">
+                                    <li>Enter your company's email domain (the part after @)</li>
+                                    <li>We'll verify your company is registered in our system</li>
+                                    <li>If verified, you'll proceed to employee verification</li>
+                                    <li>If not found, contact your company administrator</li>
+                                </ol>
+                            </div>
+                            
+                            <button type="submit" class="verification-button">
+                                <i class="fas fa-search me-2"></i>Verify Company
+                            </button>
+                        </form>
+                        
+                        <div class="verification-footer">
+                            <p class="verification-footer-text">
+                                Don't know your company domain? 
+                                <a href="{% url 'core:company_admin_registration' %}" class="verification-login-link">Contact your administrator</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const domainInput = document.getElementById('email_domain');
+    
+    // Auto-format domain input
+    domainInput.addEventListener('input', function(e) {
+        let value = e.target.value.toLowerCase();
+        
+        // Remove @ if user types it
+        if (value.startsWith('@')) {
+            value = value.substring(1);
+        }
+        
+        // Remove spaces
+        value = value.replace(/\s/g, '');
+        
+        e.target.value = value;
+    });
+    
+    // Form validation
+    const form = document.querySelector('.verification-form');
+    form.addEventListener('submit', function(e) {
+        const domain = domainInput.value.trim();
+        
+        if (!domain) {
+            e.preventDefault();
+            domainInput.focus();
+            return false;
+        }
+        
+        // Basic domain validation
+        const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}$/;
+        if (!domainRegex.test(domain)) {
+            e.preventDefault();
+            showErrorToast('Please enter a valid domain (e.g., example.com)');
+            domainInput.focus();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

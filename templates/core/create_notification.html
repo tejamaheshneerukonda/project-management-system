@@ -1,0 +1,435 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/create_notification.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid create-notification-wrapper">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-1">{{ title }}</h1>
+                <p class="text-muted mb-0">Create and send notifications to employees</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'core:notification_center' %}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Notifications
+                </a>
+                <button class="btn btn-primary" onclick="previewNotification()">
+                    <i class="fas fa-eye me-1"></i>Preview
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bell me-2"></i>Notification Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="notificationForm">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="notification_type" class="form-label">Notification Type *</label>
+                                    <select class="form-select" id="notification_type" name="notification_type" required>
+                                        <option value="">Select Type</option>
+                                        {% for value, label in notification_type_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="priority" class="form-label">Priority *</label>
+                                    <select class="form-select" id="priority" name="priority" required>
+                                        {% for value, label in priority_choices %}
+                                        <option value="{{ value }}" {% if value == 'MEDIUM' %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="channel" class="form-label">Delivery Channel *</label>
+                                    <select class="form-select" id="channel" name="channel" required>
+                                        {% for value, label in channel_choices %}
+                                        <option value="{{ value }}" {% if value == 'IN_APP' %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Title *</label>
+                                    <input type="text" class="form-control" id="title" name="title" required placeholder="Enter notification title">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message Content -->
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message *</label>
+                            <textarea class="form-control" id="message" name="message" rows="6" required placeholder="Enter notification message"></textarea>
+                            <div class="form-text">Use clear, concise language. Include any relevant details or instructions.</div>
+                        </div>
+
+                        <!-- Action Button (Optional) -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="action_text" class="form-label">Action Button Text</label>
+                                    <input type="text" class="form-control" id="action_text" name="action_text" placeholder="e.g., View Details, Take Action">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="action_url" class="form-label">Action URL</label>
+                                    <input type="url" class="form-control" id="action_url" name="action_url" placeholder="https://example.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scheduling -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="scheduled_at" class="form-label">Schedule Send Time</label>
+                                    <input type="datetime-local" class="form-control" id="scheduled_at" name="scheduled_at">
+                                    <div class="form-text">Leave empty to send immediately</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="expires_at" class="form-label">Expiration Time</label>
+                                    <input type="datetime-local" class="form-control" id="expires_at" name="expires_at">
+                                    <div class="form-text">When the notification should expire</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Targeting -->
+                        <div class="mb-3">
+                            <label class="form-label">Target Audience</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="target_employees" class="form-label">Specific Employees</label>
+                                        <select class="form-select" id="target_employees" name="target_employees" multiple>
+                                            {% for employee in employees %}
+                                            <option value="{{ employee.id }}">{{ employee.first_name }} {{ employee.last_name }} ({{ employee.department.name|default:"No Department" }})</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="form-text">Hold Ctrl/Cmd to select multiple employees</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="target_departments" class="form-label">Departments</label>
+                                        <select class="form-select" id="target_departments" name="target_departments" multiple>
+                                            {% for department in departments %}
+                                            <option value="{{ department.id }}">{{ department.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="form-text">Hold Ctrl/Cmd to select multiple departments</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-text">
+                                <strong>Note:</strong> If no specific targets are selected, the notification will be sent to all employees.
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Send Notification
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="saveDraft()">
+                                <i class="fas fa-save me-1"></i>Save as Draft
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" onclick="clearForm()">
+                                <i class="fas fa-times me-1"></i>Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-eye me-2"></i>Preview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="notificationPreview" class="notification-preview">
+                        <div class="preview-placeholder">
+                            <i class="fas fa-bell fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">Notification Preview</h6>
+                            <p class="text-muted small">Fill in the form to see a preview of your notification</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Quick Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Keep titles under 50 characters</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Use clear, actionable language</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Include relevant context</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Test with a small group first</small>
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Set appropriate priority levels</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Notification Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalPreview"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitForm()">Send Notification</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-fix readability on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply universal readability fix
+    if (typeof applyUniversalReadabilityFix === 'function') {
+        applyUniversalReadabilityFix();
+    }
+    
+    // Set default scheduled time to 1 hour from now
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    document.getElementById('scheduled_at').value = now.toISOString().slice(0, 16);
+    
+    // Update preview on form changes
+    updatePreview();
+    
+    // Add event listeners for real-time preview
+    const formElements = ['notification_type', 'priority', 'title', 'message', 'action_text', 'action_url'];
+    formElements.forEach(elementId => {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.addEventListener('input', updatePreview);
+            element.addEventListener('change', updatePreview);
+        }
+    });
+});
+
+// Update notification preview
+function updatePreview() {
+    const title = document.getElementById('title').value || 'Notification Title';
+    const message = document.getElementById('message').value || 'Notification message will appear here...';
+    const priority = document.getElementById('priority').value;
+    const notificationType = document.getElementById('notification_type').value;
+    const actionText = document.getElementById('action_text').value;
+    const actionUrl = document.getElementById('action_url').value;
+    
+    const preview = document.getElementById('notificationPreview');
+    
+    if (!title && !message) {
+        preview.innerHTML = `
+            <div class="preview-placeholder">
+                <i class="fas fa-bell fa-3x text-muted mb-3"></i>
+                <h6 class="text-muted">Notification Preview</h6>
+                <p class="text-muted small">Fill in the form to see a preview of your notification</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const priorityClass = getPriorityClass(priority);
+    const typeIcon = getTypeIcon(notificationType);
+    
+    preview.innerHTML = `
+        <div class="notification-item ${priorityClass}">
+            <div class="d-flex align-items-start">
+                <div class="notification-icon me-3">
+                    <i class="${typeIcon}"></i>
+                </div>
+                <div class="notification-content flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="notification-title mb-0">${title}</h6>
+                        <span class="badge ${priorityClass}">${priority || 'MEDIUM'}</span>
+                    </div>
+                    <p class="notification-message mb-2">${message}</p>
+                    ${actionText && actionUrl ? `
+                        <a href="${actionUrl}" class="btn btn-sm btn-outline-primary">${actionText}</a>
+                    ` : ''}
+                    <div class="notification-meta">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            ${new Date().toLocaleString()}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Get priority CSS class
+function getPriorityClass(priority) {
+    switch(priority) {
+        case 'CRITICAL': return 'priority-critical';
+        case 'HIGH': return 'priority-high';
+        case 'MEDIUM': return 'priority-medium';
+        case 'LOW': return 'priority-low';
+        default: return 'priority-medium';
+    }
+}
+
+// Get type icon
+function getTypeIcon(type) {
+    switch(type) {
+        case 'SYSTEM': return 'fas fa-cog';
+        case 'SECURITY': return 'fas fa-shield-alt';
+        case 'ANNOUNCEMENT': return 'fas fa-bullhorn';
+        case 'PERFORMANCE': return 'fas fa-chart-line';
+        case 'ATTENDANCE': return 'fas fa-clock';
+        case 'LEAVE': return 'fas fa-calendar-times';
+        case 'TIMESHEET': return 'fas fa-stopwatch';
+        case 'SHIFT': return 'fas fa-exchange-alt';
+        case 'PROJECT': return 'fas fa-project-diagram';
+        case 'TASK': return 'fas fa-tasks';
+        case 'DEADLINE': return 'fas fa-exclamation-triangle';
+        case 'BIRTHDAY': return 'fas fa-birthday-cake';
+        case 'ANNIVERSARY': return 'fas fa-gift';
+        case 'TRAINING': return 'fas fa-graduation-cap';
+        case 'MEETING': return 'fas fa-users';
+        case 'PAYROLL': return 'fas fa-dollar-sign';
+        case 'BENEFITS': return 'fas fa-heart';
+        case 'POLICY': return 'fas fa-file-alt';
+        case 'EMERGENCY': return 'fas fa-exclamation-circle';
+        default: return 'fas fa-bell';
+    }
+}
+
+// Preview notification in modal
+function previewNotification() {
+    const title = document.getElementById('title').value;
+    const message = document.getElementById('message').value;
+    
+    if (!title || !message) {
+        showNotification('Please fill in the title and message before previewing', 'warning');
+        return;
+    }
+    
+    updatePreview();
+    const previewContent = document.getElementById('notificationPreview').innerHTML;
+    document.getElementById('modalPreview').innerHTML = previewContent;
+    
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+}
+
+// Submit form
+function submitForm() {
+    document.getElementById('notificationForm').submit();
+}
+
+// Save as draft
+function saveDraft() {
+    // TODO: Implement draft saving functionality
+    showNotification('Draft saving functionality coming soon!', 'info');
+}
+
+// Clear form
+function clearForm() {
+    if (confirm('Are you sure you want to clear all form data?')) {
+        document.getElementById('notificationForm').reset();
+        updatePreview();
+        showNotification('Form cleared successfully', 'success');
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// Apply readability fixes when modals are shown
+document.addEventListener('shown.bs.modal', function(event) {
+    if (typeof applyUniversalReadabilityFix === 'function') {
+        applyUniversalReadabilityFix();
+    }
+});
+</script>
+{% endblock %}

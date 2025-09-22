@@ -1,0 +1,348 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: calc(100vh - 120px);
+        display: flex;
+        background: #f8f9fa;
+    }
+    
+    .chat-sidebar {
+        width: 350px;
+        background: white;
+        border-right: 1px solid #e9ecef;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: white;
+    }
+    
+    .chat-header {
+        padding: 20px;
+        border-bottom: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .chat-room-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f1f3f4;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .chat-room-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .chat-room-item.active {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .room-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    
+    .room-info h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .room-info p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 13px;
+        margin-top: 2px;
+    }
+    
+    .unread-badge {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: #e74c3c;
+        color: white;
+        border-radius: 12px;
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+    
+    .online-indicator {
+        width: 12px;
+        height: 12px;
+        background: #28a745;
+        border-radius: 50%;
+        border: 2px solid white;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
+    
+    .create-room-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin: 20px;
+    }
+    
+    .create-room-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .online-employees {
+        padding: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .online-employees h6 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+    
+    .employee-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .employee-item:hover {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding-left: 8px;
+    }
+    
+    .employee-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        margin-right: 10px;
+        position: relative;
+    }
+    
+    .welcome-section {
+        padding: 40px 20px;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    .welcome-section i {
+        font-size: 64px;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .welcome-section h4 {
+        color: #495057;
+        margin-bottom: 10px;
+    }
+    
+    .room-type-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+    
+    .room-type-direct {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .room-type-group {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+    
+    .room-type-department {
+        background: #e8f5e8;
+        color: #388e3c;
+    }
+    
+    .room-type-project {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .room-type-company {
+        background: #fce4ec;
+        color: #c2185b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <!-- Sidebar -->
+    <div class="chat-sidebar">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">
+                        <i class="fas fa-comments me-2"></i>
+                        Chat
+                    </h4>
+                    <p class="mb-0 opacity-75">Connect with your team</p>
+                </div>
+                <div>
+                    <span class="badge bg-light text-dark">
+                        {{ chat_rooms|length }} rooms
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Create Room Button -->
+        <a href="{% url 'core:create_chat_room' %}" class="create-room-btn d-block text-center text-decoration-none">
+            <i class="fas fa-plus me-2"></i>
+            Create New Room
+        </a>
+        
+        <!-- Chat Rooms List -->
+        <div class="flex-grow-1 overflow-auto">
+            {% if chat_rooms %}
+                {% for room in chat_rooms %}
+                <div class="chat-room-item" onclick="openRoom({{ room.id }})">
+                    <div class="d-flex align-items-center">
+                        <div class="room-avatar position-relative">
+                            {% if room.room_type == 'DIRECT' %}
+                                {{ room.participants.first.first_name|first|upper }}
+                            {% else %}
+                                {{ room.name|first|upper }}
+                            {% endif %}
+                            {% if room.room_type == 'DIRECT' %}
+                                <div class="online-indicator"></div>
+                            {% endif %}
+                        </div>
+                        <div class="room-info flex-grow-1 ms-3">
+                            <h6>{{ room.name }}</h6>
+                            <p>
+                                <span class="room-type-badge room-type-{{ room.room_type|lower }}">
+                                    {{ room.get_room_type_display }}
+                                </span>
+                                {% if room.last_message %}
+                                    <span class="ms-2">{{ room.last_message.content|truncatechars:30 }}</span>
+                                {% else %}
+                                    <span class="ms-2 text-muted">No messages yet</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% if room.unread_count > 0 %}
+                        <div class="unread-badge">{{ room.unread_count }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="welcome-section">
+                    <i class="fas fa-comments"></i>
+                    <h4>No Chat Rooms Yet</h4>
+                    <p>Create your first chat room to start communicating with your team!</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Online Employees -->
+        <div class="online-employees">
+            <h6>
+                <i class="fas fa-circle text-success me-2"></i>
+                Online Now ({{ online_employees|length }})
+            </h6>
+            {% for employee in online_employees %}
+            <div class="employee-item" onclick="startDirectMessage({{ employee.id }})">
+                <div class="employee-avatar position-relative">
+                    {{ employee.first_name|first|upper }}
+                    <div class="online-indicator"></div>
+                </div>
+                <div>
+                    <div class="fw-bold">{{ employee.first_name }} {{ employee.last_name }}</div>
+                    <small class="text-muted">{{ employee.position|default:"Employee" }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="chat-main">
+        <div class="welcome-section">
+            <i class="fas fa-comments"></i>
+            <h4>Welcome to Chat</h4>
+            <p>Select a chat room from the sidebar to start messaging, or create a new room to connect with your team.</p>
+            <div class="mt-4">
+                <a href="{% url 'core:create_chat_room' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Create Your First Room
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openRoom(roomId) {
+    window.location.href = `/employee/chat/room/${roomId}/`;
+}
+
+function startDirectMessage(employeeId) {
+    // TODO: Implement direct message creation
+    showInfoToast('Direct messaging feature coming soon!');
+}
+
+// Auto-refresh notifications
+setInterval(function() {
+    fetch('/employee/chat/notifications/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.notifications.length > 0) {
+                // Update notification count in header if exists
+                const notificationCount = document.querySelector('.notification-count');
+                if (notificationCount) {
+                    notificationCount.textContent = data.notifications.length;
+                    notificationCount.style.display = 'inline';
+                }
+            }
+        })
+        .catch(error => console.error('Error fetching notifications:', error));
+}, 30000); // Check every 30 seconds
+</script>
+{% endblock %}

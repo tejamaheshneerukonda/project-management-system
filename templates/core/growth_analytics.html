@@ -1,0 +1,426 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Project Manager</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .owner-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+        
+        .growth-card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+        }
+        
+        .breadcrumb-item a {
+            color: #6c757d;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="owner-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-trending-up me-2"></i>{{ title }}
+                    </h1>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="d-flex align-items-center justify-content-md-end">
+                        <div class="me-3">
+                            <small class="text-light">Welcome, {{ user.username }}</small>
+                        </div>
+                        <a href="{% url 'core:owner_dashboard' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:owner_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:system_stats' %}">Analytics</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <!-- Growth Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-building fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ companies_last_30_days }}</h4>
+                        <small>New Companies (30 days)</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ users_last_30_days }}</h4>
+                        <small>New Users (30 days)</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-check fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ employees_last_30_days }}</h4>
+                        <small>New Employees (30 days)</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <h4 class="mb-0">{{ avg_monthly_company_growth }}</h4>
+                        <small>Avg Monthly Growth</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Growth Trends -->
+        <div class="row mb-4">
+            <div class="col-lg-8 mb-4">
+                <div class="card growth-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Monthly Growth Trends</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="monthlyGrowthChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Growth -->
+            <div class="col-lg-4 mb-4">
+                <div class="card growth-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Weekly Growth</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="weeklyGrowthChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Growth Projections -->
+        {% if projected_growth %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card growth-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-crystal-ball me-2"></i>Growth Projections (Next 6 Months)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="projectedGrowthChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Growth by Company Size -->
+        {% if company_size_growth %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card growth-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Growth by Company Size</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Company Size</th>
+                                        <th>Total Companies</th>
+                                        <th>New (30 days)</th>
+                                        <th>Growth Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for size in company_size_growth %}
+                                    <tr>
+                                        <td>{{ size.label }}</td>
+                                        <td>{{ size.total }}</td>
+                                        <td>{{ size.new_last_30_days }}</td>
+                                        <td>
+                                            <span class="{% if size.growth_rate > 0 %}text-success{% else %}text-danger{% endif %}">
+                                                {{ size.growth_rate }}%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Growth Summary -->
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card growth-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-building me-2"></i>Company Growth</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h4 class="text-primary">{{ total_companies }}</h4>
+                        <p class="text-muted">Total Companies</p>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">{{ companies_last_7_days }} this week</small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">{{ companies_last_90_days }} this quarter</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mb-4">
+                <div class="card growth-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>User Growth</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h4 class="text-success">{{ total_users }}</h4>
+                        <p class="text-muted">Total Users</p>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">{{ users_last_7_days }} this week</small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">{{ users_last_90_days }} this quarter</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mb-4">
+                <div class="card growth-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-check me-2"></i>Employee Growth</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h4 class="text-info">{{ total_employees }}</h4>
+                        <p class="text-muted">Total Employees</p>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">{{ employees_last_7_days }} this week</small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">{{ employees_last_90_days }} this quarter</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Monthly Growth Chart
+        const monthlyData = {{ monthly_growth|safe }};
+        const monthlyCtx = document.getElementById('monthlyGrowthChart').getContext('2d');
+        
+        new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(item => item.month),
+                datasets: [
+                    {
+                        label: 'Companies',
+                        data: monthlyData.map(item => item.companies),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Users',
+                        data: monthlyData.map(item => item.users),
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Employees',
+                        data: monthlyData.map(item => item.employees),
+                        borderColor: '#f093fb',
+                        backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // Weekly Growth Chart
+        const weeklyData = {{ weekly_growth|safe }};
+        const weeklyCtx = document.getElementById('weeklyGrowthChart').getContext('2d');
+        
+        new Chart(weeklyCtx, {
+            type: 'bar',
+            data: {
+                labels: weeklyData.map(item => item.week),
+                datasets: [{
+                    label: 'Weekly Growth',
+                    data: weeklyData.map(item => item.companies + item.users + item.employees),
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: '#667eea',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // Projected Growth Chart
+        {% if projected_growth %}
+        const projectedData = {{ projected_growth|safe }};
+        const projCtx = document.getElementById('projectedGrowthChart').getContext('2d');
+        
+        new Chart(projCtx, {
+            type: 'line',
+            data: {
+                labels: projectedData.map(item => item.month),
+                datasets: [
+                    {
+                        label: 'Projected Companies',
+                        data: projectedData.map(item => item.companies),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        borderDash: [5, 5]
+                    },
+                    {
+                        label: 'Projected Users',
+                        data: projectedData.map(item => item.users),
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        tension: 0.4,
+                        borderDash: [5, 5]
+                    },
+                    {
+                        label: 'Projected Employees',
+                        data: projectedData.map(item => item.employees),
+                        borderColor: '#f093fb',
+                        backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                        tension: 0.4,
+                        borderDash: [5, 5]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+    </script>
+</body>
+</html>

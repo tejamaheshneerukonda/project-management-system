@@ -1,0 +1,629 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Project Management System{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/payment.css' %}" rel="stylesheet">
+<link href="{% static 'css/checkbox-fix.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Test Mode Notice -->
+    <div class="alert alert-warning text-center mb-4">
+        <h5><i class="fas fa-flask me-2"></i>Test Mode Active</h5>
+        <p class="mb-0">This payment page is configured for testing. Use the test card numbers provided below or click the auto-fill buttons.</p>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header Section -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-credit-card text-primary me-2"></i>
+                    Choose Your Plan
+                </h1>
+                <p class="lead text-muted">
+                    Start your free trial today. No commitment, cancel anytime.
+                </p>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="row">
+                <!-- Plan Selection -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card payment-card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-list me-2"></i>
+                                Select Your Plan
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if plans %}
+                            <div class="plan-selection">
+                                {% for plan in plans %}
+                                <div class="plan-option {% if plan.plan_type == 'PROFESSIONAL' %}popular{% endif %}">
+                                    {% if plan.plan_type == 'PROFESSIONAL' %}
+                                    <div class="popular-badge">
+                                        <i class="fas fa-star"></i> Most Popular
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="plan-header">
+                                        <div class="plan-icon">
+                                            {% if plan.plan_type == 'FREE' %}
+                                                <i class="fas fa-gift"></i>
+                                            {% elif plan.plan_type == 'STARTER' %}
+                                                <i class="fas fa-rocket"></i>
+                                            {% elif plan.plan_type == 'PROFESSIONAL' %}
+                                                <i class="fas fa-briefcase"></i>
+                                            {% elif plan.plan_type == 'ENTERPRISE' %}
+                                                <i class="fas fa-crown"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="plan-info">
+                                            <h6 class="plan-name">{{ plan.plan_type }}</h6>
+                                            <p class="plan-description">
+                                                {% if plan.plan_type == 'FREE' %}
+                                                    Perfect for individuals and small teams
+                                                {% elif plan.plan_type == 'STARTER' %}
+                                                    Great for small teams and growing businesses
+                                                {% elif plan.plan_type == 'PROFESSIONAL' %}
+                                                    Perfect for growing businesses and teams
+                                                {% elif plan.plan_type == 'ENTERPRISE' %}
+                                                    For large organizations with advanced needs
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Billing Options -->
+                                    {% if plan.plan_type != 'FREE' %}
+                                    <div class="billing-options">
+                                        <label class="billing-option">
+                                            <input type="radio" name="plan_selection" value="{{ plan.id }}" {% if forloop.first %}checked{% endif %}>
+                                            <div class="billing-content">
+                                                <div class="billing-cycle">{{ plan.get_billing_cycle_display }}</div>
+                                                <div class="billing-price">${{ plan.price|floatformat:0 }}</div>
+                                                {% if plan.billing_cycle == 'YEARLY' %}
+                                                <div class="billing-savings">Save ${{ plan.annual_savings }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </label>
+                                    </div>
+                                    {% else %}
+                                    <div class="free-plan-content">
+                                        <div class="free-price">$0</div>
+                                        <div class="free-period">Forever</div>
+                                        <div class="free-access">
+                                            <button type="button" class="btn btn-success btn-lg w-100" onclick="accessFreePlan()">
+                                                <i class="fas fa-rocket me-2"></i>Get Free Access
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Plan Features -->
+                                    <div class="plan-features">
+                                        <div class="feature-item">
+                                            <i class="fas fa-check"></i>
+                                            <span>{{ plan.max_users }} Users</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="fas fa-check"></i>
+                                            <span>{{ plan.max_projects }} Projects</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="fas fa-check"></i>
+                                            <span>{{ plan.max_storage_gb }}GB Storage</span>
+                                        </div>
+                                        {% if plan.plan_type != 'FREE' %}
+                                        <div class="feature-item">
+                                            <i class="fas fa-check"></i>
+                                            <span>Email Support</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Plans Available</h5>
+                                <p class="text-muted">Please contact support for assistance.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card payment-card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                {% if is_authenticated %}
+                                    <i class="fas fa-credit-card me-2"></i>
+                                    Payment Information
+                                {% else %}
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    Create Your Account
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if is_authenticated %}
+                                <!-- Payment Form for Authenticated Users -->
+                                <form id="paymentForm" method="post">
+                                    {% csrf_token %}
+                                    
+                                    <!-- Hidden field for selected plan -->
+                                    <input type="hidden" id="selected_plan_id" name="selected_plan_id" value="">
+                                    
+                                    <!-- Payment Summary -->
+                                    <div class="payment-summary mb-4">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0">
+                                                    <i class="fas fa-receipt me-2"></i>Payment Summary
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <!-- Plan Details -->
+                                                <div class="row mb-2">
+                                                    <div class="col-8">
+                                                        <strong id="selected-plan-name">STARTER Plan</strong>
+                                                        <br>
+                                                        <small class="text-muted" id="selected-plan-billing">Monthly</small>
+                                                    </div>
+                                                    <div class="col-4 text-end">
+                                                        <span id="selected-plan-price">$0.00</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <hr class="my-3">
+                                                
+                                                <!-- Cost Breakdown -->
+                                                <div class="cost-breakdown">
+                                                    <div class="row mb-1">
+                                                        <div class="col-8">
+                                                            <span>Subtotal:</span>
+                                                        </div>
+                                                        <div class="col-4 text-end">
+                                                            <span id="subtotal-amount">$0.00</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row mb-1">
+                                                        <div class="col-8">
+                                                            <span>GST (18%):</span>
+                                                        </div>
+                                                        <div class="col-4 text-end">
+                                                            <span id="gst-amount">$0.00</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row mb-1">
+                                                        <div class="col-8">
+                                                            <span>Processing Fee (2.9%):</span>
+                                                        </div>
+                                                        <div class="col-4 text-end">
+                                                            <span id="processing-fee">$0.00</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row mb-1">
+                                                        <div class="col-8">
+                                                            <span>Card Charges:</span>
+                                                        </div>
+                                                        <div class="col-4 text-end">
+                                                            <span id="card-charges">$0.30</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="row mb-1">
+                                                        <div class="col-8">
+                                                            <span>Service Tax:</span>
+                                                        </div>
+                                                        <div class="col-4 text-end">
+                                                            <span id="service-tax">$0.00</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <hr class="my-3">
+                                                
+                                                <!-- Total Amount -->
+                                                <div class="row">
+                                                    <div class="col-8">
+                                                        <strong class="h6">Total Amount:</strong>
+                                                    </div>
+                                                    <div class="col-4 text-end">
+                                                        <strong class="h5 text-primary" id="total-amount">$0.00</strong>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row mt-2">
+                                                    <div class="col-12">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-info-circle me-1"></i>
+                                                            All prices include applicable taxes and fees
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Card Number -->
+                                    <div class="mb-3">
+                                        <label for="cardNumber" class="form-label">Card Number</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="cardNumber" name="cardNumber"
+                                                   placeholder="4111 1111 1111 1111" maxlength="19" required>
+                                            <span class="input-group-text">
+                                                <i class="fas fa-credit-card"></i>
+                                            </span>
+                                        </div>
+                                        <div class="form-text">
+                                            <strong>Test Cards:</strong> 4111 1111 1111 1111 (Visa), 5555 5555 5555 4444 (Mastercard), 3782 822463 10005 (Amex)
+                                        </div>
+                                    </div>
+
+                                    <!-- Cardholder Name -->
+                                    <div class="mb-3">
+                                        <label for="cardholderName" class="form-label">Cardholder Name</label>
+                                        <input type="text" class="form-control" id="cardholderName" name="cardholderName"
+                                               placeholder="Test User" required>
+                                    </div>
+
+                                    <!-- Expiry and CVV -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="expiryDate" class="form-label">Expiry Date</label>
+                                            <input type="text" class="form-control" id="expiryDate" name="expiryDate"
+                                                   placeholder="12/25" maxlength="5" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="cvv" class="form-label">CVV</label>
+                                            <input type="text" class="form-control" id="cvv" name="cvv"
+                                                   placeholder="123" maxlength="4" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Billing Address -->
+                                    <div class="mb-3">
+                                        <label for="billingAddress" class="form-label">Billing Address</label>
+                                        <textarea class="form-control" id="billingAddress" name="billingAddress" rows="3" 
+                                                  placeholder="123 Test Street, Test City, TC 12345" required></textarea>
+                                    </div>
+
+                                    <!-- Terms and Conditions -->
+                                    <div class="form-check mb-4">
+                                        <input class="form-check-input" type="checkbox" id="termsCheck" name="termsCheck" required>
+                                        <label class="form-check-label" for="termsCheck">
+                                            I agree to the <a href="{% url 'core:terms_and_conditions' %}" class="text-primary" target="_blank">Terms of Service</a> 
+                                            and <a href="{% url 'core:privacy_policy' %}" class="text-primary" target="_blank">Privacy Policy</a>
+                                        </label>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <button type="submit" class="btn btn-primary btn-lg w-100" id="submitPayment" onclick="return validateAndSubmit()">
+                                        <span class="btn-text">
+                                            <i class="fas fa-lock me-2"></i>
+                                            Proceed to Payment
+                                        </span>
+                                        <span class="btn-loading d-none">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>
+                                            Processing Payment...
+                                        </span>
+                                    </button>
+                                </form>
+
+                                <!-- Security Notice -->
+                                <div class="security-notice mt-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-shield-alt text-success me-2"></i>
+                                        <small class="text-muted">
+                                            Your payment information is encrypted and secure. 
+                                            We use industry-standard SSL encryption.
+                                        </small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <!-- Registration Form for Unauthenticated Users -->
+                                <div class="auth-notice mb-4">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Almost there!</strong> Create your account to start your free trial.
+                                    </div>
+                                </div>
+
+                                <form id="registrationForm" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'core:payment' %}">
+                                    
+                                    <!-- Full Name -->
+                                    <div class="mb-3">
+                                        <label for="fullName" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="fullName" name="full_name" 
+                                               placeholder="Test User" required>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="email" name="email" 
+                                               placeholder="test@example.com" required>
+                                    </div>
+
+                                    <!-- Password -->
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                               placeholder="TestPassword123!" required>
+                                    </div>
+
+                                    <!-- Confirm Password -->
+                                    <div class="mb-3">
+                                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" 
+                                               placeholder="TestPassword123!" required>
+                                    </div>
+
+                                    <!-- Terms and Conditions -->
+                                    <div class="form-check mb-4">
+                                        <input class="form-check-input" type="checkbox" id="termsCheckReg" required>
+                                        <label class="form-check-label" for="termsCheckReg">
+                                            I agree to the <a href="{% url 'core:terms_and_conditions' %}" class="text-primary" target="_blank">Terms of Service</a> 
+                                            and <a href="{% url 'core:privacy_policy' %}" class="text-primary" target="_blank">Privacy Policy</a>
+                                        </label>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <button type="submit" class="btn btn-primary btn-lg w-100" id="submitRegistration">
+                                        <i class="fas fa-user-plus me-2"></i>
+                                        Create Account & Start Trial
+                                    </button>
+                                </form>
+
+                                <!-- Login Link -->
+                                <div class="text-center mt-4">
+                                    <p class="text-muted mb-0">
+                                        Already have an account? 
+                                        <a href="{% url 'core:login' %}" class="text-primary fw-semibold">Sign In</a>
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trial Information -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="trial-info">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="trial-feature">
+                                    <i class="fas fa-calendar-check text-primary mb-2"></i>
+                                    <h6>14-Day Free Trial</h6>
+                                    <p class="text-muted small">Full access to all features</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="trial-feature">
+                                    <i class="fas fa-ban text-success mb-2"></i>
+                                    <h6>No Commitment</h6>
+                                    <p class="text-muted small">Cancel anytime during trial</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="trial-feature">
+                                    <i class="fas fa-headset text-warning mb-2"></i>
+                                    <h6>24/7 Support</h6>
+                                    <p class="text-muted small">Get help when you need it</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/payment.js' %}?v={{ timestamp|default:'1' }}"></script>
+<script src="{% static 'js/terms_validation.js' %}?v={{ timestamp|default:'1' }}"></script>
+<script src="{% static 'js/payment_test_helper.js' %}?v={{ timestamp|default:'1' }}"></script>
+
+<script>
+// Handle plan selection
+document.addEventListener('DOMContentLoaded', function() {
+    const planRadios = document.querySelectorAll('input[name="plan_selection"]');
+    const selectedPlanIdInput = document.getElementById('selected_plan_id');
+    
+    // Plan data from database
+    const planData = {
+        {% for plan in plans %}
+        {{ plan.id }}: { 
+            type: '{{ plan.plan_type }}',
+            price: {{ plan.price|floatformat:0 }}, 
+            billing: '{{ plan.get_billing_cycle_display }}',
+            name: '{{ plan.name }}'
+        },
+        {% endfor %}
+    };
+    
+    function updatePaymentSummary(planId) {
+        const planInfo = planData[planId];
+        if (!planInfo) return;
+        
+        // Calculate fees and taxes
+        const basePrice = parseFloat(planInfo.price);
+        const gstRate = 0.18; // 18% GST
+        const processingFeeRate = 0.029; // 2.9% processing fee
+        const cardCharges = 0.30; // Fixed card charges
+        const serviceTaxRate = 0.05; // 5% service tax
+        
+        // Calculate amounts
+        const subtotal = basePrice;
+        const gstAmount = subtotal * gstRate;
+        const processingFee = subtotal * processingFeeRate;
+        const serviceTax = subtotal * serviceTaxRate;
+        const totalAmount = subtotal + gstAmount + processingFee + cardCharges + serviceTax;
+        
+        // Update payment summary
+        document.getElementById('selected-plan-name').textContent = planInfo.name + ' Plan';
+        document.getElementById('selected-plan-price').textContent = '$' + basePrice.toFixed(2);
+        document.getElementById('selected-plan-billing').textContent = planInfo.billing;
+        
+        // Update cost breakdown
+        document.getElementById('subtotal-amount').textContent = '$' + subtotal.toFixed(2);
+        document.getElementById('gst-amount').textContent = '$' + gstAmount.toFixed(2);
+        document.getElementById('processing-fee').textContent = '$' + processingFee.toFixed(2);
+        document.getElementById('card-charges').textContent = '$' + cardCharges.toFixed(2);
+        document.getElementById('service-tax').textContent = '$' + serviceTax.toFixed(2);
+        document.getElementById('total-amount').textContent = '$' + totalAmount.toFixed(2);
+        
+        // Update hidden field
+        selectedPlanIdInput.value = planId;
+        
+        console.log('Updated payment summary for plan ID:', planId, planInfo);
+        console.log('Cost breakdown:', {
+            subtotal: subtotal,
+            gst: gstAmount,
+            processingFee: processingFee,
+            cardCharges: cardCharges,
+            serviceTax: serviceTax,
+            total: totalAmount
+        });
+    }
+    
+    // Handle radio button changes
+    planRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                updatePaymentSummary(this.value);
+                
+                // Update plan option styling
+                const planOption = this.closest('.plan-option');
+                document.querySelectorAll('.plan-option').forEach(function(option) {
+                    option.classList.remove('active');
+                });
+                planOption.classList.add('active');
+            }
+        });
+    });
+    
+    // Set default selection
+    const defaultRadio = document.querySelector('input[name="plan_selection"]:checked');
+    if (defaultRadio) {
+        updatePaymentSummary(defaultRadio.value);
+        defaultRadio.closest('.plan-option').classList.add('active');
+    }
+    
+    // Handle form submission
+    const paymentForm = document.getElementById('paymentForm');
+    const submitBtn = document.getElementById('submitPayment');
+    
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.querySelector('.btn-text').classList.add('d-none');
+        submitBtn.querySelector('.btn-loading').classList.remove('d-none');
+        
+        // Add a small delay to show the loading animation
+        setTimeout(function() {
+            // Form will submit normally after this
+        }, 500);
+        });
+    }
+});
+
+// Simple validation function that bypasses complex JavaScript
+function validateAndSubmit() {
+    console.log('=== SIMPLE VALIDATION ===');
+    
+    // Get form elements
+    const cardNumber = document.getElementById('cardNumber').value;
+    const cardholderName = document.getElementById('cardholderName').value;
+    const expiryDate = document.getElementById('expiryDate').value;
+    const cvv = document.getElementById('cvv').value;
+    const billingAddress = document.getElementById('billingAddress').value;
+    const termsCheck = document.getElementById('termsCheck').checked;
+    const selectedPlan = document.querySelector('input[name="plan_selection"]:checked');
+    const selectedPlanIdField = document.getElementById('selected_plan_id');
+    
+    console.log('Card Number:', cardNumber);
+    console.log('Cardholder Name:', cardholderName);
+    console.log('Expiry Date:', expiryDate);
+    console.log('CVV:', cvv);
+    console.log('Billing Address:', billingAddress);
+    console.log('Terms Checked:', termsCheck);
+    console.log('Selected Plan:', selectedPlan ? selectedPlan.value : 'None');
+    console.log('Selected Plan ID Field:', selectedPlanIdField ? selectedPlanIdField.value : 'Not found');
+    
+    // Basic validation
+    if (!cardNumber || cardNumber.length < 13) {
+        showErrorToast('Please enter a valid card number');
+        return false;
+    }
+    
+    if (!cardholderName || cardholderName.length < 2) {
+        showErrorToast('Please enter a valid cardholder name');
+        return false;
+    }
+    
+    if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
+        showErrorToast('Please enter a valid expiry date (MM/YY)');
+        return false;
+    }
+    
+    if (!cvv || cvv.length < 3) {
+        showErrorToast('Please enter a valid CVV');
+        return false;
+    }
+    
+    if (!billingAddress || billingAddress.length < 10) {
+        showErrorToast('Please enter a valid billing address');
+        return false;
+    }
+    
+    if (!termsCheck) {
+        showErrorToast('Please accept the terms and conditions');
+        return false;
+    }
+    
+    if (!selectedPlan) {
+        showErrorToast('Please select a plan');
+        return false;
+    }
+    
+    // Update the selected_plan_id field if it's empty
+    if (selectedPlanIdField && !selectedPlanIdField.value) {
+        selectedPlanIdField.value = selectedPlan.value;
+        console.log('Updated selected_plan_id field to:', selectedPlanIdField.value);
+    }
+    
+    console.log('Validation passed - submitting form');
+    
+    // Show loading state
+    const submitBtn = document.getElementById('submitPayment');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    }
+    
+    // Allow form submission
+    return true;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Time Tracking{% endblock %}
+
+{% block page_title %}Time Tracking{% endblock %}
+
+{% block page_actions %}
+<div class="d-flex gap-2">
+    <button class="btn btn-success" onclick="startTimer()">
+        <i class="fas fa-play me-2"></i>Start Timer
+    </button>
+    <button class="btn btn-danger" onclick="stopTimer()" id="stopBtn" style="display: none;">
+        <i class="fas fa-stop me-2"></i>Stop Timer
+    </button>
+    <button class="btn btn-primary" onclick="addTimesheetEntry()">
+        <i class="fas fa-plus me-2"></i>Add Entry
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Current Timer -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">Current Session</h6>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="h2 text-primary" id="currentTimer">00:00:00</div>
+                        <small class="text-muted">Current Timer</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="h4 text-success">{{ hours_today }}h</div>
+                        <small class="text-muted">Today</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="h4 text-info">{{ week_total }}h</div>
+                        <small class="text-muted">This Week</small>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-success me-2" onclick="startTimer()" id="startBtn">
+                        <i class="fas fa-play me-2"></i>Start Timer
+                    </button>
+                    <button class="btn btn-danger me-2" onclick="stopTimer()" id="stopBtn" style="display: none;">
+                        <i class="fas fa-stop me-2"></i>Stop Timer
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="pauseTimer()" id="pauseBtn" style="display: none;">
+                        <i class="fas fa-pause me-2"></i>Pause
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- This Week's Timesheets -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">This Week's Timesheets</h6>
+                <small class="text-muted">{{ week_start|date:"M d" }} - {{ week_end|date:"M d, Y" }}</small>
+            </div>
+            <div class="card-body">
+                {% if timesheets %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Total Hours</th>
+                                <th>Task Description</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for timesheet in timesheets %}
+                            <tr>
+                                <td>{{ timesheet.date|date:"M d, Y" }}</td>
+                                <td>{{ timesheet.start_time|time:"H:i" }}</td>
+                                <td>{{ timesheet.end_time|time:"H:i" }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ timesheet.total_hours }}h</span>
+                                </td>
+                                <td>{{ timesheet.task_description|truncatewords:10 }}</td>
+                                <td>
+                                    {% if timesheet.status == 'APPROVED' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif timesheet.status == 'SUBMITTED' %}
+                                        <span class="badge bg-warning">Submitted</span>
+                                    {% elif timesheet.status == 'REJECTED' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Draft</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="editTimesheet({{ timesheet.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        {% if timesheet.status == 'DRAFT' %}
+                                            <button class="btn btn-outline-success" onclick="submitTimesheet({{ timesheet.id }})">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No timesheet entries this week</h5>
+                    <p class="text-muted">Start tracking your time to see entries here.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Timesheets -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Timesheet History</h6>
+            </div>
+            <div class="card-body">
+                {% if recent_timesheets %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Hours</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for timesheet in recent_timesheets %}
+                            <tr>
+                                <td>{{ timesheet.date|date:"M d, Y" }}</td>
+                                <td>{{ timesheet.total_hours }}h</td>
+                                <td>{{ timesheet.task_description|truncatewords:8 }}</td>
+                                <td>
+                                    {% if timesheet.status == 'APPROVED' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif timesheet.status == 'SUBMITTED' %}
+                                        <span class="badge bg-warning">Submitted</span>
+                                    {% elif timesheet.status == 'REJECTED' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Draft</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">No recent timesheet entries</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Timesheet Entry Modal -->
+<div class="modal fade" id="addTimesheetModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Timesheet Entry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="timesheetForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="entryDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="entryDate" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="startTime" class="form-label">Start Time</label>
+                            <input type="time" class="form-control" id="startTime" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="endTime" class="form-label">End Time</label>
+                            <input type="time" class="form-control" id="endTime" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDescription" class="form-label">Task Description</label>
+                        <textarea class="form-control" id="taskDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="workPerformed" class="form-label">Work Performed</label>
+                        <textarea class="form-control" id="workPerformed" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/employee_timesheet.js' %}"></script>
+{% endblock %}

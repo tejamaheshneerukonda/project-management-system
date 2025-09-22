@@ -1,0 +1,342 @@
+/**
+ * Employee Onboarding CSS
+ * Styles for employee onboarding flow and welcome experience
+ */
+
+/* Onboarding Step Styles */
+.onboarding-step {
+    min-height: 400px;
+    padding: 2rem 0;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Onboarding Preview Styles */
+.onboarding-preview img {
+    transition: transform 0.3s ease-in-out;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.onboarding-preview img:hover {
+    transform: scale(1.05);
+}
+
+/* Tip Card Styles */
+.tip-card {
+    transition: all 0.2s ease-in-out;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: #fff;
+    border: 2px solid #e9ecef;
+}
+
+.tip-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-color: #007bff;
+}
+
+/* Completion Checklist Styles */
+.completion-checklist .form-check {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+.completion-checklist .form-check-input {
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-top: 0.1rem;
+}
+
+.completion-checklist .form-check-label {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Color Utilities */
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.text-orange {
+    color: #fd7e14 !important;
+}
+
+.text-teal {
+    color: #20c997 !important;
+}
+
+/* Onboarding Progress Styles */
+.onboarding-progress {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.progress-bar-custom {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar-custom .progress-bar {
+    border-radius: 4px;
+    transition: width 0.6s ease;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Welcome Section Styles */
+.welcome-section {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.welcome-section h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.welcome-section p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+/* Feature Card Styles */
+.feature-card {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+    background-color: #fff;
+}
+
+.feature-card:hover {
+    border-color: #007bff;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,123,255,0.15);
+}
+
+.feature-card i {
+    font-size: 3rem;
+    color: #007bff;
+    margin-bottom: 1rem;
+}
+
+.feature-card h5 {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+/* Onboarding Navigation Styles */
+.onboarding-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.onboarding-nav-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+
+.onboarding-nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.onboarding-nav-btn.primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.onboarding-nav-btn.primary:hover {
+    background-color: #0056b3;
+}
+
+.onboarding-nav-btn.secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+.onboarding-nav-btn.secondary:hover {
+    background-color: #545b62;
+}
+
+/* Step Indicator Styles */
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.step-indicator-item {
+    display: flex;
+    align-items: center;
+    margin: 0 1rem;
+}
+
+.step-indicator-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.step-indicator-number.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.step-indicator-number.completed {
+    background-color: #28a745;
+    color: white;
+}
+
+.step-indicator-number.pending {
+    background-color: #e9ecef;
+    color: #6c757d;
+}
+
+.step-indicator-label {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Quick Start Styles */
+.quick-start-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quick-start-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: #fff;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.quick-start-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.quick-start-item i {
+    font-size: 1.2rem;
+    color: #007bff;
+    margin-right: 0.75rem;
+    width: 20px;
+}
+
+.quick-start-item span {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .onboarding-step {
+        min-height: 300px;
+        padding: 1rem 0;
+    }
+    
+    .welcome-section {
+        padding: 2rem 1rem;
+    }
+    
+    .welcome-section h1 {
+        font-size: 2rem;
+    }
+    
+    .feature-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-card i {
+        font-size: 2rem;
+    }
+    
+    .onboarding-nav {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .step-indicator {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .step-indicator-item {
+        margin: 0.25rem 0;
+    }
+    
+    .quick-start-item {
+        padding: 0.5rem;
+    }
+}
+
+/* Animation for onboarding steps */
+@keyframes slideInRight {
+    from {
+        transform: translateX(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.onboarding-step {
+    animation: slideInRight 0.5s ease-out;
+}
+
+/* Completion celebration */
+@keyframes celebrate {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.onboarding-complete {
+    animation: celebrate 0.6s ease-in-out;
+}

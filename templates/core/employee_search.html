@@ -1,0 +1,527 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Global Search{% endblock %}
+
+{% block page_title %}Search Results{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="filterResults('all')">
+        <i class="fas fa-list me-2"></i>All Results
+    </button>
+    <button type="button" class="btn btn-outline-success" onclick="filterResults('tasks')">
+        <i class="fas fa-tasks me-2"></i>Tasks
+    </button>
+    <button type="button" class="btn btn-outline-info" onclick="filterResults('projects')">
+        <i class="fas fa-project-diagram me-2"></i>Projects
+    </button>
+    <button type="button" class="btn btn-outline-warning" onclick="filterResults('team')">
+        <i class="fas fa-users me-2"></i>Team
+    </button>
+    <button type="button" class="btn btn-outline-secondary" onclick="filterResults('documents')">
+        <i class="fas fa-file me-2"></i>Documents
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Search Input -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="globalSearchInput" placeholder="Search tasks, projects, team members, documents..." value="{{ query|default:'' }}">
+                            <button class="btn btn-primary" type="button" onclick="performSearch()">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex justify-content-end">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary" onclick="showAdvancedSearch()">
+                                    <i class="fas fa-cog me-2"></i>Advanced
+                                </button>
+                                <button type="button" class="btn btn-outline-info" onclick="saveSearch()">
+                                    <i class="fas fa-bookmark me-2"></i>Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results Summary -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h6 class="mb-0">
+                            <span id="resultsCount">0</span> results found for "<span id="searchQuery">{{ query|default:'your search' }}</span>"
+                        </h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-end">
+                            <select class="form-select me-2" id="sortResults" onchange="sortSearchResults()">
+                                <option value="relevance">Most Relevant</option>
+                                <option value="date">Most Recent</option>
+                                <option value="name">Name A-Z</option>
+                                <option value="type">Type</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results -->
+<div class="row" id="searchResults">
+    <!-- Tasks Results -->
+    <div class="col-12 mb-4" id="tasksResults">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-tasks me-2"></i>Tasks
+                    <span class="badge bg-primary ms-2" id="tasksCount">0</span>
+                </h6>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewAllTasks()">View All</button>
+            </div>
+            <div class="card-body">
+                <div id="tasksList">
+                    <!-- Sample task results -->
+                    <div class="search-result-item mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">Complete Project Documentation</h6>
+                                <p class="text-muted mb-2">Update all project documentation with latest changes and requirements.</p>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-warning me-2">In Progress</span>
+                                    <small class="text-muted me-3">Due: Sep 25, 2024</small>
+                                    <small class="text-muted">Project: Website Redesign</small>
+                                </div>
+                            </div>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary" onclick="viewTask(1)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-success" onclick="editTask(1)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="search-result-item mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">Review Code Changes</h6>
+                                <p class="text-muted mb-2">Review and approve code changes for the new feature implementation.</p>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-info me-2">Review</span>
+                                    <small class="text-muted me-3">Due: Sep 23, 2024</small>
+                                    <small class="text-muted">Project: Mobile App</small>
+                                </div>
+                            </div>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary" onclick="viewTask(2)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-success" onclick="editTask(2)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Results -->
+    <div class="col-12 mb-4" id="projectsResults">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-project-diagram me-2"></i>Projects
+                    <span class="badge bg-primary ms-2" id="projectsCount">0</span>
+                </h6>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewAllProjects()">View All</button>
+            </div>
+            <div class="card-body">
+                <div id="projectsList">
+                    <!-- Sample project results -->
+                    <div class="search-result-item mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">Website Redesign Project</h6>
+                                <p class="text-muted mb-2">Complete redesign of the company website with modern UI/UX.</p>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-success me-2">Active</span>
+                                    <small class="text-muted me-3">Start: Sep 1, 2024</small>
+                                    <small class="text-muted me-3">End: Oct 15, 2024</small>
+                                    <small class="text-muted">Progress: 65%</small>
+                                </div>
+                            </div>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary" onclick="viewProject(1)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-info" onclick="viewProjectTasks(1)">
+                                    <i class="fas fa-tasks"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Results -->
+    <div class="col-12 mb-4" id="teamResults">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-users me-2"></i>Team Members
+                    <span class="badge bg-primary ms-2" id="teamCount">0</span>
+                </h6>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewAllTeam()">View All</button>
+            </div>
+            <div class="card-body">
+                <div id="teamList">
+                    <!-- Sample team results -->
+                    <div class="search-result-item mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3">
+                                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="Avatar">
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">John Smith</h6>
+                                    <p class="text-muted mb-1">Senior Developer</p>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-success me-2">Online</span>
+                                        <small class="text-muted">Development Team</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary" onclick="viewProfile(1)">
+                                    <i class="fas fa-user"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-info" onclick="messageUser(1)">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Results -->
+    <div class="col-12 mb-4" id="documentsResults">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-file me-2"></i>Documents
+                    <span class="badge bg-primary ms-2" id="documentsCount">0</span>
+                </h6>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewAllDocuments()">View All</button>
+            </div>
+            <div class="card-body">
+                <div id="documentsList">
+                    <!-- Sample document results -->
+                    <div class="search-result-item mb-3 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex align-items-center">
+                                <div class="file-icon me-3">
+                                    <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Project Requirements.pdf</h6>
+                                    <p class="text-muted mb-1">Detailed project requirements and specifications</p>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-info me-2">PDF</span>
+                                        <small class="text-muted me-3">2.5 MB</small>
+                                        <small class="text-muted">Updated: Sep 20, 2024</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary" onclick="viewDocument(1)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-success" onclick="downloadDocument(1)">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- No Results Message -->
+<div class="row" id="noResults" style="display: none;">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No results found</h5>
+                <p class="text-muted">Try adjusting your search terms or filters</p>
+                <button type="button" class="btn btn-primary" onclick="clearSearch()">
+                    <i class="fas fa-refresh me-2"></i>Clear Search
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Searches -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Searches</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap">
+                    <span class="badge bg-light text-dark me-2 mb-2" onclick="searchAgain('project documentation')" style="cursor: pointer;">
+                        project documentation
+                    </span>
+                    <span class="badge bg-light text-dark me-2 mb-2" onclick="searchAgain('team meeting')" style="cursor: pointer;">
+                        team meeting
+                    </span>
+                    <span class="badge bg-light text-dark me-2 mb-2" onclick="searchAgain('code review')" style="cursor: pointer;">
+                        code review
+                    </span>
+                    <span class="badge bg-light text-dark me-2 mb-2" onclick="searchAgain('deadline')" style="cursor: pointer;">
+                        deadline
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize search functionality
+    const searchInput = document.getElementById('globalSearchInput');
+    
+    // Search on Enter key
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+    
+    // Auto-search as user types (with debounce)
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            if (this.value.length >= 3) {
+                performSearch();
+            }
+        }, 500);
+    });
+    
+    // Initialize with sample data
+    updateResultCounts();
+});
+
+function performSearch() {
+    const query = document.getElementById('globalSearchInput').value.trim();
+    if (!query) {
+        showNoResults();
+        return;
+    }
+    
+    document.getElementById('searchQuery').textContent = query;
+    
+    // Simulate search API call
+    console.log('Searching for:', query);
+    
+    // Update results (in real implementation, this would be an API call)
+    updateSearchResults(query);
+    updateResultCounts();
+}
+
+function updateSearchResults(query) {
+    // This would normally make an API call to get real results
+    // For now, we'll show sample results based on the query
+    
+    const tasksList = document.getElementById('tasksList');
+    const projectsList = document.getElementById('projectsList');
+    const teamList = document.getElementById('teamList');
+    const documentsList = document.getElementById('documentsList');
+    
+    // Show/hide sections based on query relevance
+    if (query.toLowerCase().includes('task') || query.toLowerCase().includes('project')) {
+        tasksList.style.display = 'block';
+        projectsList.style.display = 'block';
+    } else {
+        tasksList.style.display = 'block';
+        projectsList.style.display = 'block';
+    }
+    
+    teamList.style.display = 'block';
+    documentsList.style.display = 'block';
+    
+    // Hide no results message
+    document.getElementById('noResults').style.display = 'none';
+}
+
+function updateResultCounts() {
+    // Update result counts (in real implementation, these would come from API)
+    document.getElementById('tasksCount').textContent = '2';
+    document.getElementById('projectsCount').textContent = '1';
+    document.getElementById('teamCount').textContent = '1';
+    document.getElementById('documentsCount').textContent = '1';
+    
+    const totalResults = 5; // Sum of all results
+    document.getElementById('resultsCount').textContent = totalResults;
+}
+
+function showNoResults() {
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('noResults').style.display = 'block';
+    document.getElementById('resultsCount').textContent = '0';
+}
+
+function filterResults(type) {
+    console.log('Filtering results by:', type);
+    
+    // Update active filter button
+    document.querySelectorAll('.btn-group button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Show/hide result sections based on filter
+    const sections = ['tasksResults', 'projectsResults', 'teamResults', 'documentsResults'];
+    
+    sections.forEach(section => {
+        const element = document.getElementById(section);
+        if (type === 'all' || section.includes(type)) {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    });
+}
+
+function sortSearchResults() {
+    const sortBy = document.getElementById('sortResults').value;
+    console.log('Sorting results by:', sortBy);
+    
+    // Implement sorting logic
+    // This would normally reorder the results based on the selected criteria
+}
+
+function searchAgain(query) {
+    document.getElementById('globalSearchInput').value = query;
+    performSearch();
+}
+
+function clearSearch() {
+    document.getElementById('globalSearchInput').value = '';
+    document.getElementById('searchResults').style.display = 'block';
+    document.getElementById('noResults').style.display = 'none';
+    updateResultCounts();
+}
+
+function showAdvancedSearch() {
+    console.log('Showing advanced search options');
+    // Implement advanced search modal
+}
+
+function saveSearch() {
+    const query = document.getElementById('globalSearchInput').value;
+    console.log('Saving search:', query);
+    // Implement save search functionality
+}
+
+// Action functions for result items
+function viewTask(taskId) {
+    console.log('Viewing task:', taskId);
+    // Navigate to task details
+}
+
+function editTask(taskId) {
+    console.log('Editing task:', taskId);
+    // Navigate to task edit
+}
+
+function viewProject(projectId) {
+    console.log('Viewing project:', projectId);
+    // Navigate to project details
+}
+
+function viewProjectTasks(projectId) {
+    console.log('Viewing project tasks:', projectId);
+    // Navigate to project tasks
+}
+
+function viewProfile(userId) {
+    console.log('Viewing profile:', userId);
+    // Navigate to user profile
+}
+
+function messageUser(userId) {
+    console.log('Messaging user:', userId);
+    // Open messaging interface
+}
+
+function viewDocument(docId) {
+    console.log('Viewing document:', docId);
+    // Open document viewer
+}
+
+function downloadDocument(docId) {
+    console.log('Downloading document:', docId);
+    // Trigger document download
+}
+
+function viewAllTasks() {
+    window.location.href = "{% url 'core:employee_tasks' %}";
+}
+
+function viewAllProjects() {
+    window.location.href = "{% url 'core:employee_projects' %}";
+}
+
+function viewAllTeam() {
+    window.location.href = "{% url 'core:employee_team_directory' %}";
+}
+
+function viewAllDocuments() {
+    window.location.href = "{% url 'core:employee_documents' %}";
+}
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_search.css' %}">
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,646 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Keyboard Shortcuts{% endblock %}
+
+{% block page_title %}Keyboard Shortcuts{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="customizeShortcuts()">
+        <i class="fas fa-edit me-2"></i>Customize
+    </button>
+    <button type="button" class="btn btn-outline-secondary" onclick="resetShortcuts()">
+        <i class="fas fa-undo me-2"></i>Reset to Defaults
+    </button>
+    <button type="button" class="btn btn-outline-info" onclick="printShortcuts()">
+        <i class="fas fa-print me-2"></i>Print
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Keyboard Shortcuts Overview -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Reference</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary mb-3">Most Used Shortcuts</h6>
+                        <div class="shortcut-item d-flex justify-content-between align-items-center mb-2">
+                            <span>Global Search</span>
+                            <kbd>Ctrl + K</kbd>
+                        </div>
+                        <div class="shortcut-item d-flex justify-content-between align-items-center mb-2">
+                            <span>Dashboard</span>
+                            <kbd>Ctrl + D</kbd>
+                        </div>
+                        <div class="shortcut-item d-flex justify-content-between align-items-center mb-2">
+                            <span>Tasks</span>
+                            <kbd>Ctrl + T</kbd>
+                        </div>
+                        <div class="shortcut-item d-flex justify-content-between align-items-center mb-2">
+                            <span>Notifications</span>
+                            <kbd>Ctrl + N</kbd>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-success mb-3">Navigation Shortcuts</h6>
+                        <div class="shortcut-item d-flex justify-content-between align-items-center mb-2">
+                            <span>Calendar</span>
+                            <kbd>Ctrl + C</kbd>
+                        </div>
+                        <div class="shortcut-item d-flex justify-content-between align-items-center mb-2">
+                            <span>Team Directory</span>
+                            <kbd>Ctrl + M</kbd>
+                        </div>
+                        <div class="shortcut-item d-flex justify-content-between align-items-center mb-2">
+                            <span>Settings</span>
+                            <kbd>Ctrl + ,</kbd>
+                        </div>
+                        <div class="shortcut-item d-flex justify-content-between align-items-center mb-2">
+                            <span>Help</span>
+                            <kbd>F1</kbd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Shortcuts by Category -->
+<div class="row">
+    <!-- Navigation Shortcuts -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-compass me-2"></i>Navigation
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="shortcut-category">
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Dashboard</strong>
+                            <br><small class="text-muted">Go to main dashboard</small>
+                        </div>
+                        <kbd>Ctrl + D</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>My Tasks</strong>
+                            <br><small class="text-muted">View all tasks</small>
+                        </div>
+                        <kbd>Ctrl + T</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Projects</strong>
+                            <br><small class="text-muted">View projects</small>
+                        </div>
+                        <kbd>Ctrl + P</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Calendar</strong>
+                            <br><small class="text-muted">Open calendar</small>
+                        </div>
+                        <kbd>Ctrl + C</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Team Directory</strong>
+                            <br><small class="text-muted">View team members</small>
+                        </div>
+                        <kbd>Ctrl + M</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Settings</strong>
+                            <br><small class="text-muted">Open settings</small>
+                        </div>
+                        <kbd>Ctrl + ,</kbd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Management Shortcuts -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-success">
+                    <i class="fas fa-tasks me-2"></i>Task Management
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="shortcut-category">
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>New Task</strong>
+                            <br><small class="text-muted">Create new task</small>
+                        </div>
+                        <kbd>Ctrl + Shift + T</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Mark Complete</strong>
+                            <br><small class="text-muted">Mark task as done</small>
+                        </div>
+                        <kbd>Ctrl + Enter</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Edit Task</strong>
+                            <br><small class="text-muted">Edit selected task</small>
+                        </div>
+                        <kbd>Ctrl + E</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Delete Task</strong>
+                            <br><small class="text-muted">Delete selected task</small>
+                        </div>
+                        <kbd>Ctrl + Delete</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Assign Task</strong>
+                            <br><small class="text-muted">Assign to team member</small>
+                        </div>
+                        <kbd>Ctrl + Shift + A</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Set Priority</strong>
+                            <br><small class="text-muted">Set task priority</small>
+                        </div>
+                        <kbd>Ctrl + Shift + P</kbd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Communication Shortcuts -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="fas fa-comments me-2"></i>Communication
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="shortcut-category">
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Notifications</strong>
+                            <br><small class="text-muted">View notifications</small>
+                        </div>
+                        <kbd>Ctrl + N</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>New Message</strong>
+                            <br><small class="text-muted">Compose message</small>
+                        </div>
+                        <kbd>Ctrl + Shift + M</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Mark All Read</strong>
+                            <br><small class="text-muted">Mark notifications as read</small>
+                        </div>
+                        <kbd>Ctrl + Shift + R</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Quick Reply</strong>
+                            <br><small class="text-muted">Reply to notification</small>
+                        </div>
+                        <kbd>Ctrl + R</kbd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productivity Shortcuts -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i class="fas fa-chart-line me-2"></i>Productivity
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="shortcut-category">
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Start Timer</strong>
+                            <br><small class="text-muted">Start focus timer</small>
+                        </div>
+                        <kbd>Ctrl + Shift + S</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Pause Timer</strong>
+                            <br><small class="text-muted">Pause current timer</small>
+                        </div>
+                        <kbd>Ctrl + Shift + P</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Analytics</strong>
+                            <br><small class="text-muted">View productivity analytics</small>
+                        </div>
+                        <kbd>Ctrl + Shift + A</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Focus Mode</strong>
+                            <br><small class="text-muted">Toggle focus mode</small>
+                        </div>
+                        <kbd>Ctrl + Shift + F</kbd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Shortcuts -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-secondary">
+                    <i class="fas fa-cog me-2"></i>System
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="shortcut-category">
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Global Search</strong>
+                            <br><small class="text-muted">Search across all content</small>
+                        </div>
+                        <kbd>Ctrl + K</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Help</strong>
+                            <br><small class="text-muted">Open help documentation</small>
+                        </div>
+                        <kbd>F1</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Refresh</strong>
+                            <br><small class="text-muted">Refresh current page</small>
+                        </div>
+                        <kbd>F5</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Logout</strong>
+                            <br><small class="text-muted">Sign out of system</small>
+                        </div>
+                        <kbd>Ctrl + Shift + L</kbd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accessibility Shortcuts -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-dark">
+                    <i class="fas fa-universal-access me-2"></i>Accessibility
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="shortcut-category">
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>High Contrast</strong>
+                            <br><small class="text-muted">Toggle high contrast mode</small>
+                        </div>
+                        <kbd>Ctrl + Shift + H</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Zoom In</strong>
+                            <br><small class="text-muted">Increase text size</small>
+                        </div>
+                        <kbd>Ctrl + +</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Zoom Out</strong>
+                            <br><small class="text-muted">Decrease text size</small>
+                        </div>
+                        <kbd>Ctrl + -</kbd>
+                    </div>
+                    
+                    <div class="shortcut-item d-flex justify-content-between align-items-center mb-3 p-2 border rounded">
+                        <div>
+                            <strong>Screen Reader</strong>
+                            <br><small class="text-muted">Toggle screen reader mode</small>
+                        </div>
+                        <kbd>Ctrl + Shift + V</kbd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Practice Area -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Practice Shortcuts</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="text-muted mb-3">Try these shortcuts to get familiar with them:</p>
+                        <div class="practice-area p-4 border rounded bg-light">
+                            <h6>Practice Commands:</h6>
+                            <div class="mb-2">
+                                <kbd>Ctrl + K</kbd> - Open global search
+                            </div>
+                            <div class="mb-2">
+                                <kbd>Ctrl + T</kbd> - Go to tasks
+                            </div>
+                            <div class="mb-2">
+                                <kbd>Ctrl + N</kbd> - View notifications
+                            </div>
+                            <div class="mb-2">
+                                <kbd>F1</kbd> - Open help
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-keyboard fa-3x text-primary mb-3"></i>
+                            <h6>Keyboard Master</h6>
+                            <p class="text-muted">Master these shortcuts to boost your productivity!</p>
+                            <button class="btn btn-primary" onclick="startPractice()">
+                                <i class="fas fa-play me-2"></i>Start Practice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize keyboard shortcuts
+    initializeKeyboardShortcuts();
+    
+    // Add visual feedback for shortcuts
+    addShortcutVisualFeedback();
+});
+
+function initializeKeyboardShortcuts() {
+    // Global search shortcut
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            window.location.href = "{% url 'core:employee_search' %}";
+        }
+        
+        // Dashboard shortcut
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            window.location.href = "{% url 'core:employee_dashboard' %}";
+        }
+        
+        // Tasks shortcut
+        if (e.ctrlKey && e.key === 't') {
+            e.preventDefault();
+            window.location.href = "{% url 'core:employee_tasks' %}";
+        }
+        
+        // Notifications shortcut
+        if (e.ctrlKey && e.key === 'n') {
+            e.preventDefault();
+            window.location.href = "{% url 'core:employee_notifications' %}";
+        }
+        
+        // Calendar shortcut
+        if (e.ctrlKey && e.key === 'c') {
+            e.preventDefault();
+            window.location.href = "{% url 'core:employee_calendar' %}";
+        }
+        
+        // Team shortcut
+        if (e.ctrlKey && e.key === 'm') {
+            e.preventDefault();
+            window.location.href = "{% url 'core:employee_team_directory' %}";
+        }
+        
+        // Settings shortcut
+        if (e.ctrlKey && e.key === ',') {
+            e.preventDefault();
+            window.location.href = "{% url 'core:employee_settings' %}";
+        }
+        
+        // Help shortcut
+        if (e.key === 'F1') {
+            e.preventDefault();
+            showHelp();
+        }
+        
+        // High contrast toggle
+        if (e.ctrlKey && e.shiftKey && e.key === 'H') {
+            e.preventDefault();
+            toggleHighContrast();
+        }
+        
+        // Zoom shortcuts
+        if (e.ctrlKey && e.key === '+') {
+            e.preventDefault();
+            zoomIn();
+        }
+        
+        if (e.ctrlKey && e.key === '-') {
+            e.preventDefault();
+            zoomOut();
+        }
+    });
+}
+
+function addShortcutVisualFeedback() {
+    // Add hover effects to shortcut items
+    const shortcutItems = document.querySelectorAll('.shortcut-item');
+    shortcutItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    });
+}
+
+function customizeShortcuts() {
+    console.log('Opening shortcut customization modal');
+    // Implement shortcut customization modal
+    showAlert('Shortcut customization coming soon!', 'info');
+}
+
+function resetShortcuts() {
+    if (confirm('Are you sure you want to reset all shortcuts to defaults?')) {
+        console.log('Resetting shortcuts to defaults');
+        showAlert('Shortcuts reset to defaults', 'success');
+    }
+}
+
+function printShortcuts() {
+    window.print();
+}
+
+function startPractice() {
+    console.log('Starting keyboard shortcut practice');
+    showAlert('Practice mode started! Try the shortcuts shown above.', 'info');
+}
+
+function showHelp() {
+    console.log('Opening help documentation');
+    // Implement help system
+}
+
+function toggleHighContrast() {
+    document.body.classList.toggle('high-contrast');
+    const isEnabled = document.body.classList.contains('high-contrast');
+    showAlert(`High contrast mode ${isEnabled ? 'enabled' : 'disabled'}`, 'info');
+}
+
+function zoomIn() {
+    const currentZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
+    document.body.style.zoom = Math.min(currentZoom + 0.1, 2);
+}
+
+function zoomOut() {
+    const currentZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
+    document.body.style.zoom = Math.max(currentZoom - 0.1, 0.5);
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+</script>
+
+<style>
+kbd {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    color: #495057;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    white-space: nowrap;
+}
+
+.shortcut-item {
+    transition: all 0.2s ease-in-out;
+}
+
+.shortcut-item:hover {
+    transform: translateX(5px);
+}
+
+.shortcut-category .shortcut-item {
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.shortcut-category .shortcut-item:hover {
+    border-left-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.high-contrast {
+    filter: contrast(150%) brightness(120%);
+}
+
+.practice-area {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.card {
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+@media print {
+    .btn-group, .page-actions {
+        display: none !important;
+    }
+    
+    .card {
+        break-inside: avoid;
+    }
+}
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_shortcuts.css' %}">
+{% endblock %}
+{% endblock %}

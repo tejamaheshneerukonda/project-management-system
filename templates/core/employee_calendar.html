@@ -1,0 +1,328 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Calendar{% endblock %}
+
+{% block page_title %}Calendar{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="changeView('month')">
+        <i class="fas fa-calendar-alt me-2"></i>Month
+    </button>
+    <button type="button" class="btn btn-outline-secondary" onclick="changeView('week')">
+        <i class="fas fa-calendar-week me-2"></i>Week
+    </button>
+    <button type="button" class="btn btn-outline-info" onclick="changeView('day')">
+        <i class="fas fa-calendar-day me-2"></i>Day
+    </button>
+</div>
+<button type="button" class="btn btn-primary ms-2" onclick="createEvent()">
+    <i class="fas fa-plus me-2"></i>New Event
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Calendar Navigation -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary" onclick="previousPeriod()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" onclick="goToToday()">
+                                Today
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="nextPeriod()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <h4 class="d-inline-block ms-3 mb-0" id="currentPeriod">September 2024</h4>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="form-check form-switch d-inline-block me-3">
+                            <input class="form-check-input" type="checkbox" id="showTasks" checked>
+                            <label class="form-check-label" for="showTasks">Show Tasks</label>
+                        </div>
+                        <div class="form-check form-switch d-inline-block">
+                            <input class="form-check-input" type="checkbox" id="showMeetings" checked>
+                            <label class="form-check-label" for="showMeetings">Show Meetings</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar Grid -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body p-0">
+                <div id="calendarContainer">
+                    <!-- Calendar will be rendered here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Tasks -->
+<div class="row mt-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Upcoming Tasks</h6>
+                <a href="{% url 'core:employee_tasks' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-eye me-1"></i>View All
+                </a>
+            </div>
+            <div class="card-body">
+                {% if upcoming_tasks %}
+                <div class="list-group list-group-flush">
+                    {% for task in upcoming_tasks %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ task.title }}</h6>
+                            <p class="text-muted mb-1">{{ task.project.name }}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>{{ task.due_date|date:"M d, Y" }}
+                            </small>
+                        </div>
+                        <div>
+                            <span class="badge bg-{{ task.priority|lower }} me-2">{{ task.priority }}</span>
+                            <span class="badge bg-{{ task.status|lower }}">{{ task.status }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-tasks fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">No upcoming tasks</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Requests -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Leave Requests</h6>
+                <a href="{% url 'core:employee_leave' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-eye me-1"></i>View All
+                </a>
+            </div>
+            <div class="card-body">
+                {% if leave_requests %}
+                <div class="list-group list-group-flush">
+                    {% for leave in leave_requests %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ leave.leave_type }}</h6>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ leave.start_date|date:"M d" }} - {{ leave.end_date|date:"M d, Y" }}
+                            </p>
+                            <small class="text-muted">{{ leave.reason|truncatechars:50 }}</small>
+                        </div>
+                        <div>
+                            <span class="badge bg-{{ leave.status|lower }}">{{ leave.status }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">No leave requests</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tasks This Week</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ upcoming_tasks|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Meetings Today</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Leave Days</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ leave_requests|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-times fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Deadlines</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ upcoming_tasks|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCalendar();
+});
+
+let calendar;
+let currentView = 'month';
+let currentDate = new Date();
+
+function initializeCalendar() {
+    const calendarEl = document.getElementById('calendarContainer');
+    
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: false, // We're using custom header
+        height: 'auto',
+        events: [
+            // Sample events - in real implementation, these would come from the backend
+            {
+                title: 'Team Meeting',
+                start: '2024-09-25T10:00:00',
+                end: '2024-09-25T11:00:00',
+                color: '#007bff',
+                type: 'meeting'
+            },
+            {
+                title: 'Project Deadline',
+                start: '2024-09-30',
+                color: '#dc3545',
+                type: 'deadline'
+            },
+            {
+                title: 'Leave Day',
+                start: '2024-09-28',
+                end: '2024-09-28',
+                color: '#28a745',
+                type: 'leave'
+            }
+        ],
+        eventClick: function(info) {
+            showEventDetails(info.event);
+        },
+        dateClick: function(info) {
+            createEvent(info.dateStr);
+        }
+    });
+    
+    calendar.render();
+    updateCurrentPeriod();
+}
+
+function changeView(view) {
+    currentView = view;
+    calendar.changeView(view);
+    updateCurrentPeriod();
+}
+
+function previousPeriod() {
+    calendar.prev();
+    updateCurrentPeriod();
+}
+
+function nextPeriod() {
+    calendar.next();
+    updateCurrentPeriod();
+}
+
+function goToToday() {
+    calendar.today();
+    updateCurrentPeriod();
+}
+
+function updateCurrentPeriod() {
+    const view = calendar.view;
+    const title = view.title;
+    document.getElementById('currentPeriod').textContent = title;
+}
+
+function createEvent(date = null) {
+    // Implement event creation modal
+    console.log('Creating event for date:', date);
+    // This would open a modal for creating new events
+}
+
+function showEventDetails(event) {
+    // Implement event details modal
+    console.log('Showing details for event:', event.title);
+    // This would open a modal showing event details
+}
+
+// Filter functionality
+document.getElementById('showTasks').addEventListener('change', function() {
+    // Implement task visibility toggle
+    console.log('Show tasks:', this.checked);
+});
+
+document.getElementById('showMeetings').addEventListener('change', function() {
+    // Implement meeting visibility toggle
+    console.log('Show meetings:', this.checked);
+});
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_calendar.css' %}">
+{% endblock %}
+{% endblock %}

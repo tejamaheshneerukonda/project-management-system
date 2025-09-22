@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Account - Project Management System{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/employee_registration.css' %}" rel="stylesheet">
+<link href="{% static 'css/checkbox-fix.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="registration-card">
+                    <div class="registration-header">
+                        <a href="{% url 'core:registration_selection' %}" class="btn btn-outline-light mb-3">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Registration Options
+                        </a>
+                        <i class="fas fa-user-plus registration-icon"></i>
+                        <h3 class="registration-title">Create Your Account</h3>
+                        <p class="registration-subtitle">Complete your registration</p>
+                    </div>
+                    
+                    <div class="registration-body">
+                        <!-- Employee Info Display -->
+                        <div class="employee-info-box">
+                            <h6 class="employee-info-title">
+                                <i class="fas fa-user-check me-2"></i>Verified Information
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Name:</strong> {{ employee.full_name }}</p>
+                                    <p><strong>Employee ID:</strong> <code>{{ employee.employee_id }}</code></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Email:</strong> {{ employee.email }}</p>
+                                    <p><strong>Department:</strong> {{ employee.department|default:"Not specified" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form method="post" class="registration-form needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="registration-form-group">
+                                <label for="{{ form.username.id_for_label }}" class="registration-label">
+                                    <i class="fas fa-at me-1"></i>Username *
+                                </label>
+                                <div class="registration-input-group">
+                                    <i class="fas fa-at registration-input-icon"></i>
+                                    {{ form.username }}
+                                </div>
+                                <div class="registration-help-text">
+                                    Choose a unique username for login
+                                </div>
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.username.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="registration-form-group">
+                                <label for="{{ form.password.id_for_label }}" class="registration-label">
+                                    <i class="fas fa-lock me-1"></i>Password *
+                                </label>
+                                <div class="registration-input-group">
+                                    <i class="fas fa-lock registration-input-icon"></i>
+                                    {{ form.password }}
+                                    <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password.id_for_label }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength">
+                                    <div class="password-strength-bar">
+                                        <div class="password-strength-fill" id="passwordStrengthFill"></div>
+                                    </div>
+                                    <small class="password-strength-text" id="passwordStrengthText">Enter a password</small>
+                                </div>
+                                {% if form.password.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="registration-form-group">
+                                <label for="{{ form.confirm_password.id_for_label }}" class="registration-label">
+                                    <i class="fas fa-lock me-1"></i>Confirm Password *
+                                </label>
+                                <div class="registration-input-group">
+                                    <i class="fas fa-lock registration-input-icon"></i>
+                                    {{ form.confirm_password }}
+                                    <button type="button" class="password-toggle" onclick="togglePassword('{{ form.confirm_password.id_for_label }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="registration-help-text">
+                                    Re-enter your password to confirm
+                                </div>
+                                {% if form.confirm_password.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.confirm_password.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Terms and Conditions -->
+                            <div class="registration-checkbox-group">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                    <label class="form-check-label" for="termsCheck">
+                                        I agree to the <a href="{% url 'core:terms_and_conditions' %}" class="registration-link" target="_blank">Terms of Service</a> and <a href="{% url 'core:privacy_policy' %}" class="registration-link" target="_blank">Privacy Policy</a>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="registration-button">
+                                <i class="fas fa-user-plus me-2"></i>Create Account
+                            </button>
+                        </form>
+                        
+                        <div class="registration-footer">
+                            <p class="registration-footer-text">
+                                Already have an account? 
+                                <a href="{% url 'core:login' %}" class="registration-login-link">Sign in here</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/employee_registration.js' %}"></script>
+<script src="{% static 'js/terms_validation.js' %}"></script>
+{% endblock %}

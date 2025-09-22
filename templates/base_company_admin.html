@@ -1,0 +1,1726 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ProjectManager Pro - Company Dashboard{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Company Admin Specific CSS -->
+    <link href="{% static 'css/pages/company_dashboard.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #059669, #10b981);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        
+        .admin-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .admin-user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: white;
+        }
+        
+        .admin-footer {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+        
+        .admin-stats-card {
+            background: linear-gradient(135deg, #ffffff, #f0fdf4);
+            border: 1px solid #dcfce7;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .company-badge {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Enhanced Dropdown Menu Styling */
+        .dropdown-menu {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            min-width: 220px;
+        }
+        
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            color: #374151;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            margin: 0.125rem 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.1));
+            color: #059669;
+            transform: translateX(5px);
+        }
+        
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: #e2e8f0;
+        }
+        
+        .dropdown-toggle::after {
+            margin-left: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .dropdown-toggle[aria-expanded="true"]::after {
+            transform: rotate(180deg);
+        }
+        
+        /* Navbar Link Hover Effects */
+        .navbar-nav .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            margin: 0 0.25rem;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+        
+        /* Mobile Dropdown Enhancements */
+        @media (max-width: 991.98px) {
+            .dropdown-menu {
+                position: static !important;
+                transform: none !important;
+                box-shadow: none;
+                border: none;
+                background: rgba(255, 255, 255, 0.1);
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .dropdown-item {
+                color: rgba(255, 255, 255, 0.8);
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .dropdown-item:hover {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                transform: none;
+            }
+        }
+        
+        /* Mobile & Accessibility Enhancements */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn-group .btn {
+                margin-bottom: 0.25rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+            
+            /* Handle many menu items on mobile */
+            .navbar-nav {
+                flex-wrap: wrap;
+            }
+            
+            .nav-item {
+                margin-bottom: 0.25rem;
+            }
+            
+            .dropdown-menu {
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            
+            /* Hamburger button on mobile */
+            .navbar .btn-outline-light {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            /* Hide navbar toggler on mobile since we have hamburger */
+            .navbar-toggler {
+                display: none;
+            }
+        }
+        
+        /* Tablet Responsive Design */
+        @media (max-width: 992px) and (min-width: 769px) {
+            .navbar-nav .nav-link {
+                padding: 0.5rem 0.5rem;
+                font-size: 0.85rem;
+            }
+            
+            .dropdown-menu {
+                min-width: 200px;
+            }
+        }
+        
+        /* Large Screen Optimization */
+        @media (min-width: 1200px) {
+            .navbar-nav .nav-link {
+                padding: 0.75rem 1rem;
+            }
+            
+            .dropdown-menu {
+                min-width: 250px;
+            }
+        }
+        
+        /* Corner Control Buttons Styling */
+        .control-buttons-left,
+        .control-buttons-right {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .control-buttons-left .btn,
+        .control-buttons-right .btn {
+            transition: all 0.2s ease;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .control-buttons-left .btn:hover,
+        .control-buttons-right .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .control-buttons-left .btn:focus,
+        .control-buttons-right .btn:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        /* Left corner button styling */
+        .control-buttons-left .btn {
+            background: linear-gradient(135deg, #e3f2fd, #ffffff);
+            border: 2px solid #2196f3;
+            color: #1976d2;
+        }
+        
+        .control-buttons-left .btn:hover {
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+            border-color: #1976d2;
+        }
+        
+        /* Right corner button styling */
+        .control-buttons-right .btn {
+            background: linear-gradient(135deg, #f5f5f5, #ffffff);
+            border: 2px solid #757575;
+            color: #424242;
+        }
+        
+        .control-buttons-right .btn:hover {
+            background: linear-gradient(135deg, #757575, #424242);
+            color: white;
+            border-color: #424242;
+        }
+        
+        /* Dark theme corner button adjustments */
+        .dark-theme .control-buttons-left .btn {
+            background: linear-gradient(135deg, #1e3a8a, #1f2937);
+            border-color: #60a5fa;
+            color: #93c5fd;
+        }
+        
+        .dark-theme .control-buttons-left .btn:hover {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            color: #1a202c;
+            border-color: #93c5fd;
+        }
+        
+        .dark-theme .control-buttons-right .btn {
+            background: linear-gradient(135deg, #374151, #1f2937);
+            border-color: #9ca3af;
+            color: #d1d5db;
+        }
+        
+        .dark-theme .control-buttons-right .btn:hover {
+            background: linear-gradient(135deg, #9ca3af, #6b7280);
+            color: #1a202c;
+            border-color: #d1d5db;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            z-index: 1050;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar.show {
+            left: 0;
+        }
+        
+        .sidebar-header {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-title {
+            color: white;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .sidebar-content {
+            padding: 0.5rem 0;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: #60a5fa;
+        }
+        
+        .sidebar-group-header {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-group-header:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left-color: #60a5fa;
+        }
+        
+        .sidebar-group-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .sidebar-group-content.show {
+            max-height: 500px;
+        }
+        
+        .sidebar-subitem {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+        
+        .sidebar-subitem:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            padding: 0;
+        }
+        
+        /* Remove spacing between header and control buttons */
+        .main-content > .d-flex:first-child {
+            margin-top: 0;
+            padding-top: 0;
+        }
+        
+        .main-content.sidebar-open {
+            margin-left: 300px;
+        }
+        
+        /* Header and Footer adjustments */
+        .admin-header {
+            transition: margin-left 0.3s ease;
+        }
+        
+        .admin-header.sidebar-open {
+            margin-left: 300px;
+        }
+        
+        footer {
+            transition: margin-left 0.3s ease;
+        }
+        
+        footer.sidebar-open {
+            margin-left: 300px;
+        }
+        
+        /* Dark theme sidebar */
+        .dark-theme .sidebar {
+            background: linear-gradient(135deg, #1f2937, #374151);
+        }
+        
+        .dark-theme .sidebar-header {
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Mobile sidebar adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 280px;
+                left: -280px;
+            }
+            
+            .main-content.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .admin-header.sidebar-open {
+                margin-left: 0;
+            }
+            
+            footer.sidebar-open {
+                margin-left: 0;
+            }
+            
+            .sidebar-overlay.show {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+        
+        /* Manual Theme Classes */
+        .light-theme {
+            background-color: #f8f9fa !important;
+            color: #212529 !important;
+        }
+        
+        .light-theme .card {
+            background-color: #ffffff !important;
+            border-color: #dee2e6 !important;
+            color: #212529 !important;
+        }
+        
+        .light-theme .card-header {
+            background-color: #f8f9fa !important;
+            border-bottom-color: #dee2e6 !important;
+            color: #212529 !important;
+        }
+        
+        .light-theme .card-body {
+            background-color: #ffffff !important;
+            color: #212529 !important;
+        }
+        
+        .light-theme .text-gray-800 {
+            color: #212529 !important;
+        }
+        
+        .light-theme .text-gray-300 {
+            color: #6c757d !important;
+        }
+        
+        .light-theme .text-muted {
+            color: #6c757d !important;
+        }
+        
+        .dark-theme {
+            background-color: #1a1a1a !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .card {
+            background-color: #2d3748 !important;
+            border-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .card-header {
+            background-color: #1a202c !important;
+            border-bottom-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .card-body {
+            background-color: #2d3748 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .text-gray-800 {
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .text-gray-300 {
+            color: #a0aec0 !important;
+        }
+        
+        .dark-theme .text-muted {
+            color: #a0aec0 !important;
+        }
+        
+        .dark-theme .table {
+            color: #e2e8f0 !important;
+            background-color: #2d3748 !important;
+        }
+        
+        .dark-theme .table-hover tbody tr:hover {
+            background-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        /* Enhanced dark theme readability */
+        .dark-theme * {
+            color: inherit !important;
+        }
+        
+        .dark-theme h1, .dark-theme h2, .dark-theme h3, 
+        .dark-theme h4, .dark-theme h5, .dark-theme h6 {
+            color: #ffffff !important;
+        }
+        
+        .dark-theme p, .dark-theme span, .dark-theme div {
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .btn {
+            color: #ffffff !important;
+        }
+        
+        .dark-theme .form-control, .dark-theme .form-select {
+            background-color: #4a5568 !important;
+            border-color: #6b7280 !important;
+            color: #ffffff !important;
+        }
+        
+        .dark-theme .form-control:focus, .dark-theme .form-select:focus {
+            background-color: #4a5568 !important;
+            border-color: #3b82f6 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+        }
+        
+        .dark-theme .modal-content {
+            background-color: #2d3748 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .modal-header {
+            background-color: #1a202c !important;
+            border-bottom-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .modal-body {
+            background-color: #2d3748 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .modal-footer {
+            background-color: #1a202c !important;
+            border-top-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        /* Force light theme for better accessibility */
+        .force-light-theme {
+            background-color: #ffffff !important;
+            color: #1f2937 !important;
+        }
+        
+        .force-light-theme * {
+            color: inherit !important;
+        }
+        
+        .force-light-theme .card {
+            background-color: #ffffff !important;
+            border-color: #e5e7eb !important;
+            color: #1f2937 !important;
+        }
+        
+        .force-light-theme .card-header {
+            background-color: #f9fafb !important;
+            border-bottom-color: #e5e7eb !important;
+            color: #1f2937 !important;
+        }
+        
+        .force-light-theme .card-body {
+            background-color: #ffffff !important;
+            color: #1f2937 !important;
+        }
+        
+        .dark-theme .modal-content {
+            background-color: #2d3748 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .modal-header {
+            background-color: #1a202c !important;
+            border-bottom-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .modal-body {
+            background-color: #2d3748 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .form-control {
+            background-color: #4a5568 !important;
+            border-color: #718096 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .form-control:focus {
+            background-color: #4a5568 !important;
+            border-color: #63b3ed !important;
+            color: #e2e8f0 !important;
+            box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25) !important;
+        }
+        
+        .dark-theme .form-select {
+            background-color: #4a5568 !important;
+            border-color: #718096 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .form-select:focus {
+            background-color: #4a5568 !important;
+            border-color: #63b3ed !important;
+            color: #e2e8f0 !important;
+            box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25) !important;
+        }
+        
+        /* Light Mode - Ensure Good Contrast */
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        
+        .card {
+            background-color: #ffffff;
+            border-color: #dee2e6;
+            color: #212529;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom-color: #dee2e6;
+            color: #212529;
+        }
+        
+        .card-body {
+            background-color: #ffffff;
+            color: #212529;
+        }
+        
+        .text-gray-800 {
+            color: #212529 !important;
+        }
+        
+        .text-gray-300 {
+            color: #6c757d !important;
+        }
+        
+        .text-muted {
+            color: #6c757d !important;
+        }
+        
+        /* Dark Mode Support - Improved Contrast */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+                color: #e2e8f0;
+            }
+            
+            .card {
+                background-color: #2d3748;
+                border-color: #4a5568;
+                color: #e2e8f0;
+            }
+            
+            .card-header {
+                background-color: #1a202c;
+                border-bottom-color: #4a5568;
+                color: #e2e8f0;
+            }
+            
+            .card-body {
+                background-color: #2d3748;
+                color: #e2e8f0;
+            }
+            
+            .table {
+                color: #e2e8f0;
+                background-color: #2d3748;
+            }
+            
+            .table-hover tbody tr:hover {
+                background-color: #4a5568;
+                color: #e2e8f0;
+            }
+            
+            .text-muted {
+                color: #a0aec0 !important;
+            }
+            
+            .text-gray-800 {
+                color: #e2e8f0 !important;
+            }
+            
+            .text-gray-300 {
+                color: #a0aec0 !important;
+            }
+            
+            .border-left-primary {
+                border-left-color: #63b3ed !important;
+            }
+            
+            .border-left-success {
+                border-left-color: #68d391 !important;
+            }
+            
+            .border-left-info {
+                border-left-color: #63b3ed !important;
+            }
+            
+            .border-left-warning {
+                border-left-color: #f6e05e !important;
+            }
+            
+            .btn-outline-primary {
+                color: #63b3ed;
+                border-color: #63b3ed;
+            }
+            
+            .btn-outline-primary:hover {
+                background-color: #63b3ed;
+                color: #1a202c;
+            }
+            
+            .btn-outline-success {
+                color: #68d391;
+                border-color: #68d391;
+            }
+            
+            .btn-outline-success:hover {
+                background-color: #68d391;
+                color: #1a202c;
+            }
+            
+            .btn-outline-info {
+                color: #63b3ed;
+                border-color: #63b3ed;
+            }
+            
+            .btn-outline-info:hover {
+                background-color: #63b3ed;
+                color: #1a202c;
+            }
+            
+            .btn-outline-warning {
+                color: #f6e05e;
+                border-color: #f6e05e;
+            }
+            
+            .btn-outline-warning:hover {
+                background-color: #f6e05e;
+                color: #1a202c;
+            }
+            
+            .modal-content {
+                background-color: #2d3748;
+                color: #e2e8f0;
+            }
+            
+            .modal-header {
+                background-color: #1a202c;
+                border-bottom-color: #4a5568;
+                color: #e2e8f0;
+            }
+            
+            .modal-body {
+                background-color: #2d3748;
+                color: #e2e8f0;
+            }
+            
+            .form-control {
+                background-color: #4a5568;
+                border-color: #718096;
+                color: #e2e8f0;
+            }
+            
+            .form-control:focus {
+                background-color: #4a5568;
+                border-color: #63b3ed;
+                color: #e2e8f0;
+                box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25);
+            }
+            
+            .form-select {
+                background-color: #4a5568;
+                border-color: #718096;
+                color: #e2e8f0;
+            }
+            
+            .form-select:focus {
+                background-color: #4a5568;
+                border-color: #63b3ed;
+                color: #e2e8f0;
+                box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25);
+            }
+            
+            .alert {
+                background-color: #2d3748;
+                border-color: #4a5568;
+                color: #e2e8f0;
+            }
+            
+            .alert-success {
+                background-color: #22543d;
+                border-color: #38a169;
+                color: #c6f6d5;
+            }
+            
+            .alert-warning {
+                background-color: #744210;
+                border-color: #d69e2e;
+                color: #faf089;
+            }
+            
+            .alert-info {
+                background-color: #2a4365;
+                border-color: #3182ce;
+                color: #bee3f8;
+            }
+            
+            .alert-danger {
+                background-color: #742a2a;
+                border-color: #e53e3e;
+                color: #fed7d7;
+            }
+        }
+        
+        /* Accessibility Improvements */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .focus-visible {
+            outline: 2px solid #3182ce;
+            outline-offset: 2px;
+        }
+        
+        /* High Contrast Mode */
+        @media (prefers-contrast: high) {
+            .btn {
+                border-width: 2px;
+            }
+            
+            .card {
+                border-width: 2px;
+            }
+            
+            .table th,
+            .table td {
+                border-width: 2px;
+            }
+        }
+        
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .btn,
+            .modal,
+            .navbar {
+                display: none !important;
+            }
+            
+            .card {
+                border: 1px solid #000;
+                box-shadow: none;
+            }
+            
+            .container-fluid {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Skip Navigation Link for Accessibility -->
+    <a href="#main-content" class="sr-only sr-only-focusable btn btn-primary position-absolute" style="top: 10px; left: 10px; z-index: 9999;">
+        Skip to main content
+    </a>
+    
+    <!-- Company Admin Header -->
+    <header class="admin-header" role="banner">
+        <nav class="navbar navbar-expand-lg navbar-dark" role="navigation" aria-label="Main navigation">
+            <div class="container-fluid">
+                <a class="navbar-brand admin-brand" href="{% url 'core:company_dashboard' %}">
+                    <i class="fas fa-building me-2"></i>
+                    ProjectManager Pro
+                    <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">Company Admin</small>
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="adminNavbar">
+                    <ul class="navbar-nav me-auto">
+                        <!-- Dashboard Link -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:company_dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        <!-- Theme Toggle Button -->
+                        <li class="nav-item">
+                            <button class="btn btn-outline-light btn-sm" id="themeToggle" title="Toggle Theme">
+                                <i class="fas fa-sun" id="themeIcon"></i>
+                            </button>
+                        </li>
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle admin-user-info" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-shield me-2"></i>{{ user.username }}
+                                <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">Company Admin</small>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'core:company_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:import_employees' %}"><i class="fas fa-file-import me-2"></i>Import Employees</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:license_activation' %}"><i class="fas fa-key me-2"></i>License Activation</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'core:user_preferences' %}"><i class="fas fa-user me-2"></i>Profile Settings</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:company_profile' %}"><i class="fas fa-cog me-2"></i>Company Settings</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:billing_subscriptions' %}"><i class="fas fa-dollar-sign me-2"></i>Billing & Subscriptions</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'core:notification_center' %}"><i class="fas fa-bell me-2"></i>Notifications</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:support_tickets' %}"><i class="fas fa-question-circle me-2"></i>Help & Support</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-mobile-alt me-2"></i>Mobile App</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'core:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h5 class="sidebar-title">
+                <i class="fas fa-building me-2"></i>Menu
+            </h5>
+            <div class="d-flex gap-1">
+                <button class="btn btn-sm btn-outline-light" onclick="forceLightTheme()" title="Fix Text Visibility">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-light" onclick="toggleSidebar()" title="Close Menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="sidebar-content">
+            <!-- Dashboard -->
+            <div class="sidebar-section">
+                <a href="{% url 'core:company_dashboard' %}" class="sidebar-item">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            </div>
+            
+            <!-- Team Management -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('team')">
+                        <i class="fas fa-users me-2"></i>Team Management
+                        <i class="fas fa-chevron-down ms-auto" id="team-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="team-content">
+                        <a href="{% url 'core:import_employees' %}" class="sidebar-subitem">
+                            <i class="fas fa-file-import me-2"></i>Import Employees
+                        </a>
+                        <a href="{% url 'core:employee_directory' %}" class="sidebar-subitem">
+                            <i class="fas fa-users me-2"></i>Employee Directory
+                        </a>
+                        <a href="{% url 'core:department_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-building me-2"></i>Department Management
+                        </a>
+                        <a href="{% url 'core:team_performance' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-line me-2"></i>Team Performance
+                        </a>
+                        <a href="{% url 'core:employee_onboarding' %}" class="sidebar-subitem">
+                            <i class="fas fa-user-plus me-2"></i>Employee Onboarding
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Performance Management -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('performance')">
+                        <i class="fas fa-trophy me-2"></i>Performance Management
+                        <i class="fas fa-chevron-down ms-auto" id="performance-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="performance-content">
+                        <a href="{% url 'core:performance_dashboard' %}" class="sidebar-subitem">
+                            <i class="fas fa-tachometer-alt me-2"></i>Performance Dashboard
+                        </a>
+                        <a href="{% url 'core:performance_reviews' %}" class="sidebar-subitem">
+                            <i class="fas fa-clipboard-check me-2"></i>Performance Reviews
+                        </a>
+                        <a href="{% url 'core:performance_goals' %}" class="sidebar-subitem">
+                            <i class="fas fa-bullseye me-2"></i>Performance Goals
+                        </a>
+                        <a href="{% url 'core:performance_feedback' %}" class="sidebar-subitem">
+                            <i class="fas fa-comments me-2"></i>360° Feedback
+                        </a>
+                        <a href="{% url 'core:performance_reports' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-bar me-2"></i>Performance Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Attendance Management -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('attendance')">
+                        <i class="fas fa-clock me-2"></i>Attendance Management
+                        <i class="fas fa-chevron-down ms-auto" id="attendance-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="attendance-content">
+                        <a href="{% url 'core:attendance_dashboard' %}" class="sidebar-subitem">
+                            <i class="fas fa-tachometer-alt me-2"></i>Attendance Dashboard
+                        </a>
+                        <a href="{% url 'core:attendance_records' %}" class="sidebar-subitem">
+                            <i class="fas fa-calendar-check me-2"></i>Attendance Records
+                        </a>
+                        <a href="{% url 'core:leave_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-calendar-times me-2"></i>Leave Management
+                        </a>
+                        <a href="{% url 'core:timesheet_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-stopwatch me-2"></i>Timesheet Management
+                        </a>
+                        <a href="{% url 'core:shift_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-calendar-alt me-2"></i>Shift Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notification Management -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('notifications')">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                        <i class="fas fa-chevron-down ms-auto" id="notifications-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="notifications-content">
+                        <a href="{% url 'core:notification_center' %}" class="sidebar-subitem">
+                            <i class="fas fa-inbox me-2"></i>Notification Center
+                        </a>
+                        <a href="{% url 'core:create_notification' %}" class="sidebar-subitem">
+                            <i class="fas fa-plus-circle me-2"></i>Create Notification
+                        </a>
+                        <a href="{% url 'core:notification_templates' %}" class="sidebar-subitem">
+                            <i class="fas fa-file-alt me-2"></i>Notification Templates
+                        </a>
+                        <a href="{% url 'core:notification_preferences' %}" class="sidebar-subitem">
+                            <i class="fas fa-cog me-2"></i>Notification Preferences
+                        </a>
+                        <a href="{% url 'core:notification_digests' %}" class="sidebar-subitem">
+                            <i class="fas fa-envelope-open-text me-2"></i>Notification Digests
+                        </a>
+                        <a href="{% url 'core:notification_analytics' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-line me-2"></i>Notification Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Onboarding Management -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('onboarding')">
+                        <i class="fas fa-user-plus me-2"></i>Onboarding
+                        <i class="fas fa-chevron-down ms-auto" id="onboarding-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="onboarding-content">
+                        <a href="{% url 'core:onboarding_dashboard' %}" class="sidebar-subitem">
+                            <i class="fas fa-tachometer-alt me-2"></i>Onboarding Dashboard
+                        </a>
+                        <a href="{% url 'core:onboarding_workflows' %}" class="sidebar-subitem">
+                            <i class="fas fa-sitemap me-2"></i>Workflow Templates
+                        </a>
+                        <a href="{% url 'core:onboarding_assignments' %}" class="sidebar-subitem">
+                            <i class="fas fa-tasks me-2"></i>Assignments
+                        </a>
+                        <a href="{% url 'core:onboarding_tasks' %}" class="sidebar-subitem">
+                            <i class="fas fa-clipboard-list me-2"></i>Tasks
+                        </a>
+                        <a href="{% url 'core:onboarding_documents' %}" class="sidebar-subitem">
+                            <i class="fas fa-file-alt me-2"></i>Documents
+                        </a>
+                        <a href="{% url 'core:onboarding_assign_workflow' %}" class="sidebar-subitem">
+                            <i class="fas fa-plus-circle me-2"></i>Assign Workflow
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Document Management -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('documents')">
+                        <i class="fas fa-file-alt me-2"></i>Documents
+                        <i class="fas fa-chevron-down ms-auto" id="documents-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="documents-content">
+                        <a href="{% url 'core:document_library' %}" class="sidebar-subitem">
+                            <i class="fas fa-folder-open me-2"></i>Document Library
+                        </a>
+                        <a href="{% url 'core:upload_document' %}" class="sidebar-subitem">
+                            <i class="fas fa-upload me-2"></i>Upload Document
+                        </a>
+                        <a href="{% url 'core:document_categories' %}" class="sidebar-subitem">
+                            <i class="fas fa-tags me-2"></i>Categories
+                        </a>
+                        <a href="{% url 'core:document_templates' %}" class="sidebar-subitem">
+                            <i class="fas fa-file-code me-2"></i>Templates
+                        </a>
+                        <a href="{% url 'core:document_sharing' %}" class="sidebar-subitem">
+                            <i class="fas fa-share-alt me-2"></i>Sharing
+                        </a>
+                        <a href="{% url 'core:document_analytics' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-bar me-2"></i>Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Project Management -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('projects')">
+                        <i class="fas fa-project-diagram me-2"></i>Projects
+                        <i class="fas fa-chevron-down ms-auto" id="projects-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="projects-content">
+                        <a href="{% url 'core:project_list' %}" class="sidebar-subitem">
+                            <i class="fas fa-list me-2"></i>All Projects
+                        </a>
+                        <a href="{% url 'core:task_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-tasks me-2"></i>Task Management
+                        </a>
+                        <a href="{% url 'core:project_analytics' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-bar me-2"></i>Project Analytics
+                        </a>
+                        <a href="{% url 'core:resource_planning' %}" class="sidebar-subitem">
+                            <i class="fas fa-users-cog me-2"></i>Resource Planning
+                        </a>
+                        <a href="{% url 'core:project_templates' %}" class="sidebar-subitem">
+                            <i class="fas fa-file-alt me-2"></i>Project Templates
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Company Management -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('company')">
+                        <i class="fas fa-building me-2"></i>Company
+                        <i class="fas fa-chevron-down ms-auto" id="company-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="company-content">
+                        <a href="{% url 'core:company_profile' %}" class="sidebar-subitem">
+                            <i class="fas fa-building me-2"></i>Company Profile
+                        </a>
+                        <a href="{% url 'core:billing_subscriptions' %}" class="sidebar-subitem">
+                            <i class="fas fa-credit-card me-2"></i>Billing & Subscriptions
+                        </a>
+                        <a href="{% url 'core:company_system_settings' %}" class="sidebar-subitem">
+                            <i class="fas fa-cog me-2"></i>System Settings
+                        </a>
+                        <a href="{% url 'core:user_preferences' %}" class="sidebar-subitem">
+                            <i class="fas fa-user-cog me-2"></i>User Preferences
+                        </a>
+                        <a href="{% url 'core:company_policies' %}" class="sidebar-subitem">
+                            <i class="fas fa-file-contract me-2"></i>Company Policies
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Communication -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('communication')">
+                        <i class="fas fa-comments me-2"></i>Communication
+                        <i class="fas fa-chevron-down ms-auto" id="communication-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="communication-content">
+                        <a href="{% url 'core:internal_messaging' %}" class="sidebar-subitem">
+                            <i class="fas fa-envelope me-2"></i>Internal Messaging
+                        </a>
+                        <a href="{% url 'core:video_meetings' %}" class="sidebar-subitem">
+                            <i class="fas fa-video me-2"></i>Video Meetings
+                        </a>
+                        <a href="{% url 'core:team_chat' %}" class="sidebar-subitem">
+                            <i class="fas fa-comment-dots me-2"></i>Team Chat
+                        </a>
+                        <a href="{% url 'core:meeting_scheduler' %}" class="sidebar-subitem">
+                            <i class="fas fa-calendar-alt me-2"></i>Meeting Scheduler
+                        </a>
+                        <a href="{% url 'core:announcements' %}" class="sidebar-subitem">
+                            <i class="fas fa-bullhorn me-2"></i>Announcements
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Documents -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('documents')">
+                        <i class="fas fa-folder-open me-2"></i>Documents
+                        <i class="fas fa-chevron-down ms-auto" id="documents-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="documents-content">
+                        <a href="{% url 'core:file_sharing' %}" class="sidebar-subitem">
+                            <i class="fas fa-share-alt me-2"></i>File Sharing
+                        </a>
+                        <a href="{% url 'core:version_control' %}" class="sidebar-subitem">
+                            <i class="fas fa-code-branch me-2"></i>Version Control
+                        </a>
+                        <a href="{% url 'core:document_templates' %}" class="sidebar-subitem">
+                            <i class="fas fa-file-alt me-2"></i>Document Templates
+                        </a>
+                        <a href="{% url 'core:document_analytics' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-bar me-2"></i>Document Analytics
+                        </a>
+                        <a href="{% url 'core:archive_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-archive me-2"></i>Archive Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- HR & Payroll -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('hr')">
+                        <i class="fas fa-user-tie me-2"></i>HR & Payroll
+                        <i class="fas fa-chevron-down ms-auto" id="hr-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="hr-content">
+                        <a href="{% url 'core:attendance_tracking' %}" class="sidebar-subitem">
+                            <i class="fas fa-clock me-2"></i>Attendance Tracking
+                        </a>
+                        <a href="{% url 'core:leave_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-calendar-times me-2"></i>Leave Management
+                        </a>
+                        <a href="{% url 'core:payroll_processing' %}" class="sidebar-subitem">
+                            <i class="fas fa-money-bill-wave me-2"></i>Payroll Processing
+                        </a>
+                        <a href="{% url 'core:performance_reviews' %}" class="sidebar-subitem">
+                            <i class="fas fa-star me-2"></i>Performance Reviews
+                        </a>
+                        <a href="{% url 'core:employee_benefits' %}" class="sidebar-subitem">
+                            <i class="fas fa-gift me-2"></i>Employee Benefits
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customers -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('customers')">
+                        <i class="fas fa-users me-2"></i>Customers
+                        <i class="fas fa-chevron-down ms-auto" id="customers-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="customers-content">
+                        <a href="{% url 'core:crm_dashboard' %}" class="sidebar-subitem">
+                            <i class="fas fa-users me-2"></i>CRM Dashboard
+                        </a>
+                        <a href="{% url 'core:support_tickets' %}" class="sidebar-subitem">
+                            <i class="fas fa-ticket-alt me-2"></i>Support Tickets
+                        </a>
+                        <a href="{% url 'core:client_portal' %}" class="sidebar-subitem">
+                            <i class="fas fa-user-circle me-2"></i>Client Portal
+                        </a>
+                        <a href="{% url 'core:customer_analytics' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-line me-2"></i>Customer Analytics
+                        </a>
+                        <a href="{% url 'core:contact_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-address-book me-2"></i>Contact Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inventory -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('inventory')">
+                        <i class="fas fa-boxes me-2"></i>Inventory
+                        <i class="fas fa-chevron-down ms-auto" id="inventory-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="inventory-content">
+                        <a href="{% url 'core:asset_tracking' %}" class="sidebar-subitem">
+                            <i class="fas fa-boxes me-2"></i>Asset Tracking
+                        </a>
+                        <a href="{% url 'core:procurement_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-shopping-cart me-2"></i>Procurement Management
+                        </a>
+                        <a href="{% url 'core:maintenance_scheduling' %}" class="sidebar-subitem">
+                            <i class="fas fa-tools me-2"></i>Maintenance Scheduling
+                        </a>
+                        <a href="{% url 'core:inventory_reports' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-bar me-2"></i>Inventory Reports
+                        </a>
+                        <a href="{% url 'core:asset_analytics' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-line me-2"></i>Asset Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reports -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('reports')">
+                        <i class="fas fa-chart-line me-2"></i>Reports
+                        <i class="fas fa-chevron-down ms-auto" id="reports-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="reports-content">
+                        <a href="{% url 'core:dashboard_analytics' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-line me-2"></i>Dashboard Analytics
+                        </a>
+                        <a href="{% url 'core:company_custom_reports' %}" class="sidebar-subitem">
+                            <i class="fas fa-file-alt me-2"></i>Custom Reports
+                        </a>
+                        <a href="{% url 'core:data_export' %}" class="sidebar-subitem">
+                            <i class="fas fa-download me-2"></i>Data Export
+                        </a>
+                        <a href="{% url 'core:performance_metrics' %}" class="sidebar-subitem">
+                            <i class="fas fa-tachometer-alt me-2"></i>Performance Metrics
+                        </a>
+                        <a href="{% url 'core:business_intelligence' %}" class="sidebar-subitem">
+                            <i class="fas fa-brain me-2"></i>Business Intelligence
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('security')">
+                        <i class="fas fa-shield-alt me-2"></i>Security
+                        <i class="fas fa-chevron-down ms-auto" id="security-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="security-content">
+                        <a href="{% url 'core:audit_logs' %}" class="sidebar-subitem">
+                            <i class="fas fa-clipboard-list me-2"></i>Audit Logs
+                        </a>
+                        <a href="{% url 'core:data_protection' %}" class="sidebar-subitem">
+                            <i class="fas fa-shield-alt me-2"></i>Data Protection
+                        </a>
+                        <a href="{% url 'core:compliance_reports' %}" class="sidebar-subitem">
+                            <i class="fas fa-file-alt me-2"></i>Compliance Reports
+                        </a>
+                        <a href="{% url 'core:company_security_settings' %}" class="sidebar-subitem">
+                            <i class="fas fa-cog me-2"></i>Security Settings
+                        </a>
+                        <a href="{% url 'core:access_control' %}" class="sidebar-subitem">
+                            <i class="fas fa-user-lock me-2"></i>Access Control
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Integrations -->
+            <div class="sidebar-section">
+                <div class="sidebar-group">
+                    <div class="sidebar-group-header" onclick="toggleGroup('integrations')">
+                        <i class="fas fa-plug me-2"></i>Integrations
+                        <i class="fas fa-chevron-down ms-auto" id="integrations-chevron"></i>
+                    </div>
+                    <div class="sidebar-group-content" id="integrations-content">
+                        <a href="{% url 'core:third_party_integrations' %}" class="sidebar-subitem">
+                            <i class="fas fa-plug me-2"></i>Third-party Integrations
+                        </a>
+                        <a href="{% url 'core:api_management' %}" class="sidebar-subitem">
+                            <i class="fas fa-code me-2"></i>API Management
+                        </a>
+                        <a href="{% url 'core:webhook_configuration' %}" class="sidebar-subitem">
+                            <i class="fas fa-link me-2"></i>Webhook Configuration
+                        </a>
+                        <a href="{% url 'core:integration_analytics' %}" class="sidebar-subitem">
+                            <i class="fas fa-chart-line me-2"></i>Integration Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content" role="main">
+        <!-- Top Control Buttons -->
+        <div class="d-flex justify-content-between align-items-start">
+            <!-- Left Corner - Menu Button -->
+            <div class="control-buttons-left">
+                <button class="btn btn-outline-primary btn-sm" onclick="toggleSidebar()" title="Toggle Menu">
+                    <i class="fas fa-bars me-1"></i>Menu
+                </button>
+            </div>
+            
+            <!-- Right Corner - Theme Button -->
+            <div class="control-buttons-right">
+                <button class="btn btn-outline-secondary btn-sm" onclick="toggleTheme()" title="Toggle Theme">
+                    <i class="fas fa-moon me-1" id="theme-icon"></i>Theme
+                </button>
+            </div>
+        </div>
+        
+        <!-- Page Title and Actions -->
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-1 pb-1 mb-2 border-bottom">
+            <h1 class="h2">{% block page_title %}Company Dashboard{% endblock %}</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                {% block page_actions %}{% endblock %}
+            </div>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <div class="container-fluid px-3 pt-0 universal-readability-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Company Admin Footer -->
+    <footer class="admin-footer mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-building me-2"></i>{% if user.company_admin_profile %}{{ user.company_admin_profile.company.name }}{% else %}Company Name{% endif %}</h5>
+                    <p class="mb-0">Company Admin Dashboard - ProjectManager Pro</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-2">
+                        <small>Admin: {{ user.get_full_name|default:user.username }}</small>
+                    </div>
+                    <div>
+                        <small>&copy; 2024 ProjectManager Pro. All rights reserved.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Enhanced Menu Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set active menu item based on current URL
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Enhanced dropdown interactions
+            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            dropdownToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const dropdown = this.nextElementSibling;
+                    const isOpen = dropdown.classList.contains('show');
+                    
+                    // Close all other dropdowns
+                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                        if (menu !== dropdown) {
+                            menu.classList.remove('show');
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    if (!isOpen) {
+                        dropdown.classList.add('show');
+                    }
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                }
+            });
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    // Only proceed if href is not just '#'
+                    if (href && href !== '#') {
+                        const target = document.querySelector(href);
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Theme toggle functionality
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+        });
+        
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        }
+        
+        function applyTheme(theme) {
+            const themeIcon = document.getElementById('theme-icon');
+            const body = document.body;
+            
+            if (theme === 'dark') {
+                body.classList.add('dark-theme');
+                body.classList.remove('light-theme');
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                body.classList.add('light-theme');
+                body.classList.remove('dark-theme');
+                themeIcon.className = 'fas fa-moon';
+            }
+        }
+        
+        // Sidebar functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const mainContent = document.getElementById('main-content');
+            const header = document.querySelector('.admin-header');
+            const footer = document.querySelector('footer');
+            
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+            
+            // On desktop, adjust main content, header, and footer margins
+            if (window.innerWidth > 768) {
+                mainContent.classList.toggle('sidebar-open');
+                if (header) header.classList.toggle('sidebar-open');
+                if (footer) footer.classList.toggle('sidebar-open');
+            }
+        }
+        
+        function toggleGroup(groupName) {
+            const content = document.getElementById(groupName + '-content');
+            const chevron = document.getElementById(groupName + '-chevron');
+            
+            content.classList.toggle('show');
+            
+            if (content.classList.contains('show')) {
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const hamburgerBtn = event.target.closest('[onclick="toggleSidebar()"]');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !hamburgerBtn && 
+                sidebar.classList.contains('show')) {
+                toggleSidebar();
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const header = document.querySelector('.admin-header');
+            const footer = document.querySelector('footer');
+            
+            if (window.innerWidth > 768) {
+                // Desktop: remove overlay, keep sidebar state
+                document.getElementById('sidebar-overlay').classList.remove('show');
+                if (sidebar.classList.contains('show')) {
+                    mainContent.classList.add('sidebar-open');
+                    if (header) header.classList.add('sidebar-open');
+                    if (footer) footer.classList.add('sidebar-open');
+                }
+            } else {
+                // Mobile: remove margin adjustments
+                mainContent.classList.remove('sidebar-open');
+                if (header) header.classList.remove('sidebar-open');
+                if (footer) footer.classList.remove('sidebar-open');
+            }
+        });
+    </script>
+    
+    <!-- Company Admin Specific JS -->
+    <script src="{% static 'js/pages/company_admin.js' %}"></script>
+    <script src="{% static 'js/pages/company_crud.js' %}"></script>
+    <!-- Toast Utility -->
+    <script src="{% static 'js/utils/toast.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

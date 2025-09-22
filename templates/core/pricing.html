@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Project Management System{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/pricing.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Pricing Hero Section -->
+<section class="pricing-hero bg-gradient-primary text-white py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-4">Choose Your Perfect Plan</h1>
+                <p class="lead mb-4">
+                    Flexible pricing options designed to scale with your business needs. 
+                    Start with a free trial and upgrade anytime.
+                </p>
+                <div class="pricing-badges">
+                    <span class="badge bg-success me-2">
+                        <i class="fas fa-check me-1"></i>14-day free trial
+                    </span>
+                    <span class="badge bg-info me-2">
+                        <i class="fas fa-sync me-1"></i>Cancel anytime
+                    </span>
+                    <span class="badge bg-warning">
+                        <i class="fas fa-shield-alt me-1"></i>No setup fees
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Plans Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        {% if plans %}
+        <div class="row justify-content-center">
+            {% regroup plans by plan_type as plan_groups %}
+            {% for plan_group in plan_groups %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="pricing-card {% if plan_group.grouper == 'PROFESSIONAL' %}popular{% endif %} {% if plan_group.grouper == current_subscription_type %}current-plan{% endif %} {% if plan_group.grouper == 'FREE' and user.is_authenticated %}free-plan{% endif %}">
+                    <!-- Plan Header -->
+                    <div class="pricing-header">
+                        {% if plan_group.grouper == 'PROFESSIONAL' %}
+                        <div class="popular-badge">
+                            <i class="fas fa-star"></i> Most Popular
+                        </div>
+                        {% endif %}
+                        <div class="plan-icon">
+                            {% if plan_group.grouper == 'FREE' %}
+                                <i class="fas fa-gift"></i>
+                            {% elif plan_group.grouper == 'STARTER' %}
+                                <i class="fas fa-rocket"></i>
+                            {% elif plan_group.grouper == 'PROFESSIONAL' %}
+                                <i class="fas fa-briefcase"></i>
+                            {% elif plan_group.grouper == 'ENTERPRISE' %}
+                                <i class="fas fa-crown"></i>
+                            {% endif %}
+                        </div>
+                        <h3 class="plan-title">{{ plan_group.grouper }}</h3>
+                        <p class="plan-subtitle">
+                            {% if plan_group.grouper == 'FREE' %}
+                                Perfect for individuals and small teams
+                            {% elif plan_group.grouper == 'STARTER' %}
+                                Great for small teams and growing businesses
+                            {% elif plan_group.grouper == 'PROFESSIONAL' %}
+                                Perfect for growing businesses and teams
+                            {% elif plan_group.grouper == 'ENTERPRISE' %}
+                                For large organizations with advanced needs
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Billing Toggle -->
+                    <div class="billing-toggle">
+                        <div class="toggle-switch">
+                            {% for plan in plan_group.list %}
+                                {% if plan.billing_cycle == 'MONTHLY' or plan.billing_cycle == 'YEARLY' %}
+                                <label class="toggle-option {% if plan.billing_cycle == 'MONTHLY' %}active{% endif %}" data-plan-id="{{ plan.id }}">
+                                    <input type="radio" name="billing_{{ plan_group.grouper }}" value="{{ plan.billing_cycle }}" {% if plan.billing_cycle == 'MONTHLY' %}checked{% endif %}>
+                                    <span class="toggle-label">{{ plan.get_billing_cycle_display }}</span>
+                                </label>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Pricing Display -->
+                    <div class="pricing-display">
+                        {% for plan in plan_group.list %}
+                            {% if plan.billing_cycle == 'MONTHLY' or plan.billing_cycle == 'YEARLY' %}
+                            <div class="price-section {% if plan.billing_cycle == 'MONTHLY' %}active{% endif %}" data-plan="{{ plan.billing_cycle }}">
+                                <div class="price-amount">
+                                    <span class="currency">$</span>
+                                    <span class="amount">{{ plan.price|floatformat:0 }}</span>
+                                </div>
+                                <div class="price-period">Billed {{ plan.get_billing_cycle_display|lower }}</div>
+                                {% if plan.billing_cycle == 'YEARLY' %}
+                                <div class="savings-badge">
+                                    <i class="fas fa-gift"></i> Save ${{ plan.annual_savings }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Features -->
+                    <div class="features-section">
+                        <div class="features-header">
+                            <h4 class="features-title">
+                                <i class="fas fa-gem me-2"></i>Features
+                            </h4>
+                        </div>
+                        <div class="features-list">
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>{{ plan_group.list.0.max_users }} Users</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>{{ plan_group.list.0.max_projects }} Projects</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>{{ plan_group.list.0.max_storage_gb }}GB Storage</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>{{ plan_group.list.0.max_api_calls }} API Calls</span>
+                            </div>
+                            {% if plan_group.grouper == 'STARTER' or plan_group.grouper == 'PROFESSIONAL' or plan_group.grouper == 'ENTERPRISE' %}
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Email Support</span>
+                            </div>
+                            {% endif %}
+                            {% if plan_group.grouper == 'PROFESSIONAL' or plan_group.grouper == 'ENTERPRISE' %}
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Priority Support</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Advanced Analytics</span>
+                            </div>
+                            {% endif %}
+                            {% if plan_group.grouper == 'ENTERPRISE' %}
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Custom Integrations</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>White Label</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Call to Action -->
+                    <div class="cta-section">
+                        {% if not user.is_authenticated %}
+                            <a href="{% url 'core:registration_selection' %}" class="cta-button">
+                                <i class="fas fa-rocket me-2"></i>Start Free Trial
+                            </a>
+                        {% else %}
+                            {% if plan_group.grouper == current_subscription_type %}
+                                <div class="current-plan-badge">
+                                    <i class="fas fa-check-circle me-2"></i>Current Plan
+                                </div>
+                            {% elif plan_group.grouper == 'FREE' %}
+                                <div class="free-plan-info">
+                                    <i class="fas fa-info-circle me-2"></i>Already Included
+                                </div>
+                            {% else %}
+                                <a href="{% url 'core:payment' %}?plan={{ plan_group.grouper }}" class="cta-button">
+                                    <i class="fas fa-arrow-right me-2"></i>Upgrade to {{ plan_group.grouper }}
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Highlighted Feature -->
+                    <div class="highlighted-feature">
+                        <i class="fas fa-check-circle me-2"></i>
+                        {% if plan_group.grouper == 'FREE' %}
+                            Community Support
+                        {% elif plan_group.grouper == 'STARTER' %}
+                            Email Support
+                        {% elif plan_group.grouper == 'PROFESSIONAL' %}
+                            Priority Support
+                        {% elif plan_group.grouper == 'ENTERPRISE' %}
+                            24/7 Priority Support
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- No Plans -->
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="no-plans-card">
+                    <div class="no-plans-content">
+                        <i class="fas fa-credit-card fa-3x mb-4"></i>
+                        <h3 class="text-dark mb-3">Subscription plans coming soon!</h3>
+                        <p class="text-muted mb-4">We're working on exciting pricing options for you.</p>
+                        <a href="{% url 'core:home' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-home me-2"></i>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- FAQ Section -->
+        <div class="row mt-5">
+            <div class="col-lg-8 mx-auto">
+                <h3 class="text-center mb-4">Frequently Asked Questions</h3>
+                <div class="accordion" id="pricingFAQ">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq1">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                                Can I change my plan anytime?
+                            </button>
+                        </h2>
+                        <div id="collapse1" class="accordion-collapse collapse show" aria-labelledby="faq1" data-bs-parent="#pricingFAQ">
+                            <div class="accordion-body">
+                                Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing differences.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq2">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+                                Is there a free trial?
+                            </button>
+                        </h2>
+                        <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#pricingFAQ">
+                            <div class="accordion-body">
+                                Absolutely! All plans come with a 14-day free trial. No credit card required to get started.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq3">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                                What payment methods do you accept?
+                            </button>
+                        </h2>
+                        <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#pricingFAQ">
+                            <div class="accordion-body">
+                                We accept all major credit cards, PayPal, and bank transfers for annual plans. All payments are processed securely.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq4">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+                                Can I cancel anytime?
+                            </button>
+                        </h2>
+                        <div id="collapse4" class="accordion-collapse collapse" aria-labelledby="faq4" data-bs-parent="#pricingFAQ">
+                            <div class="accordion-body">
+                                Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact CTA -->
+        <div class="row mt-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="contact-cta">
+                    <h4 class="mb-3">Still have questions?</h4>
+                    <p class="text-muted mb-4">
+                        Our team is here to help you choose the right plan for your needs.
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="mailto:support@projectmanager.com" class="btn btn-primary btn-lg">
+                            <i class="fas fa-envelope me-2"></i>Contact Support
+                        </a>
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-home me-2"></i>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/pricing.js' %}"></script>
+{% endblock %}

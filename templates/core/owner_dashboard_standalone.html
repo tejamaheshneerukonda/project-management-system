@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - ProjectManager Pro</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Owner Dashboard CSS -->
+    <link href="{% static 'css/pages/owner.css' %}" rel="stylesheet">
+    
+    <style>
+        .owner-header {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .owner-sidebar {
+            background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+            border-right: 1px solid #e2e8f0;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .owner-nav-link {
+            color: #475569;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .owner-nav-link:hover {
+            background-color: rgba(30, 64, 175, 0.1);
+            color: #1e40af;
+            border-left-color: #1e40af;
+        }
+        
+        .owner-nav-link.active {
+            background-color: rgba(30, 64, 175, 0.15);
+            color: #1e40af;
+            border-left-color: #1e40af;
+            font-weight: 600;
+        }
+        
+        .owner-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .owner-user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: white;
+        }
+        
+        .owner-footer {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+        
+        .owner-stats-card {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .owner-stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .main-content {
+            margin-left: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                margin-left: 25%;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .main-content {
+                margin-left: 16.666667%;
+            }
+        }
+        
+        .border-left-primary {
+            border-left: 0.25rem solid #1e40af !important;
+        }
+        
+        .border-left-success {
+            border-left: 0.25rem solid #10b981 !important;
+        }
+        
+        .border-left-info {
+            border-left: 0.25rem solid #06b6d4 !important;
+        }
+        
+        .border-left-warning {
+            border-left: 0.25rem solid #f59e0b !important;
+        }
+        
+        .text-xs {
+            font-size: 0.7rem;
+        }
+        
+        .text-gray-300 {
+            color: #d1d5db !important;
+        }
+        
+        .text-gray-800 {
+            color: #1f2937 !important;
+        }
+        
+        .company-key {
+            background-color: #f3f4f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    {% load static %}
+    
+    <!-- Owner Header -->
+    <header class="owner-header">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand owner-brand" href="{% url 'core:owner_dashboard' %}">
+                    <i class="fas fa-crown me-2"></i>
+                    ProjectManager Pro
+                    <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">Owner Dashboard</small>
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ownerNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="ownerNavbar">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:owner_dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:register_company' %}">
+                                <i class="fas fa-building me-1"></i>Register Company
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:export_companies' %}">
+                                <i class="fas fa-download me-1"></i>Export Data
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle owner-user-info" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-crown me-2"></i>{{ user.get_full_name|default:user.username }}
+                                <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">
+                                    {% if owner_profile.phone %}
+                                        System Owner • {{ owner_profile.phone }}
+                                    {% else %}
+                                        System Owner
+                                    {% endif %}
+                                </small>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'core:owner_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:register_company' %}"><i class="fas fa-building me-2"></i>Register Company</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'core:user_preferences' %}"><i class="fas fa-user me-2"></i>Profile Settings</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:owner_system_settings' %}"><i class="fas fa-cog me-2"></i>System Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'core:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Owner Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block owner-sidebar sidebar collapse" id="ownerSidebar">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <div class="owner-stats-card p-3">
+                            <h6 class="text-primary mb-1">System Overview</h6>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="h6 mb-0 text-primary">{{ total_companies|default:"0" }}</div>
+                                    <small class="text-muted">Companies</small>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h6 mb-0 text-success">{{ active_companies|default:"0" }}</div>
+                                    <small class="text-muted">Active</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Management</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link owner-nav-link active" href="{% url 'core:owner_dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link owner-nav-link" href="{% url 'core:register_company' %}">
+                                <i class="fas fa-building me-2"></i>Register Company
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link owner-nav-link" href="{% url 'core:export_companies' %}">
+                                <i class="fas fa-download me-2"></i>Export Companies
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Analytics</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link owner-nav-link" href="{% url 'core:revenue_reports' %}">
+                                <i class="fas fa-chart-bar me-2"></i>Revenue Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link owner-nav-link" href="{% url 'core:growth_analytics' %}">
+                                <i class="fas fa-chart-line me-2"></i>Growth Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link owner-nav-link" href="{% url 'core:user_stats' %}">
+                                <i class="fas fa-users me-2"></i>User Statistics
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>System</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link owner-nav-link" href="{% url 'core:owner_system_settings' %}">
+                                <i class="fas fa-cog me-2"></i>System Settings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link owner-nav-link" href="{% url 'core:owner_security_settings' %}">
+                                <i class="fas fa-shield-alt me-2"></i>Security
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link owner-nav-link" href="{% url 'core:backup_restore' %}">
+                                <i class="fas fa-database me-2"></i>Backup & Restore
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Owner Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="{% url 'core:register_company' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Register Company
+                        </a>
+                    </div>
+                </div>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Companies</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_companies }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-building fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Active Companies</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_companies }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Users</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_users|default:"0" }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Monthly Revenue</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ monthly_revenue|default:"0" }}</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Dashboard Widgets -->
+                <div class="row mb-4">
+                    <!-- Notifications Widget -->
+                    <div class="col-xl-6 col-lg-12 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-bell me-2"></i>System Notifications
+                                </h6>
+                                <span class="badge bg-danger" id="notificationCount">0</span>
+                            </div>
+                            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                <div id="notificationsList">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading notifications...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Performance Widget -->
+                    <div class="col-xl-6 col-lg-12 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-tachometer-alt me-2"></i>System Performance
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">CPU Usage</div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-primary" id="cpuProgress" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="cpuText">0%</small>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Memory Usage</div>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" id="memoryProgress" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="memoryText">0%</small>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Active Sessions</div>
+                                        <div class="h6 mb-0 font-weight-bold text-gray-800" id="activeSessions">0</div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Response Time</div>
+                                        <div class="h6 mb-0 font-weight-bold text-gray-800" id="responseTime">0ms</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subscription & API Overview -->
+                <div class="row mb-4">
+                    <!-- Subscription Overview Widget -->
+                    <div class="col-xl-8 col-lg-12 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-credit-card me-2"></i>Subscription Overview
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-3">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Active</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="activeSubscriptions">0</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Trial</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="trialSubscriptions">0</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Expired</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="expiredSubscriptions">0</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Monthly Revenue</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="monthlyRevenue">$0</div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Company</th>
+                                                <th>Plan</th>
+                                                <th>Expires</th>
+                                                <th>Days Left</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="upcomingRenewals">
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Usage Widget -->
+                    <div class="col-xl-4 col-lg-12 mb-4">
+                        <div class="card shadow h-100">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-code me-2"></i>API Usage (24h)
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Requests</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalApiRequests">0</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Success Rate</div>
+                                    <div class="progress mb-1">
+                                        <div class="progress-bar bg-success" id="apiSuccessProgress" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <small class="text-muted" id="apiSuccessRate">0%</small>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Avg Response Time</div>
+                                    <div class="h6 mb-0 font-weight-bold text-gray-800" id="avgApiResponseTime">0ms</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Failed Requests</div>
+                                    <div class="h6 mb-0 font-weight-bold text-gray-800" id="failedApiRequests">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Analytics Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-chart-line me-2"></i>Advanced Analytics
+                                </h6>
+                                <div class="analytics-controls">
+                                    <select id="analyticsDateRange" class="form-select form-select-sm me-2" style="width: auto; display: inline-block;">
+                                        <option value="7">Last 7 Days</option>
+                                        <option value="30" selected>Last 30 Days</option>
+                                        <option value="90">Last 90 Days</option>
+                                        <option value="365">Last Year</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="refreshAnalytics()">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Date Range Picker (Hidden by default) -->
+                                <div id="customDateRange" class="row mb-3" style="display: none;">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Start Date</label>
+                                        <input type="date" id="startDate" class="form-control">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">End Date</label>
+                                        <input type="date" id="endDate" class="form-control">
+                                    </div>
+                                </div>
+
+                                <!-- Analytics Tabs -->
+                                <ul class="nav nav-tabs mb-3" id="analyticsTab" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="growth-tab" data-bs-toggle="tab" data-bs-target="#growth" type="button" role="tab">
+                                            <i class="fas fa-chart-line me-1"></i>Growth Analysis
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="revenue-tab" data-bs-toggle="tab" data-bs-target="#revenue" type="button" role="tab">
+                                            <i class="fas fa-dollar-sign me-1"></i>Revenue Analysis
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="predictive-tab" data-bs-toggle="tab" data-bs-target="#predictive" type="button" role="tab">
+                                            <i class="fas fa-crystal-ball me-1"></i>Predictive Analytics
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="comparative-tab" data-bs-toggle="tab" data-bs-target="#comparative" type="button" role="tab">
+                                            <i class="fas fa-balance-scale me-1"></i>Comparative Analysis
+                                        </button>
+                                    </li>
+                                </ul>
+
+                                <!-- Tab Content -->
+                                <div class="tab-content" id="analyticsTabContent">
+                                    <!-- Growth Analysis Tab -->
+                                    <div class="tab-pane fade show active" id="growth" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="chart-container">
+                                                    <canvas id="growthChart" height="300"></canvas>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="growth-metrics">
+                                                    <div class="metric-card mb-3">
+                                                        <h6 class="text-muted">Company Growth Rate</h6>
+                                                        <h3 class="text-success" id="companyGrowthRate">+0%</h3>
+                                                        <small class="text-muted">vs previous period</small>
+                                                    </div>
+                                                    <div class="metric-card mb-3">
+                                                        <h6 class="text-muted">User Growth Rate</h6>
+                                                        <h3 class="text-info" id="userGrowthRate">+0%</h3>
+                                                        <small class="text-muted">vs previous period</small>
+                                                    </div>
+                                                    <div class="metric-card">
+                                                        <h6 class="text-muted">Churn Rate</h6>
+                                                        <h3 class="text-warning" id="churnRate">0%</h3>
+                                                        <small class="text-muted">companies leaving</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Revenue Analysis Tab -->
+                                    <div class="tab-pane fade" id="revenue" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="chart-container">
+                                                    <canvas id="revenueChart" height="300"></canvas>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="revenue-metrics">
+                                                    <div class="metric-card mb-3">
+                                                        <h6 class="text-muted">MRR Growth</h6>
+                                                        <h3 class="text-success" id="mrrGrowth">+$0</h3>
+                                                        <small class="text-muted">monthly recurring revenue</small>
+                                                    </div>
+                                                    <div class="metric-card mb-3">
+                                                        <h6 class="text-muted">ARPU</h6>
+                                                        <h3 class="text-info" id="arpu">$0</h3>
+                                                        <small class="text-muted">average revenue per user</small>
+                                                    </div>
+                                                    <div class="metric-card">
+                                                        <h6 class="text-muted">LTV</h6>
+                                                        <h3 class="text-primary" id="ltv">$0</h3>
+                                                        <small class="text-muted">lifetime value</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Predictive Analytics Tab -->
+                                    <div class="tab-pane fade" id="predictive" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="chart-container">
+                                                    <canvas id="predictiveChart" height="300"></canvas>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="prediction-metrics">
+                                                    <div class="metric-card mb-3">
+                                                        <h6 class="text-muted">Predicted Growth (3M)</h6>
+                                                        <h3 class="text-success" id="predictedGrowth3M">+0%</h3>
+                                                        <small class="text-muted">next 3 months</small>
+                                                    </div>
+                                                    <div class="metric-card mb-3">
+                                                        <h6 class="text-muted">Predicted Revenue (3M)</h6>
+                                                        <h3 class="text-info" id="predictedRevenue3M">$0</h3>
+                                                        <small class="text-muted">next 3 months</small>
+                                                    </div>
+                                                    <div class="metric-card">
+                                                        <h6 class="text-muted">Risk Score</h6>
+                                                        <h3 class="text-warning" id="riskScore">Low</h3>
+                                                        <small class="text-muted">churn risk</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Comparative Analysis Tab -->
+                                    <div class="tab-pane fade" id="comparative" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="comparison-card">
+                                                    <h6 class="text-muted mb-3">Period Comparison</h6>
+                                                    <div class="comparison-item">
+                                                        <span>Companies</span>
+                                                        <div class="comparison-values">
+                                                            <span class="current" id="currentPeriodCompanies">0</span>
+                                                            <span class="vs">vs</span>
+                                                            <span class="previous" id="previousPeriodCompanies">0</span>
+                                                            <span class="change" id="companiesChange">+0%</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="comparison-item">
+                                                        <span>Users</span>
+                                                        <div class="comparison-values">
+                                                            <span class="current" id="currentPeriodUsers">0</span>
+                                                            <span class="vs">vs</span>
+                                                            <span class="previous" id="previousPeriodUsers">0</span>
+                                                            <span class="change" id="usersChange">+0%</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="comparison-item">
+                                                        <span>Revenue</span>
+                                                        <div class="comparison-values">
+                                                            <span class="current" id="currentPeriodRevenue">$0</span>
+                                                            <span class="vs">vs</span>
+                                                            <span class="previous" id="previousPeriodRevenue">$0</span>
+                                                            <span class="change" id="revenueChange">+0%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="chart-container">
+                                                    <canvas id="comparisonChart" height="250"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Export Options -->
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-end">
+                                            <button class="btn btn-outline-secondary me-2" onclick="exportAnalytics('pdf')">
+                                                <i class="fas fa-file-pdf me-1"></i>Export PDF
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="exportAnalytics('excel')">
+                                                <i class="fas fa-file-excel me-1"></i>Export Excel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header">
+                                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <a href="{% url 'core:register_company' %}" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-building fa-2x mb-2"></i><br>
+                                            Register Company
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <a href="{% url 'core:export_companies' %}" class="btn btn-outline-success w-100">
+                                            <i class="fas fa-download fa-2x mb-2"></i><br>
+                                            Export Companies
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <button class="btn btn-outline-info w-100" onclick="refreshDashboard()">
+                                            <i class="fas fa-sync-alt fa-2x mb-2"></i><br>
+                                            Refresh Data
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <button class="btn btn-outline-warning w-100" onclick="showSystemSettings()">
+                                            <i class="fas fa-cog fa-2x mb-2"></i><br>
+                                            System Settings
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Companies Table -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">Registered Companies</h6>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="refreshCompanies()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <a href="{% url 'core:export_companies' %}" class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-download"></i> Export
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="companiesTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                        </th>
+                                        <th>Company Name</th>
+                                        <th>Domain</th>
+                                        <th>Admin</th>
+                                        <th>Company Key</th>
+                                        <th>Status</th>
+                                        <th>Employees</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for company in companies %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="company-checkbox" value="{{ company.id }}">
+                                        </td>
+                                        <td>
+                                            <strong>{{ company.name }}</strong>
+                                            {% if not company.is_active %}
+                                                <span class="badge bg-secondary ms-1">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ company.domain }}</td>
+                                        <td>
+                                            <div>
+                                                <strong>{{ company.admin_user.get_full_name|default:company.admin_user.username }}</strong><br>
+                                                <small class="text-muted">{{ company.admin_user.email }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <code class="company-key">{{ company.company_key }}</code>
+                                            <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('{{ company.company_key }}')" title="Copy Key">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            {% if company.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ company.employees.count }}</span>
+                                            <small class="text-muted">/ {{ company.max_users }}</small>
+                                        </td>
+                                        <td>{{ company.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'core:company_details' company.id %}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'core:edit_company' company.id %}" class="btn btn-sm btn-outline-warning" title="Edit Company">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'core:toggle_company_status' company.id %}" class="btn btn-sm btn-outline-{% if company.is_active %}danger{% else %}success{% endif %}" title="{% if company.is_active %}Deactivate{% else %}Activate{% endif %} Company">
+                                                    <i class="fas fa-{% if company.is_active %}pause{% else %}play{% endif %}"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDeleteCompany({{ company.id }}, '{{ company.name }}')" title="Delete Company">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted">
+                                            <i class="fas fa-building fa-3x mb-3 text-muted"></i><br>
+                                            No companies registered yet.<br>
+                                            <a href="{% url 'core:register_company' %}" class="btn btn-primary mt-2">
+                                                <i class="fas fa-plus me-2"></i>Register First Company
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Filtering Panel -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-filter me-2"></i>Advanced Filters & Bulk Operations
+                                </h6>
+                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterPanel">
+                                    <i class="fas fa-chevron-down"></i> Toggle Filters
+                                </button>
+                            </div>
+                            <div class="collapse" id="filterPanel">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <!-- Status Filter -->
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Status</label>
+                                            <select class="form-select" id="statusFilter" onchange="applyFilters()">
+                                                <option value="">All Statuses</option>
+                                                <option value="active">Active</option>
+                                                <option value="inactive">Inactive</option>
+                                                <option value="suspended">Suspended</option>
+                                                <option value="trial">Trial</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Subscription Plan Filter -->
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Subscription Plan</label>
+                                            <select class="form-select" id="planFilter" onchange="applyFilters()">
+                                                <option value="">All Plans</option>
+                                                <option value="basic">Basic</option>
+                                                <option value="professional">Professional</option>
+                                                <option value="enterprise">Enterprise</option>
+                                                <option value="custom">Custom</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Registration Date Filter -->
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Registration Date</label>
+                                            <select class="form-select" id="dateFilter" onchange="applyFilters()">
+                                                <option value="">All Time</option>
+                                                <option value="today">Today</option>
+                                                <option value="week">This Week</option>
+                                                <option value="month">This Month</option>
+                                                <option value="quarter">This Quarter</option>
+                                                <option value="year">This Year</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Company Size Filter -->
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Company Size</label>
+                                            <select class="form-select" id="sizeFilter" onchange="applyFilters()">
+                                                <option value="">All Sizes</option>
+                                                <option value="small">Small (1-10)</option>
+                                                <option value="medium">Medium (11-50)</option>
+                                                <option value="large">Large (51-200)</option>
+                                                <option value="enterprise">Enterprise (200+)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <!-- Search Filter -->
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Search</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="searchFilter" placeholder="Search by company name, domain, or admin..." onkeyup="applyFilters()">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Sort Options -->
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Sort By</label>
+                                            <select class="form-select" id="sortFilter" onchange="applyFilters()">
+                                                <option value="name_asc">Name (A-Z)</option>
+                                                <option value="name_desc">Name (Z-A)</option>
+                                                <option value="date_asc">Oldest First</option>
+                                                <option value="date_desc">Newest First</option>
+                                                <option value="employees_asc">Employees (Low-High)</option>
+                                                <option value="employees_desc">Employees (High-Low)</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Results Per Page -->
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Results Per Page</label>
+                                            <select class="form-select" id="limitFilter" onchange="applyFilters()">
+                                                <option value="10">10</option>
+                                                <option value="25" selected>25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <button class="btn btn-primary me-2" onclick="applyFilters()">
+                                                <i class="fas fa-search me-2"></i>Apply Filters
+                                            </button>
+                                            <button class="btn btn-secondary me-2" onclick="clearAllFilters()">
+                                                <i class="fas fa-undo me-2"></i>Clear All
+                                            </button>
+                                            <button class="btn btn-success me-2" onclick="exportFiltered()">
+                                                <i class="fas fa-download me-2"></i>Export Filtered
+                                            </button>
+                                            <span class="text-muted" id="filterResults">Showing all companies</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Bulk Actions -->
+                <div class="row mb-4" id="bulkActions" style="display: none;">
+                    <div class="col-12">
+                        <div class="card shadow border-warning">
+                            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold">
+                                    <i class="fas fa-tasks me-2"></i>Bulk Operations
+                                </h6>
+                                <span class="badge bg-dark" id="selectedCount">0 companies selected</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Status Operations -->
+                                    <div class="col-md-4 mb-3">
+                                        <h6 class="text-muted">Status Operations</h6>
+                                        <div class="btn-group-vertical w-100" role="group">
+                                            <button type="button" class="btn btn-sm btn-success" onclick="bulkActivate()">
+                                                <i class="fas fa-play me-2"></i>Activate Selected
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-warning" onclick="bulkDeactivate()">
+                                                <i class="fas fa-pause me-2"></i>Deactivate Selected
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-secondary" onclick="bulkSuspend()">
+                                                <i class="fas fa-ban me-2"></i>Suspend Selected
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Subscription Operations -->
+                                    <div class="col-md-4 mb-3">
+                                        <h6 class="text-muted">Subscription Operations</h6>
+                                        <div class="btn-group-vertical w-100" role="group">
+                                            <button type="button" class="btn btn-sm btn-info" onclick="bulkChangePlan()">
+                                                <i class="fas fa-exchange-alt me-2"></i>Change Plan
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-primary" onclick="bulkExtendTrial()">
+                                                <i class="fas fa-clock me-2"></i>Extend Trial
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-dark" onclick="bulkApplyDiscount()">
+                                                <i class="fas fa-percent me-2"></i>Apply Discount
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Data Operations -->
+                                    <div class="col-md-4 mb-3">
+                                        <h6 class="text-muted">Data Operations</h6>
+                                        <div class="btn-group-vertical w-100" role="group">
+                                            <button type="button" class="btn btn-sm btn-success" onclick="bulkExport()">
+                                                <i class="fas fa-download me-2"></i>Export Selected
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-warning" onclick="bulkSendNotification()">
+                                                <i class="fas fa-envelope me-2"></i>Send Notification
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="bulkDelete()">
+                                                <i class="fas fa-trash me-2"></i>Delete Selected
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="alert alert-info mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Tip:</strong> Use the filters above to narrow down companies before performing bulk operations. 
+                                            All operations will be logged for audit purposes.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Owner Footer -->
+    <footer class="owner-footer mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-crown me-2"></i>ProjectManager Pro</h5>
+                    <p class="mb-0">Professional project management system for enterprise companies.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-2">
+                        <small>System Owner: {{ user.get_full_name|default:user.username }}</small>
+                    </div>
+                    <div>
+                        <small>&copy; 2024 ProjectManager Pro. All rights reserved.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Owner Dashboard JS -->
+    <script src="{% static 'js/pages/owner.js' %}"></script>
+</body>
+</html>

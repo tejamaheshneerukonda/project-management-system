@@ -1,0 +1,422 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Achievements & Recognition{% endblock %}
+
+{% block page_title %}Achievements & Recognition{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="shareAchievements()">
+        <i class="fas fa-share me-2"></i>Share
+    </button>
+    <button type="button" class="btn btn-outline-secondary" onclick="viewAllAchievements()">
+        <i class="fas fa-trophy me-2"></i>All Achievements
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Points and Level -->
+<div class="row mb-4">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Points</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_points }}</div>
+                        <div class="small text-muted">Points earned</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-star fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Current Level</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">Level {{ total_points|floatformat:0|add:"1" }}</div>
+                        <div class="small text-muted">Keep it up!</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-medal fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Achievements</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ achievements|length }}</div>
+                        <div class="small text-muted">Badges earned</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-trophy fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Bar -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <h6 class="card-title">Progress to Next Level</h6>
+                <div class="progress mb-2" style="height: 20px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" 
+                         style="width: {{ total_points|floatformat:0|add:"50" }}%"
+                         aria-valuenow="{{ total_points|floatformat:0|add:"50" }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        {{ total_points|floatformat:0|add:"50" }}%
+                    </div>
+                </div>
+                <small class="text-muted">{{ total_points|floatformat:0|add:"50" }} points to next level</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Achievements -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Your Achievements</h6>
+            </div>
+            <div class="card-body">
+                {% if achievements %}
+                <div class="row">
+                    {% for achievement in achievements %}
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-left-success h-100">
+                            <div class="card-body text-center">
+                                <div class="achievement-icon mb-3">
+                                    <i class="{{ achievement.icon }} fa-3x text-success"></i>
+                                </div>
+                                <h5 class="card-title">{{ achievement.name }}</h5>
+                                <p class="card-text text-muted">{{ achievement.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-success">{{ achievement.points }} points</span>
+                                    <span class="badge bg-success">Earned</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No achievements yet</h5>
+                    <p class="text-muted">Complete tasks and projects to earn your first achievement!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Available Achievements -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Available Achievements</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Task Master -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-left-warning h-100">
+                            <div class="card-body text-center">
+                                <div class="achievement-icon mb-3">
+                                    <i class="fas fa-tasks fa-3x text-warning"></i>
+                                </div>
+                                <h5 class="card-title">Task Master</h5>
+                                <p class="card-text text-muted">Complete 10+ tasks</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">100 points</span>
+                                    <span class="badge bg-secondary">Not Earned</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Tracker -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-left-warning h-100">
+                            <div class="card-body text-center">
+                                <div class="achievement-icon mb-3">
+                                    <i class="fas fa-clock fa-3x text-warning"></i>
+                                </div>
+                                <h5 class="card-title">Time Tracker</h5>
+                                <p class="card-text text-muted">Log 100+ hours</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">150 points</span>
+                                    <span class="badge bg-secondary">Not Earned</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Champion -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-left-warning h-100">
+                            <div class="card-body text-center">
+                                <div class="achievement-icon mb-3">
+                                    <i class="fas fa-project-diagram fa-3x text-warning"></i>
+                                </div>
+                                <h5 class="card-title">Project Champion</h5>
+                                <p class="card-text text-muted">Complete 3+ projects</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">200 points</span>
+                                    <span class="badge bg-secondary">Not Earned</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team Player -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-left-warning h-100">
+                            <div class="card-body text-center">
+                                <div class="achievement-icon mb-3">
+                                    <i class="fas fa-users fa-3x text-warning"></i>
+                                </div>
+                                <h5 class="card-title">Team Player</h5>
+                                <p class="card-text text-muted">Collaborate on 5+ team tasks</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">125 points</span>
+                                    <span class="badge bg-secondary">Not Earned</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Early Bird -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-left-warning h-100">
+                            <div class="card-body text-center">
+                                <div class="achievement-icon mb-3">
+                                    <i class="fas fa-sun fa-3x text-warning"></i>
+                                </div>
+                                <h5 class="card-title">Early Bird</h5>
+                                <p class="card-text text-muted">Complete tasks before deadline</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">75 points</span>
+                                    <span class="badge bg-secondary">Not Earned</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Perfectionist -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card border-left-warning h-100">
+                            <div class="card-body text-center">
+                                <div class="achievement-icon mb-3">
+                                    <i class="fas fa-gem fa-3x text-warning"></i>
+                                </div>
+                                <h5 class="card-title">Perfectionist</h5>
+                                <p class="card-text text-muted">Complete tasks with 100% quality</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning">300 points</span>
+                                    <span class="badge bg-secondary">Not Earned</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaderboard -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Team Leaderboard</h6>
+            </div>
+            <div class="card-body">
+                {% if leaderboard %}
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Employee</th>
+                                <th>Points</th>
+                                <th>Tasks Completed</th>
+                                <th>Hours Logged</th>
+                                <th>Achievements</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in leaderboard %}
+                            <tr {% if member.employee.id == employee.id %}class="table-primary"{% endif %}>
+                                <td>
+                                    {% if forloop.counter == 1 %}
+                                        <i class="fas fa-crown text-warning"></i>
+                                    {% elif forloop.counter == 2 %}
+                                        <i class="fas fa-medal text-secondary"></i>
+                                    {% elif forloop.counter == 3 %}
+                                        <i class="fas fa-award text-warning"></i>
+                                    {% else %}
+                                        {{ forloop.counter }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{% if member.employee.profile_picture %}{{ member.employee.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" 
+                                             class="rounded-circle me-2" width="30" height="30" alt="{{ member.employee.first_name }}">
+                                        <div>
+                                            <div class="fw-bold">{{ member.employee.first_name }} {{ member.employee.last_name }}</div>
+                                            <small class="text-muted">{{ member.employee.department }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ member.points }}</span>
+                                </td>
+                                <td>{{ member.tasks_completed }}</td>
+                                <td>{{ member.hours_logged|floatformat:1 }}h</td>
+                                <td>
+                                    <span class="badge bg-success">{{ member.points|floatformat:0|add:"1" }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No leaderboard data</h5>
+                    <p class="text-muted">Team members will appear here as they earn points.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Activity</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Task Master Achievement Unlocked!</h6>
+                            <p class="timeline-text">You completed your 10th task and earned 100 points.</p>
+                            <small class="text-muted">2 hours ago</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Task Completed</h6>
+                            <p class="timeline-text">You completed "Update project documentation" and earned 10 points.</p>
+                            <small class="text-muted">1 day ago</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Time Logged</h6>
+                            <p class="timeline-text">You logged 8 hours of work and earned 16 points.</p>
+                            <small class="text-muted">2 days ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation to achievement cards
+    animateAchievements();
+});
+
+function animateAchievements() {
+    const achievementCards = document.querySelectorAll('.achievement-icon');
+    
+    achievementCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.animation = 'bounceIn 0.6s ease-in-out';
+        }, index * 100);
+    });
+}
+
+function shareAchievements() {
+    // Implement sharing functionality
+    if (navigator.share) {
+        navigator.share({
+            title: 'My Achievements',
+            text: `I've earned ${document.querySelector('.h5').textContent} points and ${document.querySelectorAll('.achievement-icon').length} achievements!`,
+            url: window.location.href
+        });
+    } else {
+        // Fallback for browsers that don't support Web Share API
+        const shareText = `Check out my achievements! I've earned ${document.querySelector('.h5').textContent} points.`;
+        navigator.clipboard.writeText(shareText).then(() => {
+            showAlert('Achievement summary copied to clipboard!', 'success');
+        });
+    }
+}
+
+function viewAllAchievements() {
+    // Implement view all achievements functionality
+    console.log('Viewing all achievements');
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.row'));
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_gamification.css' %}">
+{% endblock %}
+{% endblock %}

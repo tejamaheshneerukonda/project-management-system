@@ -1,0 +1,287 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_edit_leave_request.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-edit me-2 text-primary"></i>
+                        Edit Leave Request
+                    </h2>
+                    <p class="text-muted mb-0">Modify your leave request details</p>
+                </div>
+                <div>
+                    <a href="{% url 'core:employee_leave_details' leave_request.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Form -->
+        <div class="col-lg-8">
+            <form method="post" id="editLeaveForm">
+                {% csrf_token %}
+                
+                <!-- Leave Request Information -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Leave Request Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="leave_type" class="form-label fw-bold">Leave Type <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="leave_type" name="leave_type" required>
+                                        <option value="">Select Leave Type</option>
+                                        {% for value, label in leave_types %}
+                                            <option value="{{ value }}" {% if leave_request.leave_type == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Current Status</label>
+                                    <div class="form-control-plaintext">
+                                        <span class="badge bg-warning fs-6">
+                                            <i class="fas fa-clock me-1"></i>Pending
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="start_date" class="form-label fw-bold">Start Date <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date" 
+                                           value="{{ leave_request.start_date|date:'Y-m-d' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label fw-bold">End Date <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date" 
+                                           value="{{ leave_request.end_date|date:'Y-m-d' }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Total Days</label>
+                                    <div class="form-control-plaintext">
+                                        <span class="badge bg-info fs-6" id="totalDays">
+                                            {{ leave_request.total_days }} day{{ leave_request.total_days|pluralize }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Applied Date</label>
+                                    <div class="form-control-plaintext">
+                                        <i class="fas fa-calendar-plus me-2 text-muted"></i>
+                                        {{ leave_request.created_at|date:"F d, Y" }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="reason" class="form-label fw-bold">Reason for Leave <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="reason" name="reason" rows="4" 
+                                      placeholder="Please provide a detailed reason for your leave request..." required>{{ leave_request.reason }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contact Information -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-phone me-2"></i>
+                            Emergency Contact Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="emergency_contact" class="form-label fw-bold">Emergency Contact Person</label>
+                                    <input type="text" class="form-control" id="emergency_contact" name="emergency_contact" 
+                                           value="{{ leave_request.emergency_contact }}" 
+                                           placeholder="Name of emergency contact person">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="emergency_phone" class="form-label fw-bold">Emergency Phone Number</label>
+                                    <input type="tel" class="form-control" id="emergency_phone" name="emergency_phone" 
+                                           value="{{ leave_request.emergency_phone }}" 
+                                           placeholder="Emergency contact phone number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Emergency contact information is optional but recommended for longer leave periods.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </button>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Update Leave Request
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Leave Balance -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Leave Balance
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-primary mb-1">20</h4>
+                                <small class="text-muted">Annual Leave</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-info mb-1">10</h4>
+                            <small class="text-muted">Sick Leave</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editing Guidelines -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Editing Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Only pending requests can be edited
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Start date cannot be in the past
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            End date must be after start date
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Reason is required for all requests
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Changes will be reviewed by management
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Calculate total days when dates change
+function calculateDays() {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    
+    if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        
+        const totalDaysElement = document.getElementById('totalDays');
+        totalDaysElement.textContent = diffDays + ' day' + (diffDays !== 1 ? 's' : '');
+    }
+}
+
+// Add event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('start_date').addEventListener('change', calculateDays);
+    document.getElementById('end_date').addEventListener('change', calculateDays);
+    
+    // Form validation
+    document.getElementById('editLeaveForm').addEventListener('submit', function(e) {
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+        const today = new Date().toISOString().split('T')[0];
+        
+        if (startDate < today) {
+            e.preventDefault();
+            showErrorToast('Start date cannot be in the past.');
+            return false;
+        }
+        
+        if (startDate > endDate) {
+            e.preventDefault();
+            showErrorToast('Start date cannot be after end date.');
+            return false;
+        }
+        
+        if (!startDate || !endDate) {
+            e.preventDefault();
+            showErrorToast('Please select both start and end dates.');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

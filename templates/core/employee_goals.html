@@ -1,0 +1,319 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}My Goals{% endblock %}
+
+{% block page_title %}My Goals{% endblock %}
+
+{% block page_actions %}
+<div class="d-flex gap-2">
+    <button class="btn btn-success" onclick="addNewGoal()">
+        <i class="fas fa-plus me-2"></i>Add Goal
+    </button>
+    <button class="btn btn-primary" onclick="refreshGoals()">
+        <i class="fas fa-sync me-2"></i>Refresh
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Goals Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Goals</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_goals }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-bullseye fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Completed</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ completed_goals }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">In Progress</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ in_progress_goals }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Success Rate</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {% if total_goals > 0 %}
+                                {% widthratio completed_goals total_goals 100 %}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Goals Filter -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="status" class="form-label">Filter by Status</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="">All Statuses</option>
+                            {% for value, label in goal_statuses %}
+                                <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter me-1"></i>Filter Goals
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <a href="{% url 'core:employee_goals' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Clear Filters
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Goals List -->
+<div class="row">
+    {% for goal in goals %}
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">{{ goal.title }}</h6>
+                <div>
+                    {% if goal.priority == 'HIGH' %}
+                        <span class="badge bg-danger">High</span>
+                    {% elif goal.priority == 'MEDIUM' %}
+                        <span class="badge bg-warning">Medium</span>
+                    {% else %}
+                        <span class="badge bg-success">Low</span>
+                    {% endif %}
+                    {% if goal.status == 'COMPLETED' %}
+                        <span class="badge bg-success">Completed</span>
+                    {% elif goal.status == 'IN_PROGRESS' %}
+                        <span class="badge bg-primary">In Progress</span>
+                    {% elif goal.status == 'ON_HOLD' %}
+                        <span class="badge bg-warning">On Hold</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Not Started</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">{{ goal.description|truncatewords:25 }}</p>
+                
+                <!-- Goal Progress -->
+                {% if goal.target_value and goal.current_value %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Progress</small>
+                        <small class="text-muted">{{ goal.current_value }}/{{ goal.target_value }} {{ goal.unit }}</small>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {% widthratio goal.current_value goal.target_value 100 %}%">
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Goal Timeline -->
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        Start: {{ goal.start_date|date:"M d, Y" }}
+                        {% if goal.target_date %}
+                            | Target: {{ goal.target_date|date:"M d, Y" }}
+                        {% endif %}
+                        {% if goal.completed_date %}
+                            | Completed: {{ goal.completed_date|date:"M d, Y" }}
+                        {% endif %}
+                    </small>
+                </div>
+
+                <!-- Goal Type -->
+                <div class="mb-3">
+                    <span class="badge bg-info">{{ goal.goal_type }}</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2">
+                    {% if goal.status != 'COMPLETED' %}
+                        <button class="btn btn-sm btn-success" onclick="updateGoalProgress({{ goal.id }})">
+                            <i class="fas fa-plus me-1"></i>Update Progress
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="markGoalComplete({{ goal.id }})">
+                            <i class="fas fa-check me-1"></i>Mark Complete
+                        </button>
+                    {% endif %}
+                    <button class="btn btn-sm btn-outline-info" onclick="viewGoalDetails({{ goal.id }})">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-bullseye fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No Goals Found</h5>
+                <p class="text-muted">
+                    {% if status_filter %}
+                        No goals match your current filter.
+                    {% else %}
+                        You don't have any goals set yet.
+                    {% endif %}
+                </p>
+                <button class="btn btn-primary" onclick="addNewGoal()">
+                    <i class="fas fa-plus me-2"></i>Add Your First Goal
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Goal Modal -->
+<div class="modal fade" id="addGoalModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Goal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="goalForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="goalTitle" class="form-label">Goal Title</label>
+                                <input type="text" class="form-control" id="goalTitle" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="goalType" class="form-label">Goal Type</label>
+                                <select class="form-select" id="goalType" required>
+                                    <option value="SMART">SMART Goal</option>
+                                    <option value="KPI">Key Performance Indicator</option>
+                                    <option value="MILESTONE">Milestone</option>
+                                    <option value="SKILL">Skill Development</option>
+                                    <option value="PROJECT">Project Goal</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="goalDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="goalDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="goalPriority" class="form-label">Priority</label>
+                                <select class="form-select" id="goalPriority" required>
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM" selected>Medium</option>
+                                    <option value="HIGH">High</option>
+                                    <option value="CRITICAL">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="startDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="targetDate" class="form-label">Target Date</label>
+                                <input type="date" class="form-control" id="targetDate" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="targetValue" class="form-label">Target Value</label>
+                                <input type="number" class="form-control" id="targetValue" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="unit" class="form-label">Unit</label>
+                                <input type="text" class="form-control" id="unit" placeholder="e.g., hours, tasks, %">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="successCriteria" class="form-label">Success Criteria</label>
+                        <textarea class="form-control" id="successCriteria" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Goal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/employee_goals.js' %}"></script>
+{% endblock %}

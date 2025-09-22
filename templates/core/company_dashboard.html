@@ -1,0 +1,750 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}Enhanced Company Dashboard{% endblock %}
+
+{% block page_title %}Company Dashboard{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <a href="{% url 'core:import_employees' %}" class="btn btn-primary">
+        <i class="fas fa-file-import me-2"></i>Import Employees
+    </a>
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+        <i class="fas fa-plus me-2"></i>Create Project
+    </button>
+    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
+        <i class="fas fa-bullhorn me-2"></i>Announcement
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- CSRF Token for JavaScript -->
+{% csrf_token %}
+
+<!-- Free Version Banner -->
+{% if not company.is_premium or not company.is_license_valid %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-gift fa-2x me-3"></i>
+        <div class="flex-grow-1">
+            <h6 class="mb-1">
+                <i class="fas fa-star me-1"></i>You're using the Free Version
+            </h6>
+            <p class="mb-0">
+                Unlock premium features with unlimited employees, advanced analytics, and priority support.
+            </p>
+        </div>
+        <div class="ms-3">
+            <a href="{% url 'core:license_activation' %}" class="btn btn-warning btn-sm me-2">
+                <i class="fas fa-unlock me-1"></i>Activate License
+            </a>
+            <a href="{% url 'core:pricing' %}" class="btn btn-outline-warning btn-sm">
+                <i class="fas fa-shopping-cart me-1"></i>Upgrade Now
+            </a>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<!-- Enhanced Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Employees</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_employees }}</div>
+                        <div class="text-xs text-success">
+                            <i class="fas fa-arrow-up me-1"></i>{{ recent_employees|length }} new this week
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Active Projects</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_projects }}</div>
+                        <div class="text-xs text-info">
+                            <i class="fas fa-check me-1"></i>{{ completed_projects }} completed
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-project-diagram fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks Progress</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ completed_tasks }}/{{ total_tasks }}</div>
+                        <div class="text-xs text-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>{{ overdue_tasks }} overdue
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Activity</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ recent_activities }}</div>
+                        <div class="text-xs text-primary">
+                            <i class="fas fa-clock me-1"></i>Last 7 days
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications and Announcements -->
+{% if notifications or announcements %}
+<div class="row mb-4">
+    {% if notifications %}
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-bell me-2"></i>Notifications
+                </h6>
+                <span class="badge bg-primary">{{ notifications|length }}</span>
+            </div>
+            <div class="card-body">
+                {% for notification in notifications %}
+                <div class="d-flex align-items-start mb-3 p-2 border-left border-{{ notification.notification_type|lower }} border-3">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-{{ notification.notification_type|lower }} text-{{ notification.notification_type|lower }}"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">{{ notification.title }}</h6>
+                        <p class="mb-1 text-muted small">{{ notification.message|truncatechars:100 }}</p>
+                        <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if announcements %}
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-success">
+                    <i class="fas fa-bullhorn me-2"></i>Announcements
+                </h6>
+                <span class="badge bg-success">{{ announcements|length }}</span>
+            </div>
+            <div class="card-body">
+                {% for announcement in announcements %}
+                <div class="d-flex align-items-start mb-3 p-2 border-left border-success border-3">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-success"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">{{ announcement.title }}</h6>
+                        <p class="mb-1 text-muted small">{{ announcement.content|truncatechars:100 }}</p>
+                        <small class="text-muted">{{ announcement.created_at|timesince }} ago</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Main Content Row -->
+<div class="row">
+    <!-- Left Column -->
+    <div class="col-lg-8">
+        <!-- Quick Actions -->
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'core:import_employees' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <i class="fas fa-file-import fa-2x mb-2"></i>
+                            <span>Import Employees</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                            <i class="fas fa-plus fa-2x mb-2"></i>
+                            <span>Create Project</span>
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center" onclick="viewReports()">
+                            <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                            <span>View Reports</span>
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <button class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
+                            <i class="fas fa-bullhorn fa-2x mb-2"></i>
+                            <span>Announcement</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Employees -->
+        <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-users me-2"></i>Recent Employees
+                </h6>
+                <a href="{% url 'core:import_employees' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add More
+                </a>
+            </div>
+            <div class="card-body">
+                {% if recent_employees %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in recent_employees %}
+                            <tr>
+                                <td>{{ employee.employee_id }}</td>
+                                <td>{{ employee.first_name }} {{ employee.last_name }}</td>
+                                <td>{{ employee.email }}</td>
+                                <td>{{ employee.department|default:"-" }}</td>
+                                <td>
+                                    {% if employee.is_verified %}
+                                        <span class="badge bg-success">Verified</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No employees imported yet</h5>
+                    <p class="text-muted">Start by importing your employee data</p>
+                    <a href="{% url 'core:import_employees' %}" class="btn btn-primary">
+                        <i class="fas fa-file-import me-2"></i>Import Employees
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        {% if performance_metrics %}
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-chart-line me-2"></i>Performance Metrics
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for metric in performance_metrics %}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="mb-1">{{ metric.employee.first_name }} {{ metric.employee.last_name }}</h6>
+                        <small class="text-muted">{{ metric.metric_type }}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="h5 mb-0">{{ metric.value }}</span>
+                        {% if metric.target_value %}
+                        <small class="text-muted d-block">Target: {{ metric.target_value }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+        <!-- Department Statistics -->
+        {% if department_stats %}
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-building me-2"></i>Department Stats
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for dept in department_stats %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>{{ dept.department|default:"Unassigned" }}</span>
+                    <span class="badge bg-primary">{{ dept.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Company Info -->
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-info-circle me-2"></i>Company Info
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Company:</strong></div>
+                    <div class="col-6">{{ company.name }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Domain:</strong></div>
+                    <div class="col-6">{{ company.domain }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Status:</strong></div>
+                    <div class="col-6">
+                        {% if company.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Max Users:</strong></div>
+                    <div class="col-6">
+                        {{ max_users }}
+                        {% if subscription_type == 'FREE' %}
+                            <span class="badge bg-secondary ms-2">Free Plan</span>
+                        {% elif subscription_type == 'STARTER' %}
+                            <span class="badge bg-primary ms-2">Starter Plan</span>
+                        {% elif subscription_type == 'PROFESSIONAL' %}
+                            <span class="badge bg-success ms-2">Professional Plan</span>
+                        {% elif subscription_type == 'ENTERPRISE' %}
+                            <span class="badge bg-warning ms-2">Enterprise Plan</span>
+                        {% endif %}
+                        <div class="progress mt-1" style="height: 6px;">
+                            <div class="progress-bar 
+                                {% if total_employees >= max_users %}bg-danger
+                                {% elif total_employees >= warning_threshold %}bg-warning
+                                {% else %}bg-success{% endif %}" 
+                                role="progressbar" 
+                                style="width: {% widthratio total_employees max_users 100 %}%"
+                                aria-valuenow="{{ total_employees }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="{{ max_users }}">
+                            </div>
+                        </div>
+                        <small class="text-muted">{{ total_employees }} of {{ max_users }} users</small>
+                        {% if total_employees >= warning_threshold and subscription_type != 'ENTERPRISE' %}
+                            <div class="alert alert-warning alert-sm mt-2 mb-0">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                <strong>Approaching limit!</strong> 
+                                <a href="{% url 'core:pricing' %}" class="alert-link">Upgrade your plan</a> to add more users.
+                            </div>
+                        {% elif total_employees >= max_users %}
+                            <div class="alert alert-danger alert-sm mt-2 mb-0">
+                                <i class="fas fa-ban me-1"></i>
+                                <strong>User limit reached!</strong> 
+                                <a href="{% url 'core:pricing' %}" class="alert-link">Upgrade now</a> to add more users.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Activation Key:</strong></div>
+                    <div class="col-6">
+                        {% if company.license_key %}
+                            <div class="company-key-container">
+                                <code class="small" id="companyKey">{{ company.license_key }}</code>
+                                <button type="button" class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyActivationKey()" title="Copy Activation Key">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            {% if company.is_premium and company.is_license_valid %}
+                                <span class="badge bg-success ms-2">Active</span>
+                            {% else %}
+                                <span class="badge bg-warning ms-2">Expired</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">No activation key</span>
+                            <a href="{% url 'core:pricing' %}" class="btn btn-sm btn-primary ms-2">
+                                <i class="fas fa-shopping-cart me-1"></i>Get License
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workflow Instances -->
+        {% if workflow_instances %}
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-cogs me-2"></i>Active Workflows
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for workflow in workflow_instances %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <h6 class="mb-1">{{ workflow.title }}</h6>
+                        <small class="text-muted">Step {{ workflow.current_step }}</small>
+                    </div>
+                    <span class="badge bg-info">{{ workflow.status }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create Project Modal -->
+<div class="modal fade" id="createProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createProjectForm">
+                    <div class="mb-3">
+                        <label for="projectName" class="form-label">Project Name</label>
+                        <input type="text" class="form-control" id="projectName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="projectDescription" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="startDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="endDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select class="form-select" id="priority">
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM" selected>Medium</option>
+                            <option value="HIGH">High</option>
+                            <option value="URGENT">Urgent</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createProject()">Create Project</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Announcement Modal -->
+<div class="modal fade" id="createAnnouncementModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Announcement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createAnnouncementForm">
+                    <div class="mb-3">
+                        <label for="announcementTitle" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="announcementTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="announcementContent" class="form-label">Content</label>
+                        <textarea class="form-control" id="announcementContent" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="announcementPriority" class="form-label">Priority</label>
+                        <select class="form-select" id="announcementPriority">
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM" selected>Medium</option>
+                            <option value="HIGH">High</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createAnnouncement()">Create Announcement</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+/* Copy button styling */
+#companyKey {
+    font-family: 'Courier New', monospace;
+    background-color: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #dee2e6;
+    word-break: break-all;
+}
+
+.dark-theme #companyKey {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #e2e8f0;
+}
+
+.copy-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.copy-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Ensure proper spacing */
+.company-key-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+</style>
+<script>
+function createProject() {
+    const form = document.getElementById('createProjectForm');
+    const formData = {
+        'name': document.getElementById('projectName').value,
+        'description': document.getElementById('projectDescription').value,
+        'start_date': document.getElementById('startDate').value,
+        'end_date': document.getElementById('endDate').value,
+        'priority': document.getElementById('priority').value
+    };
+    
+    fetch('/api/projects/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessToast('Project created successfully!');
+                location.reload();
+            } else {
+                showErrorToast('Error creating project: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('Error creating project');
+        });
+}
+
+function createAnnouncement() {
+    const formData = {
+        'title': document.getElementById('announcementTitle').value,
+        'content': document.getElementById('announcementContent').value,
+        'priority': document.getElementById('announcementPriority').value
+    };
+    
+    fetch('/api/announcements/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessToast('Announcement created successfully!');
+                location.reload();
+            } else {
+                showErrorToast('Error creating announcement: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('Error creating announcement');
+        });
+}
+
+function viewReports() {
+    // Placeholder for reports functionality
+    window.location.href = '/company/reports/';
+}
+
+function copyActivationKey() {
+    const activationKeyElement = document.getElementById('companyKey');
+    const activationKey = activationKeyElement.textContent.trim();
+    
+    // Use the modern Clipboard API if available
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(activationKey).then(function() {
+            showActivationKeyCopySuccess();
+        }).catch(function(err) {
+            console.error('Failed to copy: ', err);
+            fallbackCopyTextToClipboard(activationKey);
+        });
+    } else {
+        // Fallback for older browsers
+        fallbackCopyTextToClipboard(activationKey);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    
+    // Avoid scrolling to bottom
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showActivationKeyCopySuccess();
+        } else {
+            showActivationKeyCopyError();
+        }
+    } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+        showActivationKeyCopyError();
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+function showActivationKeyCopySuccess() {
+    const button = event.target.closest('button');
+    const originalIcon = button.innerHTML;
+    
+    // Change icon to checkmark
+    button.innerHTML = '<i class="fas fa-check text-success"></i>';
+    button.classList.remove('btn-outline-secondary');
+    button.classList.add('btn-outline-success');
+    
+    // Show tooltip
+    button.setAttribute('title', 'Copied!');
+    
+    // Reset after 2 seconds
+    setTimeout(function() {
+        button.innerHTML = originalIcon;
+        button.classList.remove('btn-outline-success');
+        button.classList.add('btn-outline-secondary');
+        button.setAttribute('title', 'Copy Activation Key');
+    }, 2000);
+}
+
+function showActivationKeyCopyError() {
+    const button = event.target.closest('button');
+    const originalIcon = button.innerHTML;
+    
+    // Change icon to error
+    button.innerHTML = '<i class="fas fa-times text-danger"></i>';
+    button.classList.remove('btn-outline-secondary');
+    button.classList.add('btn-outline-danger');
+    
+    // Show tooltip
+    button.setAttribute('title', 'Copy failed');
+    
+    // Reset after 2 seconds
+    setTimeout(function() {
+        button.innerHTML = originalIcon;
+        button.classList.remove('btn-outline-danger');
+        button.classList.add('btn-outline-secondary');
+        button.setAttribute('title', 'Copy Activation Key');
+    }, 2000);
+}
+
+
+
+
+
+// Auto-refresh notifications every 30 seconds
+setInterval(function() {
+    fetch('/api/notifications/unread/')
+    .then(response => response.json())
+    .then(data => {
+        if (data.count > 0) {
+            // Update notification badge
+            const badge = document.querySelector('.badge.bg-primary');
+            if (badge) {
+                badge.textContent = data.count;
+            }
+        }
+    });
+}, 30000);
+</script>
+{% endblock %}

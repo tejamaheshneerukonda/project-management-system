@@ -1,0 +1,458 @@
+{% extends 'base_company_admin.html' %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-chart-bar me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Analyze asset performance and maintenance trends</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="exportAnalytics()">
+                        <i class="fas fa-download me-1"></i>Export Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ asset_types|length }}</h4>
+                            <p class="mb-0">Asset Types</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tags fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ asset_status|length }}</h4>
+                            <p class="mb-0">Status Types</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-pie fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ maintenance_frequency|length }}</h4>
+                            <p class="mb-0">Maintenance Periods</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">
+                                {% for status in asset_status %}{{ status.count|add:0 }}{% if not forloop.last %}+{% endif %}{% endfor %}
+                            </h4>
+                            <p class="mb-0">Total Assets</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-boxes fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Asset Type Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="assetTypesChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-doughnut me-2"></i>Asset Status Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="assetStatusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance Frequency Chart -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Maintenance Frequency Over Time
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="maintenanceFrequencyChart" width="800" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asset Types Table -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Asset Types Analysis
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if asset_types %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Asset Type</th>
+                                        <th>Count</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for asset_type in asset_types %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if asset_type.description|slice:":7" == "computer" %}
+                                                        <i class="fas fa-laptop text-primary me-2"></i>
+                                                    {% elif asset_type.description|slice:":8" == "furniture" %}
+                                                        <i class="fas fa-chair text-success me-2"></i>
+                                                    {% elif asset_type.description|slice:":7" == "vehicle" %}
+                                                        <i class="fas fa-car text-info me-2"></i>
+                                                    {% elif asset_type.description|slice:":8" == "machinery" %}
+                                                        <i class="fas fa-cogs text-warning me-2"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-box text-secondary me-2"></i>
+                                                    {% endif %}
+                                                    <span>{{ asset_type.description|title }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ asset_type.count }}</span>
+                                            </td>
+                                            <td>
+                                                {% widthratio asset_type.count asset_types.0.count 100 as percentage %}
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: {{ percentage }}%" 
+                                                         aria-valuenow="{{ percentage }}" 
+                                                         aria-valuemin="0" aria-valuemax="100">
+                                                        {{ percentage }}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-tags fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No asset types found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Asset Status Analysis -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Asset Status Analysis
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if asset_status %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Status</th>
+                                        <th>Count</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for status in asset_status %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if status.status == 'ACTIVE' %}
+                                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                                        <span class="text-success">Active</span>
+                                                    {% elif status.status == 'PENDING' %}
+                                                        <i class="fas fa-clock text-warning me-2"></i>
+                                                        <span class="text-warning">Maintenance Due</span>
+                                                    {% elif status.status == 'COMPLETED' %}
+                                                        <i class="fas fa-pause text-info me-2"></i>
+                                                        <span class="text-info">Inactive</span>
+                                                    {% else %}
+                                                        <i class="fas fa-question text-secondary me-2"></i>
+                                                        <span class="text-secondary">{{ status.status }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ status.count }}</span>
+                                            </td>
+                                            <td>
+                                                {% widthratio status.count asset_status.0.count 100 as percentage %}
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-info" role="progressbar" 
+                                                         style="width: {{ percentage }}%" 
+                                                         aria-valuenow="{{ percentage }}" 
+                                                         aria-valuemin="0" aria-valuemax="100">
+                                                        {{ percentage }}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-chart-bar fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No asset status data found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Summary -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Key Asset Metrics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-primary">85%</h3>
+                                <p class="text-muted">Asset Utilization</p>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>5% increase
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-success">92%</h3>
+                                <p class="text-muted">Maintenance Compliance</p>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>3% increase
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-info">$125K</h3>
+                                <p class="text-muted">Total Asset Value</p>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>8% increase
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-warning">15</h3>
+                                <p class="text-muted">Maintenance Due</p>
+                                <small class="text-danger">
+                                    <i class="fas fa-arrow-up me-1"></i>2 more
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Asset Types Chart
+{% if asset_types %}
+const assetTypesCtx = document.getElementById('assetTypesChart').getContext('2d');
+const assetTypesChart = new Chart(assetTypesCtx, {
+    type: 'pie',
+    data: {
+        labels: [
+            {% for asset_type in asset_types %}
+                '{{ asset_type.description|title }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for asset_type in asset_types %}
+                    {{ asset_type.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+{% endif %}
+
+// Asset Status Chart
+{% if asset_status %}
+const assetStatusCtx = document.getElementById('assetStatusChart').getContext('2d');
+const assetStatusChart = new Chart(assetStatusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for status in asset_status %}
+                '{{ status.status }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for status in asset_status %}
+                    {{ status.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#28a745', '#ffc107', '#17a2b8', '#6c757d'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+{% endif %}
+
+// Maintenance Frequency Chart
+{% if maintenance_frequency %}
+const maintenanceFrequencyCtx = document.getElementById('maintenanceFrequencyChart').getContext('2d');
+const maintenanceFrequencyChart = new Chart(maintenanceFrequencyCtx, {
+    type: 'line',
+    data: {
+        labels: [
+            {% for maintenance in maintenance_frequency %}
+                '{{ maintenance.month|date:"M Y" }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Maintenance Activities',
+            data: [
+                {% for maintenance in maintenance_frequency %}
+                    {{ maintenance.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            borderColor: '#FF6384',
+            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+{% endif %}
+
+function exportAnalytics() {
+    // TODO: Implement analytics export
+    showErrorToast('Analytics export functionality will be implemented soon.');
+}
+</script>
+{% endblock %}
+{% endblock %}

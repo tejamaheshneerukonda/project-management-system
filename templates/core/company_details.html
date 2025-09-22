@@ -1,0 +1,248 @@
+{% extends 'base_owner.html' %}
+{% load static %}
+
+{% block title %}{{ company.name }} - Company Details{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/company_details.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block page_title %}{{ company.name }} - Details{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'core:edit_company' company.id %}" class="btn btn-primary me-2">
+    <i class="fas fa-edit me-2"></i>Edit Company
+</a>
+<a href="{% url 'core:toggle_company_status' company.id %}" class="btn btn-{% if company.is_active %}danger{% else %}success{% endif %}">
+    <i class="fas fa-{% if company.is_active %}pause{% else %}play{% endif %} me-2"></i>
+    {% if company.is_active %}Deactivate{% else %}Activate{% endif %}
+</a>
+{% endblock %}
+
+{% block content %}
+
+            <!-- Company Overview -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Employees</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_employees }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Verified Employees</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ verified_employees }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Registered Users</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ registered_users }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Max Users</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" data-no-animate>{{ company.max_users }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-lock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Information -->
+            <div class="row mb-4">
+                <div class="col-lg-6">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Company Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Company Name:</strong></td>
+                                    <td>{{ company.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Domain:</strong></td>
+                                    <td>{{ company.domain }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td>
+                                        {% if company.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Max Users:</strong></td>
+                                    <td>{{ company.max_users }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Created:</strong></td>
+                                    <td>{{ company.created_at|date:"F d, Y" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Last Updated:</strong></td>
+                                    <td>{{ company.updated_at|date:"F d, Y" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Admin Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                {% if company.admin_user %}
+                                <tr>
+                                    <td><strong>Admin Name:</strong></td>
+                                    <td>{{ company.admin_user.get_full_name|default:company.admin_user.username }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Username:</strong></td>
+                                    <td>{{ company.admin_user.username }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td>{{ company.admin_user.email }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td><strong>Admin Status:</strong></td>
+                                    <td>
+                                        <span class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>Admin not registered yet
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Registration:</strong></td>
+                                    <td>
+                                        <small class="text-muted">Use company key to register admin account</small>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <td><strong>Company Key:</strong></td>
+                                    <td>
+                                        <code class="company-key">{{ company.company_key }}</code>
+                                        <button class="btn btn-sm btn-outline-secondary ms-1" onclick="copyToClipboard('{{ company.company_key }}')" title="Copy Key">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employees List -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Employees</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="employeesTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Department</th>
+                                    <th>Position</th>
+                                    <th>Status</th>
+                                    <th>Account</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in employees %}
+                                <tr>
+                                    <td><code>{{ employee.employee_id }}</code></td>
+                                    <td>{{ employee.full_name }}</td>
+                                    <td>{{ employee.email }}</td>
+                                    <td>{{ employee.department|default:"-" }}</td>
+                                    <td>{{ employee.position|default:"-" }}</td>
+                                    <td>
+                                        {% if employee.is_verified %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if employee.user_account %}
+                                            <span class="badge bg-success">Registered</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">No Account</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">
+                                        <i class="fas fa-users fa-3x mb-3 text-muted"></i><br>
+                                        No employees found for this company.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/company_details.js' %}"></script>
+{% endblock %}

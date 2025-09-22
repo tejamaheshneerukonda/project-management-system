@@ -1,0 +1,234 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}Import Employees - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/import_employees.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Beautiful Background with Gradient -->
+<div class="import-page-wrapper">
+    <!-- Animated Background Elements -->
+    <div class="bg-animation">
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+        </div>
+    </div>
+    
+    <div class="container-fluid py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <!-- Main Card with Glass Effect -->
+                <div class="main-card">
+                    <div class="card-header-modern">
+                        <div class="header-content">
+                            <div class="icon-wrapper">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                            <div class="header-text">
+                                <h2 class="title">Import Employees</h2>
+                                <p class="subtitle">Streamline your employee onboarding with bulk CSV import</p>
+                            </div>
+                        </div>
+                        <div class="header-decoration"></div>
+                    </div>
+                    
+                    <div class="card-body-modern">
+                        <div class="row g-4">
+                            <!-- Upload Section -->
+                            <div class="col-md-7">
+                                <div class="upload-section">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i>Upload Employee CSV
+                                    </h5>
+                                    
+                                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate id="importForm">
+                                        {% csrf_token %}
+                                        
+                                        <!-- Upload Zone -->
+                                        <div class="upload-zone-modern" id="uploadZone">
+                                            <div class="upload-content" id="uploadContent">
+                                                <div class="upload-icon">
+                                                    <i class="fas fa-cloud-upload-alt"></i>
+                                                </div>
+                                                <h5 class="upload-title">Drag & Drop CSV File Here</h5>
+                                                <p class="upload-subtitle">or click to browse files</p>
+                                                <button type="button" class="btn btn-primary btn-lg" onclick="document.getElementById('id_csv_file').click()">
+                                                    <i class="fas fa-folder-open me-2"></i>Choose File
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="file-info d-none" id="fileInfo">
+                                                <div class="file-icon">
+                                                    <i class="fas fa-file-csv"></i>
+                                                </div>
+                                                <div class="file-details">
+                                                    <h5 class="file-name" id="fileName"></h5>
+                                                    <p class="file-size" id="fileSize"></p>
+                                                </div>
+                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearFile()">
+                                                    <i class="fas fa-times me-1"></i>Remove
+                                                </button>
+                                            </div>
+                                            
+                                            {{ form.csv_file }}
+                                            {% if form.csv_file.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.csv_file.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Import Options -->
+                                        <div class="import-options">
+                                            <h6 class="options-title">Import Options</h6>
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" id="skipDuplicates" name="skip_duplicates" checked>
+                                                <label class="form-check-label" for="skipDuplicates">Skip duplicate employee IDs</label>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="sendWelcomeEmail" name="send_welcome_email">
+                                                <label class="form-check-label" for="sendWelcomeEmail">Send welcome email to new employees</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Action Buttons -->
+                                        <div class="action-buttons">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="downloadTemplate()">
+                                                <i class="fas fa-download me-2"></i>Download Template
+                                            </button>
+                                            <button type="submit" class="btn btn-success btn-lg" id="importSubmitBtn">
+                                                <i class="fas fa-upload me-2"></i>Import Employees
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <!-- Instructions & Recent Imports -->
+                            <div class="col-md-5">
+                                <!-- CSV Format Instructions -->
+                                <div class="instructions-card">
+                                    <h5 class="instructions-title">
+                                        <i class="fas fa-info-circle me-2"></i>CSV Format Instructions
+                                    </h5>
+                                    <div class="instructions-content">
+                                        <p class="instructions-text">Your CSV file should contain the following columns:</p>
+                                        <ul class="instructions-list">
+                                            <li><i class="fas fa-check-circle text-success me-2"></i><code>employee_id</code> (Required, Unique)</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i><code>first_name</code> (Required)</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i><code>last_name</code> (Required)</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i><code>email</code> (Required, Unique)</li>
+                                            <li><i class="fas fa-info-circle text-info me-2"></i><code>department</code> (Optional)</li>
+                                            <li><i class="fas fa-info-circle text-info me-2"></i><code>position</code> (Optional)</li>
+                                        </ul>
+                                        <div class="warning-box">
+                                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                            <span>Ensure your CSV is UTF-8 encoded</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Recent Imports -->
+                                <div class="recent-imports-card">
+                                    <h5 class="recent-title">
+                                        <i class="fas fa-history me-2"></i>Recent Imports
+                                    </h5>
+                                    {% if employees %}
+                                    <div class="employees-list">
+                                        {% for employee in employees %}
+                                        <div class="employee-item">
+                                            <div class="employee-avatar">
+                                                {{ employee.first_name|first }}{{ employee.last_name|first }}
+                                            </div>
+                                            <div class="employee-info">
+                                                <h6 class="employee-name">{{ employee.full_name }}</h6>
+                                                <p class="employee-email">{{ employee.email }}</p>
+                                            </div>
+                                            <span class="employee-status badge bg-{{ employee.is_verified|yesno:'success,warning' }}">
+                                                {{ employee.is_verified|yesno:'Verified,Pending' }}
+                                            </span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="view-all-btn">
+                                        <a href="{% url 'core:employee_directory' %}" class="btn btn-outline-primary btn-sm">
+                                            View All Employees ({{ total_employees }})
+                                        </a>
+                                    </div>
+                                    {% else %}
+                                    <div class="no-employees">
+                                        <i class="fas fa-users fa-2x mb-3"></i>
+                                        <p class="mb-0">No employees imported yet</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Simple file handling
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('id_csv_file');
+    const uploadContent = document.getElementById('uploadContent');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    
+    // Hide file input
+    fileInput.style.display = 'none';
+    
+    // File input change handler
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            const fileSizeKB = (file.size / 1024).toFixed(2);
+            
+            fileName.textContent = file.name;
+            fileSize.textContent = `Size: ${fileSizeKB} KB`;
+            
+            uploadContent.classList.add('d-none');
+            fileInfo.classList.remove('d-none');
+        }
+    });
+    
+    // Clear file function
+    window.clearFile = function() {
+        fileInput.value = '';
+        uploadContent.classList.remove('d-none');
+        fileInfo.classList.add('d-none');
+    };
+});
+
+// Download template function
+function downloadTemplate() {
+    const csvContent = 'employee_id,first_name,last_name,email,department,position\nEMP001,John,Doe,john.doe@company.com,IT,Developer\nEMP002,Jane,Smith,jane.smith@company.com,HR,Manager\nEMP003,Bob,Johnson,bob.johnson@company.com,Finance,Analyst';
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'employee_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    showErrorToast('Template downloaded successfully!');
+}
+</script>
+{% endblock %}

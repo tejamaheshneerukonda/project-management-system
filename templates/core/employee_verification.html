@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Employee Verification - Project Management System{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/employee_verification.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="verification-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="verification-card">
+                    <div class="verification-header">
+                        <a href="{% url 'core:registration_selection' %}" class="btn btn-outline-light mb-3">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Registration Options
+                        </a>
+                        <i class="fas fa-user-check verification-icon"></i>
+                        <h3 class="verification-title">Employee Verification</h3>
+                        <p class="verification-subtitle">Verify your identity to create an account</p>
+                        {% if company %}
+                            <div class="company-badge">
+                                <i class="fas fa-building me-2"></i>{{ company.name }}
+                            </div>
+                            {% if debug_info %}
+                                <div class="alert alert-info mt-2" style="font-size: 0.8rem;">
+                                    <strong>Debug Info:</strong><br>
+                                    Company ID: {{ debug_info.company_id }}<br>
+                                    Company Name: {{ debug_info.company_name }}<br>
+                                    Company Domain: {{ debug_info.company_domain }}<br>
+                                    Session Company ID: {{ debug_info.session_company_id }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="verification-body">
+                        <form method="post" class="verification-form needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="verification-form-group">
+                                <label for="{{ form.employee_id.id_for_label }}" class="verification-label">
+                                    <i class="fas fa-id-card me-1"></i>Employee ID *
+                                </label>
+                                <div class="verification-input-group">
+                                    <i class="fas fa-id-card verification-input-icon"></i>
+                                    {{ form.employee_id }}
+                                </div>
+                                <div class="verification-help-text">
+                                    Enter your employee ID as provided by your company
+                                </div>
+                                {% if form.employee_id.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.employee_id.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="verification-form-group">
+                                <label for="{{ form.email.id_for_label }}" class="verification-label">
+                                    <i class="fas fa-envelope me-1"></i>Company Email *
+                                </label>
+                                <div class="verification-input-group">
+                                    <i class="fas fa-envelope verification-input-icon"></i>
+                                    {{ form.email }}
+                                </div>
+                                <div class="verification-help-text">
+                                    Enter your company email address
+                                </div>
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Information Box -->
+                            <div class="verification-info-box">
+                                <h6 class="verification-info-title">
+                                    <i class="fas fa-info-circle me-2"></i>How it works
+                                </h6>
+                                <ol class="verification-info-list">
+                                    <li>Enter your Employee ID and company email</li>
+                                    <li>We'll verify your information against our records</li>
+                                    <li>If verified, you'll be redirected to create your account</li>
+                                    <li>If not found, contact your company administrator</li>
+                                </ol>
+                            </div>
+                            
+                            <button type="submit" class="verification-button">
+                                <i class="fas fa-search me-2"></i>Verify Identity
+                            </button>
+                        </form>
+                        
+                        <div class="verification-footer">
+                            <p class="verification-footer-text">
+                                Already have an account? 
+                                <a href="{% url 'core:login' %}" class="verification-login-link">Sign in here</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/employee_verification.js' %}"></script>
+<style>
+.company-badge {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    display: inline-block;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+</style>
+{% endblock %}

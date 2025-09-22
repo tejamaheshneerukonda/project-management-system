@@ -1,0 +1,757 @@
+{% extends 'base_company_admin.html' %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-tasks me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Manage and track project tasks</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                        <i class="fas fa-plus me-1"></i>New Task
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_tasks }}</h4>
+                            <p class="mb-0">Total Tasks</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tasks fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ todo_tasks }}</h4>
+                            <p class="mb-0">To Do</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ in_progress_tasks }}</h4>
+                            <p class="mb-0">In Progress</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-play fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ done_tasks }}</h4>
+                            <p class="mb-0">Completed</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overdue Tasks Alert -->
+    {% if overdue_tasks > 0 %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>{{ overdue_tasks }} task{{ overdue_tasks|pluralize }}</strong> {{ overdue_tasks|pluralize:"is,are" }} overdue!
+                    <a href="?status=TODO&priority=HIGH" class="alert-link">View overdue tasks</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search Tasks</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ search_query }}" placeholder="Search by title, description, or project">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Filter by Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                <option value="TODO" {% if status_filter == 'TODO' %}selected{% endif %}>To Do</option>
+                                <option value="IN_PROGRESS" {% if status_filter == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                <option value="DONE" {% if status_filter == 'DONE' %}selected{% endif %}>Done</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="priority" class="form-label">Filter by Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="">All Priorities</option>
+                                <option value="LOW" {% if priority_filter == 'LOW' %}selected{% endif %}>Low</option>
+                                <option value="MEDIUM" {% if priority_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
+                                <option value="HIGH" {% if priority_filter == 'HIGH' %}selected{% endif %}>High</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-search me-1"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Task Overview
+                        {% if search_query or status_filter or priority_filter %}
+                            <span class="badge bg-secondary ms-2">Filtered Results</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if tasks %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Task</th>
+                                        <th>Project</th>
+                                        <th>Assigned To</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Due Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for task in tasks %}
+                                        <tr {% if task.due_date and task.due_date < now and task.status != 'DONE' %}class="table-warning"{% endif %}>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                        {{ task.title|first|upper }}
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ task.title }}</strong>
+                                                        {% if task.description %}
+                                                            <br><small class="text-muted">{{ task.description|truncatechars:50 }}</small>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ task.project.name }}</span>
+                                            </td>
+                                            <td>
+                                                {% if task.assigned_to %}
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-sm bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                            {{ task.assigned_to.first_name|first }}{{ task.assigned_to.last_name|first }}
+                                                        </div>
+                                                        <div>
+                                                            <small>{{ task.assigned_to.first_name }} {{ task.assigned_to.last_name }}</small>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted">Unassigned</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if task.status == 'TODO' %}
+                                                    <span class="badge bg-warning">To Do</span>
+                                                {% elif task.status == 'IN_PROGRESS' %}
+                                                    <span class="badge bg-info">In Progress</span>
+                                                {% elif task.status == 'DONE' %}
+                                                    <span class="badge bg-success">Done</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if task.priority == 'HIGH' %}
+                                                    <span class="badge bg-danger">High</span>
+                                                {% elif task.priority == 'MEDIUM' %}
+                                                    <span class="badge bg-warning">Medium</span>
+                                                {% else %}
+                                                    <span class="badge bg-success">Low</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if task.due_date %}
+                                                    <small class="{% if task.due_date < now and task.status != 'DONE' %}text-danger{% endif %}">
+                                                        {{ task.due_date|date:"M d, Y" }}
+                                                    </small>
+                                                {% else %}
+                                                    <span class="text-muted">No due date</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" onclick="viewTask({{ task.id }})" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary" onclick="editTask({{ task.id }})" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" onclick="deleteTask({{ task.id }})" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if tasks.has_other_pages %}
+                            <div class="card-footer">
+                                <nav aria-label="Task pagination">
+                                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                                        {% if tasks.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">First</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ tasks.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">Previous</a>
+                                            </li>
+                                        {% endif %}
+                                        
+                                        <li class="page-item active">
+                                            <span class="page-link">
+                                                Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}
+                                            </span>
+                                        </li>
+                                        
+                                        {% if tasks.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ tasks.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">Next</a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ tasks.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}">Last</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No tasks found</h5>
+                            <p class="text-muted">
+                                {% if search_query or status_filter or priority_filter %}
+                                    Try adjusting your search criteria or filters.
+                                {% else %}
+                                    Start by creating your first task.
+                                {% endif %}
+                            </p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                                <i class="fas fa-plus me-1"></i>Create First Task
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskModalLabel">
+                    <i class="fas fa-plus me-2"></i>Create New Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addTaskForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="task_title" class="form-label">Task Title *</label>
+                                <input type="text" class="form-control" id="task_title" name="task_title" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="priority" class="form-label">Priority</label>
+                                <select class="form-select" id="priority" name="priority">
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM" selected>Medium</option>
+                                    <option value="HIGH">High</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="project" class="form-label">Project *</label>
+                                <select class="form-select" id="project" name="project" required>
+                                    <option value="">Select Project</option>
+                                    <!-- TODO: Populate with projects -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="assigned_to" class="form-label">Assign To</label>
+                                <select class="form-select" id="assigned_to" name="assigned_to">
+                                    <option value="">Unassigned</option>
+                                    <!-- TODO: Populate with employees -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="due_date" class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="due_date" name="due_date">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="TODO" selected>To Do</option>
+                                    <option value="IN_PROGRESS">In Progress</option>
+                                    <option value="DONE">Done</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addTask()">
+                    <i class="fas fa-plus me-1"></i>Create Task
+                </button>
+            </div>
+        </div>
+</div>
+</div>
+
+<!-- Task Details Modal -->
+<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskDetailsModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>Task Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="taskDetailsContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTaskModalLabel">
+                    <i class="fas fa-edit me-2"></i>Edit Task
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editTaskForm">
+                    <input type="hidden" id="editTaskId" value="">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="editTitle" class="form-label">Title *</label>
+                            <input type="text" class="form-control" id="editTitle" name="title" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="editDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editProject" class="form-label">Project</label>
+                            <select class="form-select" id="editProject" name="project" disabled>
+                                <!-- Will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editAssignedTo" class="form-label">Assign To</label>
+                            <select class="form-select" id="editAssignedTo" name="assigned_to">
+                                <option value="">Unassigned</option>
+                                {% for employee in company.employee_set.all %}
+                                    <option value="{{ employee.id }}">{{ employee.first_name }} {{ employee.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="editStatus" class="form-label">Status *</label>
+                            <select class="form-select" id="editStatus" name="status" required>
+                                <option value="TODO">To Do</option>
+                                <option value="IN_PROGRESS">In Progress</option>
+                                <option value="REVIEW">Review</option>
+                                <option value="DONE">Done</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="editPriority" class="form-label">Priority *</label>
+                            <select class="form-select" id="editPriority" name="priority" required>
+                                <option value="LOW">Low</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="HIGH">High</option>
+                                <option value="URGENT">Urgent</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="editDueDate" class="form-label">Due Date</label>
+                            <input type="date" class="form-control" id="editDueDate" name="due_date">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editEstimatedHours" class="form-label">Estimated Hours</label>
+                            <input type="number" class="form-control" id="editEstimatedHours" name="estimated_hours" step="0.5" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editActualHours" class="form-label">Actual Hours</label>
+                            <input type="number" class="form-control" id="editActualHours" name="actual_hours" step="0.5" min="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitEditTask()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.table-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script>
+function addTask() {
+    const form = document.getElementById('addTaskForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "api:create_task" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessToast('Task created successfully!');
+                location.reload();
+            } else {
+                showErrorToast('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('An error occurred while creating the task.');
+        });
+}
+
+function viewTask(taskId) {
+    // Get task details
+    fetch(`/api/task/${taskId}/`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const task = data.task;
+            
+            // Format dates
+            const formatDate = (dateString) => {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+            
+            // Get status and priority badges
+            const getStatusBadge = (status) => {
+                const statusMap = {
+                    'TODO': '<span class="badge bg-warning text-white">To Do</span>',
+                    'IN_PROGRESS': '<span class="badge bg-info text-white">In Progress</span>',
+                    'REVIEW': '<span class="badge bg-primary text-white">Review</span>',
+                    'DONE': '<span class="badge bg-success text-white">Done</span>'
+                };
+                return statusMap[status] || `<span class="badge bg-secondary">${status}</span>`;
+            };
+            
+            const getPriorityBadge = (priority) => {
+                const priorityMap = {
+                    'LOW': '<span class="badge bg-secondary">Low</span>',
+                    'MEDIUM': '<span class="badge bg-info">Medium</span>',
+                    'HIGH': '<span class="badge bg-warning">High</span>',
+                    'URGENT': '<span class="badge bg-danger">Urgent</span>'
+                };
+                return priorityMap[priority] || `<span class="badge bg-secondary">${priority}</span>`;
+            };
+            
+            // Build task details HTML
+            const detailsHtml = `
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h3>${task.title}</h3>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            ${getStatusBadge(task.status)}
+                            ${getPriorityBadge(task.priority)}
+                            <span class="badge bg-secondary">Project: ${task.project.name}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                ${task.description ? `
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="text-muted">Description</h5>
+                        <p>${task.description}</p>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Task Information</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><strong>Assigned To:</strong> ${task.assigned_to ? `${task.assigned_to.first_name} ${task.assigned_to.last_name}` : 'Unassigned'}</li>
+                            <li class="mb-2"><strong>Due Date:</strong> ${formatDate(task.due_date)}</li>
+                            <li class="mb-2"><strong>Estimated Hours:</strong> ${task.estimated_hours || 'N/A'}</li>
+                            <li class="mb-2"><strong>Actual Hours:</strong> ${task.actual_hours || 'N/A'}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Timestamps</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><strong>Created:</strong> ${formatDate(task.created_at)}</li>
+                            <li class="mb-2"><strong>Last Updated:</strong> ${formatDate(task.updated_at)}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h5 class="text-muted">Project Details</h5>
+                        <p class="mb-2"><strong>Project:</strong> ${task.project.name}</p>
+                        <p class="mb-2"><strong>Project Manager:</strong> ${task.project.project_manager ? `${task.project.project_manager.first_name} ${task.project.project_manager.last_name}` : 'Unassigned'}</p>
+                        <p><strong>Project Status:</strong> ${task.project.status}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Set content and show modal
+            document.getElementById('taskDetailsContent').innerHTML = detailsHtml;
+            const detailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
+            detailsModal.show();
+        } else {
+            showErrorToast('Error: ' + data.error);
+        }
+    })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('An error occurred while fetching task details.');
+        });
+}
+
+function editTask(taskId) {
+    // Get task details
+    fetch(`/api/task/${taskId}/`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const task = data.task;
+            
+            // Set form values
+            document.getElementById('editTaskId').value = task.id;
+            document.getElementById('editTitle').value = task.title;
+            document.getElementById('editDescription').value = task.description;
+            document.getElementById('editStatus').value = task.status;
+            document.getElementById('editPriority').value = task.priority;
+            document.getElementById('editDueDate').value = task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : '';
+            document.getElementById('editEstimatedHours').value = task.estimated_hours || '';
+            document.getElementById('editActualHours').value = task.actual_hours || '';
+            
+            // Show the edit modal
+            const editModal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+            editModal.show();
+        } else {
+            showErrorToast('Error: ' + data.error);
+        }
+    })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('An error occurred while fetching task details.');
+        });
+}
+
+function submitEditTask() {
+    const form = document.getElementById('editTaskForm');
+    const taskId = document.getElementById('editTaskId').value;
+    
+    // Create form data
+    const formData = {
+        title: document.getElementById('editTitle').value,
+        description: document.getElementById('editDescription').value,
+        status: document.getElementById('editStatus').value,
+        priority: document.getElementById('editPriority').value,
+        due_date: document.getElementById('editDueDate').value,
+        estimated_hours: document.getElementById('editEstimatedHours').value || null,
+        actual_hours: document.getElementById('editActualHours').value || null,
+        assigned_to: document.getElementById('editAssignedTo').value || null
+    };
+    
+    fetch(`/api/update_task/${taskId}/`, {
+        method: 'POST',
+        body: JSON.stringify(formData),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            showErrorToast('Error: ' + data.error);
+        }
+    })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('An error occurred while updating the task.');
+        });
+}
+
+function deleteTask(taskId) {
+    if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+        fetch(`/api/delete_task/${taskId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showErrorToast('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('An error occurred while deleting the task.');
+        });
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

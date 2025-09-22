@@ -1,0 +1,394 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Project Manager</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .owner-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .report-card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+        }
+        
+        .breadcrumb-item a {
+            color: #6c757d;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: #495057;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="owner-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-cog me-2"></i>{{ title }}
+                    </h1>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="d-flex align-items-center justify-content-md-end">
+                        <div class="me-3">
+                            <small class="text-light">Welcome, {{ user.username }}</small>
+                        </div>
+                        <a href="{% url 'core:owner_dashboard' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:owner_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:system_stats' %}">Analytics</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <!-- Report Categories -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Report Categories</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for category in report_categories %}
+                            <div class="col-md-2 mb-2">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-bar fa-2x text-primary mb-2"></i>
+                                    <h6>{{ category }}</h6>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Performance -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-building me-2"></i>Company Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="metric-card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-building fa-2x mb-2"></i>
+                                        <h4 class="mb-0">{{ company_performance.total_companies }}</h4>
+                                        <small>Total Companies</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="metric-card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                        <h4 class="mb-0">{{ company_performance.active_companies }}</h4>
+                                        <small>Active Companies</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="metric-card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-users fa-2x mb-2"></i>
+                                        <h4 class="mb-0">{{ company_performance.avg_employees_per_company|floatformat:1 }}</h4>
+                                        <small>Avg Employees/Company</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="metric-card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-activity fa-2x mb-2"></i>
+                                        <h4 class="mb-0">{{ company_performance.companies_with_recent_activity }}</h4>
+                                        <small>Recent Activity</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if company_performance.largest_company %}
+                        <div class="mt-3">
+                            <h6>Largest Company:</h6>
+                            <p class="mb-0">
+                                <strong>{{ company_performance.largest_company.name }}</strong> 
+                                ({{ company_performance.largest_company.employee_count }} employees)
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Engagement -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-4">
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>User Engagement</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <h4 class="text-primary">{{ user_engagement.total_users }}</h4>
+                                <small class="text-muted">Total Users</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h4 class="text-success">{{ user_engagement.active_users }}</h4>
+                                <small class="text-muted">Active Users</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h4 class="text-info">{{ user_engagement.users_with_recent_login }}</h4>
+                                <small class="text-muted">Recent Login (30 days)</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h4 class="text-warning">{{ user_engagement.users_never_logged_in }}</h4>
+                                <small class="text-muted">Never Logged In</small>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <h6>Average Users per Company: {{ user_engagement.avg_users_per_company|floatformat:1 }}</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Usage -->
+            <div class="col-lg-6 mb-4">
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>System Usage</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <h4 class="text-primary">{{ system_usage.total_employees }}</h4>
+                                <small class="text-muted">Total Employees</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h4 class="text-success">{{ system_usage.verified_employees }}</h4>
+                                <small class="text-muted">Verified Employees</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h4 class="text-info">{{ system_usage.registered_employees }}</h4>
+                                <small class="text-muted">Registered Employees</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h4 class="text-warning">{{ system_usage.unregistered_employees }}</h4>
+                                <small class="text-muted">Unregistered</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Statistics -->
+        {% if system_usage.employees_by_department %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-building me-2"></i>Department Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for dept in system_usage.employees_by_department %}
+                            <div class="col-md-3 mb-3">
+                                <div class="text-center">
+                                    <h5 class="text-primary">{{ dept.count }}</h5>
+                                    <small class="text-muted">{{ dept.department|default:"No Department" }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Security Metrics -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Security Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <h4 class="text-danger">{{ security_metrics.failed_login_attempts }}</h4>
+                                <small class="text-muted">Failed Login Attempts</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <h4 class="text-warning">{{ security_metrics.suspicious_activities }}</h4>
+                                <small class="text-muted">Suspicious Activities</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <h4 class="text-info">{{ security_metrics.password_resets }}</h4>
+                                <small class="text-muted">Password Resets</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <h4 class="text-dark">{{ security_metrics.account_locks }}</h4>
+                                <small class="text-muted">Account Locks</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Growth Analysis -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-trending-up me-2"></i>Growth Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <h4 class="text-primary">{{ growth_analysis.companies_last_30_days }}</h4>
+                                <small class="text-muted">New Companies (30 days)</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <h4 class="text-success">{{ growth_analysis.users_last_30_days }}</h4>
+                                <small class="text-muted">New Users (30 days)</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <h4 class="text-info">{{ growth_analysis.employees_last_30_days }}</h4>
+                                <small class="text-muted">New Employees (30 days)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Analysis -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Revenue Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <h4 class="text-success">${{ revenue_analysis.monthly_revenue }}</h4>
+                                <small class="text-muted">Monthly Revenue</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <h4 class="text-primary">${{ revenue_analysis.annual_revenue }}</h4>
+                                <small class="text-muted">Annual Revenue</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <h4 class="text-info">${{ revenue_analysis.revenue_per_company }}</h4>
+                                <small class="text-muted">Per Company/Month</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <h4 class="text-warning">${{ revenue_analysis.revenue_per_user }}</h4>
+                                <small class="text-muted">Per User/Month</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range Reports -->
+        {% if date_range_reports %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Date Range Reports</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Period</th>
+                                        <th>New Companies</th>
+                                        <th>New Users</th>
+                                        <th>New Employees</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in date_range_reports %}
+                                    <tr>
+                                        <td>{{ report.period }}</td>
+                                        <td>{{ report.companies }}</td>
+                                        <td>{{ report.users }}</td>
+                                        <td>{{ report.employees }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,361 @@
+{% extends 'base_company_admin.html' %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-comments me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Real-time team communication</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="startNewChat()">
+                        <i class="fas fa-plus me-1"></i>New Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ chat_messages|length }}</h4>
+                            <p class="mb-0">Total Messages</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-comments fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ team_members|length }}</h4>
+                            <p class="mb-0">Active Members</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">Online</h4>
+                            <p class="mb-0">{{ team_members|length }} Members</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-circle text-success fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">Today</h4>
+                            <p class="mb-0">{{ chat_messages|length }} Messages</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-day fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Chat Messages -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>Team Chat
+                        <span class="badge bg-success ms-2">{{ team_members|length }} Online</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0" style="height: 500px; overflow-y: auto;">
+                    <div id="chatMessages" class="p-3">
+                        {% if chat_messages %}
+                            {% for message in chat_messages %}
+                                <div class="message-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                            {{ message.created_by.username|first|upper }}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <h6 class="mb-0">{{ message.created_by.username }}</h6>
+                                                <small class="text-muted">{{ message.created_at|date:"H:i" }}</small>
+                                            </div>
+                                            <p class="mb-0">{{ message.content }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No messages yet</h5>
+                                <p class="text-muted">Start the conversation with your team!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <form id="chatForm" class="d-flex">
+                        {% csrf_token %}
+                        <input type="text" class="form-control me-2" id="messageInput" placeholder="Type your message..." required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Online Members -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Online Members
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if team_members %}
+                        <div class="list-group list-group-flush">
+                            {% for member in team_members %}
+                                <div class="list-group-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 position-relative">
+                                            {{ member.first_name|first }}{{ member.last_name|first }}
+                                            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle">
+                                                <span class="visually-hidden">Online</span>
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0">{{ member.first_name }} {{ member.last_name }}</h6>
+                                            <small class="text-muted">{{ member.department|default:"No Department" }}</small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-success">Online</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No team members online.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Chat Actions -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Chat Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="clearChat()">
+                            <i class="fas fa-trash me-2"></i>Clear Chat
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="exportChat()">
+                            <i class="fas fa-download me-2"></i>Export Chat
+                        </button>
+                        <button class="btn btn-outline-info" onclick="chatSettings()">
+                            <i class="fas fa-cog me-2"></i>Chat Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+}
+
+.message-item {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+}
+
+.message-item:last-child {
+    border-bottom: none;
+}
+
+#chatMessages {
+    background-color: #f8f9fa;
+}
+
+.card-footer {
+    background-color: white;
+    border-top: 1px solid #dee2e6;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        height: 300px !important;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script>
+// Auto-scroll to bottom of chat
+function scrollToBottom() {
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Send message
+document.getElementById('chatForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    
+    if (message) {
+        sendChatMessage(message);
+        messageInput.value = '';
+    }
+});
+
+function sendChatMessage(message) {
+    fetch('{% url "api:send_chat_message" %}', {
+        method: 'POST',
+        body: JSON.stringify({message: message}),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            addMessageToChat(data.message);
+        } else {
+            showErrorToast('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showErrorToast('An error occurred while sending the message.');
+    });
+}
+
+function addMessageToChat(messageData) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageHtml = `
+        <div class="message-item mb-3">
+            <div class="d-flex align-items-start">
+                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                    ${messageData.user.charAt(0).toUpperCase()}
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="mb-0">${messageData.user}</h6>
+                        <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+                    </div>
+                    <p class="mb-0">${messageData.message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    chatMessages.innerHTML += messageHtml;
+    scrollToBottom();
+}
+
+function startNewChat() {
+    if (confirm('Are you sure you want to start a new chat? This will clear the current conversation.')) {
+        clearChat();
+    }
+}
+
+function clearChat() {
+    if (confirm('Are you sure you want to clear the chat? This action cannot be undone.')) {
+        fetch('{% url "api:clear_chat" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showErrorToast('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('An error occurred while clearing the chat.');
+        });
+    }
+}
+
+function exportChat() {
+    // TODO: Implement chat export
+    showErrorToast('Chat export functionality will be implemented soon.');
+}
+
+function chatSettings() {
+    // TODO: Implement chat settings
+    showErrorToast('Chat settings will be implemented soon.');
+}
+
+// Auto-scroll to bottom on page load
+document.addEventListener('DOMContentLoaded', function() {
+    scrollToBottom();
+});
+</script>
+{% endblock %}
+{% endblock %}

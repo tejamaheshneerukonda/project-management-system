@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Settings - ProjectManager Pro</title>
+    
+    {% load static %}
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .owner-header {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .owner-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .owner-user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: white;
+        }
+        
+        .settings-card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+        }
+        
+        .settings-section {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1.5rem 0;
+        }
+        
+        .settings-section:last-child {
+            border-bottom: none;
+        }
+        
+        .form-check-input:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    {% load static %}
+    
+    <!-- Owner Header -->
+    <header class="owner-header">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand owner-brand" href="{% url 'core:owner_dashboard' %}">
+                    <i class="fas fa-crown me-2"></i>
+                    ProjectManager Pro
+                    <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">Owner Dashboard</small>
+                </a>
+                
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle owner-user-info" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-crown me-2"></i>{{ user.username }}
+                            <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">System Owner</small>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'core:owner_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:register_company' %}"><i class="fas fa-building me-2"></i>Register Company</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'core:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:owner_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">System Settings</li>
+            </ol>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1">System Settings</h1>
+                <p class="text-muted mb-0">Configure system-wide settings and preferences</p>
+            </div>
+            <div>
+                <a href="{% url 'core:owner_security_settings' %}" class="btn btn-outline-warning me-2">
+                    <i class="fas fa-shield-alt me-2"></i>Security
+                </a>
+                <a href="{% url 'core:backup_restore' %}" class="btn btn-outline-info">
+                    <i class="fas fa-database me-2"></i>Backup
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- General Settings -->
+                <div class="card settings-card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>General Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="settings-section">
+                                <h6 class="fw-bold mb-3">System Information</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="system_name" class="form-label">System Name</label>
+                                        <input type="text" class="form-control" id="system_name" name="system_name" value="ProjectManager Pro">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="system_version" class="form-label">System Version</label>
+                                        <input type="text" class="form-control" id="system_version" name="system_version" value="1.0.0" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h6 class="fw-bold mb-3">Company Registration</h6>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="allow_registration" name="allow_registration" checked>
+                                    <label class="form-check-label" for="allow_registration">
+                                        Allow new company registrations
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="require_approval" name="require_approval">
+                                    <label class="form-check-label" for="require_approval">
+                                        Require approval for new companies
+                                    </label>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="max_companies" class="form-label">Maximum Companies</label>
+                                    <input type="number" class="form-control" id="max_companies" name="max_companies" value="1000">
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h6 class="fw-bold mb-3">Email Settings</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="smtp_host" class="form-label">SMTP Host</label>
+                                        <input type="text" class="form-control" id="smtp_host" name="smtp_host" placeholder="smtp.gmail.com">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="smtp_port" class="form-label">SMTP Port</label>
+                                        <input type="number" class="form-control" id="smtp_port" name="smtp_port" value="587">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="smtp_user" class="form-label">SMTP Username</label>
+                                        <input type="email" class="form-control" id="smtp_user" name="smtp_user">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="smtp_password" class="form-label">SMTP Password</label>
+                                        <input type="password" class="form-control" id="smtp_password" name="smtp_password">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h6 class="fw-bold mb-3">Maintenance Mode</h6>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="maintenance_mode" name="maintenance_mode">
+                                    <label class="form-check-label" for="maintenance_mode">
+                                        Enable maintenance mode
+                                    </label>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="maintenance_message" class="form-label">Maintenance Message</label>
+                                    <textarea class="form-control" id="maintenance_message" name="maintenance_message" rows="3" placeholder="System is currently under maintenance. Please try again later."></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Settings
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- System Status -->
+                <div class="card settings-card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>System Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>System Status</span>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Database</span>
+                            <span class="badge bg-success">Connected</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Email Service</span>
+                            <span class="badge bg-warning">Not Configured</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Backup Status</span>
+                            <span class="badge bg-info">Last: 2 hours ago</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Uptime</span>
+                            <span class="badge bg-primary">99.9%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="card settings-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'core:owner_security_settings' %}" class="btn btn-outline-warning">
+                                <i class="fas fa-shield-alt me-2"></i>Security Settings
+                            </a>
+                            <a href="{% url 'core:backup_restore' %}" class="btn btn-outline-info">
+                                <i class="fas fa-database me-2"></i>Backup & Restore
+                            </a>
+                            <a href="{% url 'core:system_logs' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-file-alt me-2"></i>System Logs
+                            </a>
+                            <a href="{% url 'core:maintenance' %}" class="btn btn-outline-danger">
+                                <i class="fas fa-tools me-2"></i>Maintenance
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

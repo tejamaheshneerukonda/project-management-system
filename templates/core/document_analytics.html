@@ -1,0 +1,389 @@
+{% extends 'base_company_admin.html' %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-chart-bar me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Analyze document usage and activity</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="exportAnalytics()">
+                        <i class="fas fa-download me-1"></i>Export Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ document_types|length }}</h4>
+                            <p class="mb-0">File Types</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ document_timeline|length }}</h4>
+                            <p class="mb-0">Days Tracked</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ active_users|length }}</h4>
+                            <p class="mb-0">Active Users</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">
+                                {% for timeline in document_timeline %}{{ timeline.count|add:0 }}{% if not forloop.last %}+{% endif %}{% endfor %}
+                            </h4>
+                            <p class="mb-0">Total Activity</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Document Type Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="documentTypeChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Document Activity Timeline
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="timelineChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Types Table -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Document Types
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if document_types %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>File Type</th>
+                                        <th>Count</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for doc_type in document_types %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    {% if doc_type.content|slice:":3" == "pdf" %}
+                                                        <i class="fas fa-file-pdf text-danger me-2"></i>
+                                                    {% elif doc_type.content|slice:":3" == "doc" %}
+                                                        <i class="fas fa-file-word text-primary me-2"></i>
+                                                    {% elif doc_type.content|slice:":3" == "xls" %}
+                                                        <i class="fas fa-file-excel text-success me-2"></i>
+                                                    {% elif doc_type.content|slice:":3" == "jpg" or doc_type.content|slice:":3" == "png" %}
+                                                        <i class="fas fa-file-image text-info me-2"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-file text-secondary me-2"></i>
+                                                    {% endif %}
+                                                    <span>{{ doc_type.content|slice:":3"|upper|default:"Unknown" }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ doc_type.count }}</span>
+                                            </td>
+                                            <td>
+                                                {% widthratio doc_type.count document_types.0.count 100 as percentage %}
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: {{ percentage }}%" 
+                                                         aria-valuenow="{{ percentage }}" 
+                                                         aria-valuemin="0" aria-valuemax="100">
+                                                        {{ percentage }}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-file-alt fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No document types found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Most Active Users -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Most Active Users
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if active_users %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Files Uploaded</th>
+                                        <th>Activity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in active_users %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                        {{ user.created_by__username|first|upper }}
+                                                    </div>
+                                                    <div>
+                                                        <strong>{{ user.created_by__username }}</strong>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ user.file_count }}</span>
+                                            </td>
+                                            <td>
+                                                {% if user.file_count > 10 %}
+                                                    <span class="badge bg-success">High</span>
+                                                {% elif user.file_count > 5 %}
+                                                    <span class="badge bg-warning">Medium</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Low</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No active users found.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Activity Summary -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Document Activity Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-primary">{{ document_types|length }}</h3>
+                                <p class="text-muted">Different File Types</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-success">
+                                    {% for timeline in document_timeline %}{{ timeline.count|add:0 }}{% if not forloop.last %}+{% endif %}{% endfor %}
+                                </h3>
+                                <p class="text-muted">Total Document Activities</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-info">{{ active_users|length }}</h3>
+                                <p class="text-muted">Active Contributors</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Document Type Chart
+{% if document_types %}
+const documentTypeCtx = document.getElementById('documentTypeChart').getContext('2d');
+const documentTypeChart = new Chart(documentTypeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for doc_type in document_types %}
+                '{{ doc_type.content|slice:":3"|upper|default:"Unknown" }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for doc_type in document_types %}
+                    {{ doc_type.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+{% endif %}
+
+// Timeline Chart
+{% if document_timeline %}
+const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+const timelineChart = new Chart(timelineCtx, {
+    type: 'line',
+    data: {
+        labels: [
+            {% for timeline in document_timeline %}
+                '{{ timeline.day|date:"M d" }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Document Activity',
+            data: [
+                {% for timeline in document_timeline %}
+                    {{ timeline.count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            borderColor: '#36A2EB',
+            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+{% endif %}
+
+function exportAnalytics() {
+    // TODO: Implement analytics export
+    showErrorToast('Analytics export functionality will be implemented soon.');
+}
+</script>
+{% endblock %}
+{% endblock %}

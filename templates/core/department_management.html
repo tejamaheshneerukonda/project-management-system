@@ -1,0 +1,676 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/department_management.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="department-management-page">
+    <div class="container-fluid">
+        <!-- Enhanced Page Header -->
+        <div class="department-header fade-in">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-building me-2"></i>{{ title }}
+                    </h2>
+                    <p class="mb-0">Manage departments and organizational structure</p>
+                </div>
+                <div>
+                    <button class="btn" data-bs-toggle="modal" data-bs-target="#addDepartmentModal">
+                        <i class="fas fa-plus me-1"></i>Add Department
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Department Statistics -->
+        <div class="stats-grid slide-up">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stat-number">{{ departments|length }}</div>
+                <div class="stat-label">Total Departments</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-number">
+                    {% for dept in departments %}
+                        {{ dept.verified_count|add:0 }}{% if not forloop.last %}+{% endif %}
+                    {% empty %}
+                        0
+                    {% endfor %}
+                </div>
+                <div class="stat-label">Verified Employees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="stat-number">
+                    {% for dept in departments %}
+                        {{ dept.registered_count|add:0 }}{% if not forloop.last %}+{% endif %}
+                    {% empty %}
+                        0
+                    {% endfor %}
+                </div>
+                <div class="stat-label">Registered Employees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number">
+                    {% for dept in departments %}
+                        {{ dept.employee_count|add:0 }}{% if not forloop.last %}+{% endif %}
+                    {% empty %}
+                        0
+                    {% endfor %}
+                </div>
+                <div class="stat-label">Total Employees</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        {% if departments %}
+        <div class="charts-section slide-up">
+            <h5><i class="fas fa-chart-pie me-2"></i>Department Analytics</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="departmentChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="verificationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Enhanced Department List -->
+        <div class="department-table-card slide-up">
+            <div class="card-header">
+                <h5><i class="fas fa-list me-2"></i>Department Overview</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if departments %}
+                    <div class="table-responsive">
+                        <table class="table department-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Department Name</th>
+                                    <th>Total Employees</th>
+                                    <th>Verified</th>
+                                    <th>Registered</th>
+                                    <th>Verification Rate</th>
+                                    <th>Registration Rate</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dept in departments %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="department-avatar">
+                                                    {{ dept.department|first|upper }}
+                                                </div>
+                                                <div>
+                                                    <strong>{{ dept.department|default:"Unassigned" }}</strong>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="department-badge primary">{{ dept.employee_count }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="department-badge success">{{ dept.verified_count }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="department-badge info">{{ dept.registered_count }}</span>
+                                        </td>
+                                        <td>
+                                            {% if dept.employee_count > 0 %}
+                                                {% widthratio dept.verified_count dept.employee_count 100 as verification_rate %}
+                                                <div class="d-flex align-items-center">
+                                                    <div class="department-progress me-2" style="width: 100px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" 
+                                                             style="width: {{ verification_rate }}%">
+                                                        </div>
+                                                    </div>
+                                                    <small class="text-muted">{{ verification_rate }}%</small>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if dept.employee_count > 0 %}
+                                                {% widthratio dept.registered_count dept.employee_count 100 as registration_rate %}
+                                                <div class="d-flex align-items-center">
+                                                    <div class="department-progress me-2" style="width: 100px;">
+                                                        <div class="progress-bar bg-info" role="progressbar" 
+                                                             style="width: {{ registration_rate }}%">
+                                                        </div>
+                                                    </div>
+                                                    <small class="text-muted">{{ registration_rate }}%</small>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn btn-primary btn-sm me-1" onclick="viewDepartment({{ dept.announcement_id|default:'null' }}, '{{ dept.department }}')" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-success btn-sm me-1" onclick="editDepartment({{ dept.announcement_id|default:'null' }}, '{{ dept.department }}')" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm" onclick="deleteDepartment({{ dept.announcement_id|default:'null' }}, '{{ dept.department }}')" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-building"></i>
+                            <h4>No Departments Found</h4>
+                            <p>Start by adding your first department to organize your team structure.</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDepartmentModal">
+                                <i class="fas fa-plus me-1"></i>Add First Department
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+</div>
+
+<!-- Add Department Modal -->
+<div class="modal fade" id="addDepartmentModal" tabindex="-1" aria-labelledby="addDepartmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addDepartmentModalLabel">
+                    <i class="fas fa-plus me-2"></i>Add New Department
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addDepartmentForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="department_name" class="form-label">Department Name *</label>
+                                <input type="text" class="form-control" id="department_name" name="department_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="department_code" class="form-label">Department Code</label>
+                                <input type="text" class="form-control" id="department_code" name="department_code" placeholder="e.g., IT, HR, FIN">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="department_description" class="form-label">Description</label>
+                        <textarea class="form-control" id="department_description" name="department_description" rows="3" placeholder="Brief description of the department's role and responsibilities"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="department_manager" class="form-label">Department Manager</label>
+                                <select class="form-select" id="department_manager" name="department_manager">
+                                    <option value="">Select Manager</option>
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="department_budget" class="form-label">Annual Budget (Optional)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="department_budget" name="department_budget" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addDepartment()">
+                    <i class="fas fa-plus me-1"></i>Add Department
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Department Chart
+{% if departments %}
+const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+const departmentChart = new Chart(departmentCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for dept in departments %}
+                '{{ dept.department|default:"Unassigned" }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for dept in departments %}
+                    {{ dept.employee_count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#3b82f6', '#10b981', '#f59e0b', '#06b6d4', '#ef4444', '#8b5cf6'
+            ],
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Verification Chart
+const verificationCtx = document.getElementById('verificationChart').getContext('2d');
+const verificationChart = new Chart(verificationCtx, {
+    type: 'bar',
+    data: {
+        labels: [
+            {% for dept in departments %}
+                '{{ dept.department|default:"Unassigned" }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Verified',
+            data: [
+                {% for dept in departments %}
+                    {{ dept.verified_count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: '#10b981',
+            borderColor: '#059669',
+        }, {
+            label: 'Pending',
+            data: [
+                {% for dept in departments %}
+                    {{ dept.employee_count|add:dept.verified_count|add:"-"|add:dept.verified_count }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: '#f59e0b',
+            borderColor: '#d97706',
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+{% endif %}
+
+function addDepartment() {
+    const form = document.getElementById('addDepartmentForm');
+    const formData = new FormData(form);
+    
+    // Check if we're editing an existing department
+    const departmentId = document.getElementById('addDepartmentModal').getAttribute('data-department-id');
+    const isEdit = departmentId !== null;
+    
+    // Add loading state
+    const submitBtn = document.querySelector('#addDepartmentModal .btn-primary');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + (isEdit ? 'Updating...' : 'Adding...');
+    submitBtn.disabled = true;
+    
+    let url, method;
+    if (isEdit) {
+        url = `{% url 'api:update_department' 0 %}`.replace('0', departmentId);
+        method = 'PUT';
+    } else {
+        url = '{% url "api:create_department" %}';
+        method = 'POST';
+    }
+    
+    fetch(url, {
+        method: method,
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        if (data.success) {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addDepartmentModal'));
+            modal.hide();
+            
+            // Show success message
+            showNotification(isEdit ? 'Department updated successfully!' : 'Department added successfully!', 'success');
+            
+            // Reset modal for next use
+            resetModal();
+            
+            // Reload page to show updated department list
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.error || 'Operation failed', 'error');
+        }
+    })
+    .catch(error => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        showNotification('An error occurred', 'error');
+    });
+}
+
+function resetModal() {
+    // Reset form
+    document.getElementById('addDepartmentForm').reset();
+    
+    // Reset modal title and button text
+    document.getElementById('addDepartmentModalLabel').innerHTML = '<i class="fas fa-plus me-2"></i>Add New Department';
+    document.querySelector('#addDepartmentModal .btn-primary').innerHTML = '<i class="fas fa-plus me-1"></i>Add Department';
+    
+    // Remove department ID
+    document.getElementById('addDepartmentModal').removeAttribute('data-department-id');
+}
+
+function viewDepartment(departmentId, departmentName) {
+    if (!departmentId) {
+        // Show basic department info even without announcement record
+        showBasicDepartmentDetails(departmentName);
+        return;
+    }
+    
+    fetch(`{% url 'api:get_department' 0 %}`.replace('0', departmentId), {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Create and show department details modal
+            showDepartmentDetailsModal(data.department);
+        } else {
+            showNotification(data.error || 'Failed to load department details', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error loading department details', 'error');
+    });
+}
+
+function editDepartment(departmentId, departmentName) {
+    if (!departmentId) {
+        // Create a new department announcement for this department
+        createDepartmentAnnouncement(departmentName);
+        return;
+    }
+    
+    fetch(`{% url 'api:get_department' 0 %}`.replace('0', departmentId), {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Populate edit modal with department data
+            populateEditModal(data.department);
+        } else {
+            showNotification(data.error || 'Failed to load department details', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error loading department details', 'error');
+    });
+}
+
+function deleteDepartment(departmentId, departmentName) {
+    if (!departmentId) {
+        showNotification('This department cannot be deleted as it has no management record', 'warning');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete the "${departmentName}" department? This action cannot be undone.`)) {
+        fetch(`{% url 'api:delete_department' 0 %}`.replace('0', departmentId), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(`Department "${departmentName}" deleted successfully`, 'success');
+                // Reload page to show updated department list
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showNotification(data.error || 'Failed to delete department', 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('Error deleting department', 'error');
+        });
+    }
+}
+
+function showBasicDepartmentDetails(departmentName) {
+    const modalHtml = `
+        <div class="modal fade" id="departmentDetailsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-building me-2"></i>Department Details
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Department Name</h6>
+                                <p class="text-muted">${departmentName}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Status</h6>
+                                <p class="text-muted">Active (No management record)</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>Description</h6>
+                                <p class="text-muted">This department exists in the system but has no detailed management record. You can create one by clicking the Edit button.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="createDepartmentAnnouncement('${departmentName}')">
+                            <i class="fas fa-plus me-1"></i>Create Management Record
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if it exists
+    const existingModal = document.getElementById('departmentDetailsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add new modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('departmentDetailsModal'));
+    modal.show();
+}
+
+function createDepartmentAnnouncement(departmentName) {
+    // Populate the add modal with department name for creating management record
+    document.getElementById('department_name').value = departmentName;
+    document.getElementById('department_description').value = `Department: ${departmentName}`;
+    
+    // Change modal title and button text
+    document.getElementById('addDepartmentModalLabel').innerHTML = '<i class="fas fa-plus me-2"></i>Create Department Management Record';
+    document.querySelector('#addDepartmentModal .btn-primary').innerHTML = '<i class="fas fa-plus me-1"></i>Create Record';
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('addDepartmentModal'));
+    modal.show();
+}
+
+function showDepartmentDetailsModal(department) {
+    const modalHtml = `
+        <div class="modal fade" id="departmentDetailsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-building me-2"></i>Department Details
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Department Name</h6>
+                                <p class="text-muted">${department.name}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Created Date</h6>
+                                <p class="text-muted">${new Date(department.created_at).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>Description</h6>
+                                <p class="text-muted">${department.description || 'No description provided'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if it exists
+    const existingModal = document.getElementById('departmentDetailsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add new modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('departmentDetailsModal'));
+    modal.show();
+}
+
+function populateEditModal(department) {
+    // Populate the existing add modal with department data for editing
+    document.getElementById('department_name').value = department.name;
+    document.getElementById('department_description').value = department.description || '';
+    
+    // Change modal title and button text
+    document.getElementById('addDepartmentModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Department';
+    document.querySelector('#addDepartmentModal .btn-primary').innerHTML = '<i class="fas fa-save me-1"></i>Update Department';
+    
+    // Store department ID for update
+    document.getElementById('addDepartmentModal').setAttribute('data-department-id', department.id);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('addDepartmentModal'));
+    modal.show();
+}
+</script>
+{% endblock %}
+{% endblock %}

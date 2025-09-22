@@ -1,0 +1,263 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Project Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'css/pages/subscription_plans.css' %}" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'core:owner_dashboard' %}">
+                <i class="fas fa-crown me-2"></i>Project Manager Owner
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'core:subscription_plans' %}">
+                    <i class="fas fa-credit-card me-1"></i>Plans
+                </a>
+                <a class="nav-link" href="{% url 'core:owner_dashboard' %}">
+                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                </a>
+                <a class="nav-link" href="{% url 'core:logout' %}">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-plus-circle me-2 text-primary"></i>{{ title }}
+                        </h2>
+                        <p class="text-muted mb-0">Create a new subscription plan for your customers</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'core:subscription_plans' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Plans
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Create Plan Form -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Plan Details</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Plan Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <div class="invalid-feedback">Please provide a plan name.</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="plan_type" class="form-label">Plan Type *</label>
+                                    <select class="form-select" id="plan_type" name="plan_type" required>
+                                        <option value="">Select Plan Type</option>
+                                        {% for value, label in plan_types %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">Please select a plan type.</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Describe what this plan includes..."></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="price" class="form-label">Price *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" required>
+                                    </div>
+                                    <div class="invalid-feedback">Please provide a valid price.</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="billing_cycle" class="form-label">Billing Cycle *</label>
+                                    <select class="form-select" id="billing_cycle" name="billing_cycle" required>
+                                        <option value="">Select Billing Cycle</option>
+                                        {% for value, label in billing_cycles %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">Please select a billing cycle.</div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+                            <h6 class="text-primary mb-3"><i class="fas fa-cogs me-2"></i>Feature Limits</h6>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="max_users" class="form-label">Max Users</label>
+                                    <input type="number" class="form-control" id="max_users" name="max_users" min="1" value="10">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="max_projects" class="form-label">Max Projects</label>
+                                    <input type="number" class="form-control" id="max_projects" name="max_projects" min="1" value="5">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="max_storage_gb" class="form-label">Max Storage (GB)</label>
+                                    <input type="number" class="form-control" id="max_storage_gb" name="max_storage_gb" min="1" value="5">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="max_api_calls" class="form-label">Max API Calls</label>
+                                    <input type="number" class="form-control" id="max_api_calls" name="max_api_calls" min="0" value="1000">
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+                            <h6 class="text-primary mb-3"><i class="fas fa-star me-2"></i>Features Included</h6>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="has_analytics" name="has_analytics">
+                                        <label class="form-check-label" for="has_analytics">
+                                            <i class="fas fa-chart-bar text-primary me-2"></i>Advanced Analytics
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="has_advanced_reporting" name="has_advanced_reporting">
+                                        <label class="form-check-label" for="has_advanced_reporting">
+                                            <i class="fas fa-file-alt text-primary me-2"></i>Advanced Reporting
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="has_api_access" name="has_api_access">
+                                        <label class="form-check-label" for="has_api_access">
+                                            <i class="fas fa-code text-primary me-2"></i>API Access
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="has_priority_support" name="has_priority_support">
+                                        <label class="form-check-label" for="has_priority_support">
+                                            <i class="fas fa-headset text-primary me-2"></i>Priority Support
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="has_custom_integrations" name="has_custom_integrations">
+                                        <label class="form-check-label" for="has_custom_integrations">
+                                            <i class="fas fa-plug text-primary me-2"></i>Custom Integrations
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="has_white_label" name="has_white_label">
+                                        <label class="form-check-label" for="has_white_label">
+                                            <i class="fas fa-paint-brush text-primary me-2"></i>White Label
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+                            <h6 class="text-primary mb-3"><i class="fas fa-settings me-2"></i>Plan Settings</h6>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="sort_order" class="form-label">Sort Order</label>
+                                    <input type="number" class="form-control" id="sort_order" name="sort_order" min="0" value="0">
+                                    <div class="form-text">Lower numbers appear first</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check mt-4">
+                                        <input class="form-check-input" type="checkbox" id="is_popular" name="is_popular">
+                                        <label class="form-check-label" for="is_popular">
+                                            <i class="fas fa-star text-warning me-2"></i>Mark as Popular Plan
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="{% url 'core:subscription_plans' %}" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Create Plan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        // Auto-calculate annual savings
+        document.getElementById('price').addEventListener('input', function() {
+            const price = parseFloat(this.value) || 0;
+            const billingCycle = document.getElementById('billing_cycle').value;
+            
+            if (billingCycle === 'MONTHLY' && price > 0) {
+                const annualPrice = price * 12;
+                const monthlyEquivalent = annualPrice / 12;
+                console.log(`Monthly: $${price}, Annual equivalent: $${annualPrice}`);
+            }
+        });
+
+        document.getElementById('billing_cycle').addEventListener('change', function() {
+            const price = parseFloat(document.getElementById('price').value) || 0;
+            if (price > 0) {
+                // Trigger price calculation
+                document.getElementById('price').dispatchEvent(new Event('input'));
+            }
+        });
+    </script>
+</body>
+</html>

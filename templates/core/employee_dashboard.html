@@ -1,0 +1,391 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Employee Dashboard{% endblock %}
+
+{% block page_title %}Employee Dashboard{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary" onclick="startTimeTracking()">
+    <i class="fas fa-play me-2"></i>Start Timer
+</button>
+{% endblock %}
+
+{% block content %}
+            <!-- Employee Statistics -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">My Tasks</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ my_tasks|default:"0" }}</div>
+                                    <div class="small text-muted">
+                                        <span class="text-success">{{ completed_tasks }}</span> completed, 
+                                        <span class="text-warning">{{ in_progress_tasks }}</span> in progress
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Active Projects</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_projects|default:"0" }}</div>
+                                    <div class="small text-muted">Projects assigned</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-project-diagram fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Hours Today</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ hours_today|default:"0" }}</div>
+                                    <div class="small text-muted">{{ hours_week }}h this week</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Leave</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_leave|default:"0" }}</div>
+                                    <div class="small text-muted">Leave requests</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-calendar-times fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_tasks' %}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-tasks fa-2x mb-2"></i><br>
+                                        My Tasks
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_projects' %}" class="btn btn-outline-info w-100">
+                                        <i class="fas fa-project-diagram fa-2x mb-2"></i><br>
+                                        Projects
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_timesheet' %}" class="btn btn-outline-success w-100">
+                                        <i class="fas fa-clock fa-2x mb-2"></i><br>
+                                        Time Tracking
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_goals' %}" class="btn btn-outline-warning w-100">
+                                        <i class="fas fa-bullseye fa-2x mb-2"></i><br>
+                                        My Goals
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_leave' %}" class="btn btn-outline-secondary w-100">
+                                        <i class="fas fa-calendar-times fa-2x mb-2"></i><br>
+                                        Leave
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_analytics' %}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-chart-line fa-2x mb-2"></i><br>
+                                        Analytics
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_notifications' %}" class="btn btn-outline-warning w-100">
+                                        <i class="fas fa-bell fa-2x mb-2"></i><br>
+                                        Notifications
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_team_directory' %}" class="btn btn-outline-info w-100">
+                                        <i class="fas fa-users fa-2x mb-2"></i><br>
+                                        Team
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_calendar' %}" class="btn btn-outline-success w-100">
+                                        <i class="fas fa-calendar-alt fa-2x mb-2"></i><br>
+                                        Calendar
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_kanban_board' %}" class="btn btn-outline-dark w-100">
+                                        <i class="fas fa-columns fa-2x mb-2"></i><br>
+                                        Task Board
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_gamification' %}" class="btn btn-outline-warning w-100">
+                                        <i class="fas fa-trophy fa-2x mb-2"></i><br>
+                                        Achievements
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_documents' %}" class="btn btn-outline-secondary w-100">
+                                        <i class="fas fa-folder fa-2x mb-2"></i><br>
+                                        Documents
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_productivity' %}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-chart-line fa-2x mb-2"></i><br>
+                                        Productivity
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <a href="{% url 'core:employee_settings' %}" class="btn btn-outline-dark w-100">
+                                        <i class="fas fa-cog fa-2x mb-2"></i><br>
+                                        Settings
+                                    </a>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button class="btn btn-outline-dark w-100" onclick="startTimeTracking()">
+                                        <i class="fas fa-play fa-2x mb-2"></i><br>
+                                        Start Timer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Tasks and Upcoming Deadlines -->
+            <div class="row mb-4">
+                <div class="col-lg-6">
+                    <div class="card shadow">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">Recent Tasks</h6>
+                            <a href="{% url 'core:employee_tasks' %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye me-1"></i>View All
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% for task in recent_tasks %}
+                            <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ task.title }}</h6>
+                                    <small class="text-muted">{{ task.project.name }}</small>
+                                </div>
+                                <div class="text-end">
+                                    {% if task.priority == 'HIGH' %}
+                                        <span class="badge bg-danger">High</span>
+                                    {% elif task.priority == 'MEDIUM' %}
+                                        <span class="badge bg-warning">Medium</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Low</span>
+                                    {% endif %}
+                                    <br>
+                                    {% if task.status == 'DONE' %}
+                                        <span class="badge bg-success">Done</span>
+                                    {% elif task.status == 'IN_PROGRESS' %}
+                                        <span class="badge bg-primary">In Progress</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">To Do</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-tasks fa-3x mb-3 text-muted"></i><br>
+                                No tasks assigned yet.<br>
+                                <small>Your manager will assign tasks to you soon.</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card shadow">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-warning">Upcoming Deadlines</h6>
+                            <span class="badge bg-warning">{{ upcoming_deadlines|length }}</span>
+                        </div>
+                        <div class="card-body">
+                            {% for task in upcoming_deadlines %}
+                            <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ task.title }}</h6>
+                                    <small class="text-muted">{{ task.project.name }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">{{ task.due_date|date:"M d" }}</small>
+                                    <br>
+                                    {% if task.priority == 'HIGH' %}
+                                        <span class="badge bg-danger">High</span>
+                                    {% elif task.priority == 'MEDIUM' %}
+                                        <span class="badge bg-warning">Medium</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Low</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-calendar-check fa-3x mb-3 text-muted"></i><br>
+                                No upcoming deadlines.<br>
+                                <small>Great job staying on top of your tasks!</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Announcements and My Information -->
+            <div class="row mb-4">
+                <div class="col-lg-6">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-info">Recent Announcements</h6>
+                        </div>
+                        <div class="card-body">
+                            {% for announcement in recent_announcements %}
+                            <div class="d-flex align-items-start mb-3 p-2 border rounded">
+                                <div class="me-3">
+                                    {% if announcement.announcement_type == 'IMPORTANT' %}
+                                        <i class="fas fa-exclamation-triangle text-danger fa-lg"></i>
+                                    {% elif announcement.announcement_type == 'GENERAL' %}
+                                        <i class="fas fa-bullhorn text-info fa-lg"></i>
+                                    {% else %}
+                                        <i class="fas fa-info-circle text-primary fa-lg"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ announcement.title }}</h6>
+                                    <p class="mb-1 text-muted small">{{ announcement.content|truncatewords:20 }}</p>
+                                    <small class="text-muted">{{ announcement.created_at|date:"M d, Y" }}</small>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-bullhorn fa-3x mb-3 text-muted"></i><br>
+                                No recent announcements.<br>
+                                <small>Check back later for updates.</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">My Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Name:</strong></td>
+                                    <td>{{ employee.first_name }} {{ employee.last_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Employee ID:</strong></td>
+                                    <td><code>{{ employee.employee_id }}</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td>{{ employee.email }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Department:</strong></td>
+                                    <td>{{ employee.department|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Position:</strong></td>
+                                    <td>{{ employee.position|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Company:</strong></td>
+                                    <td>{{ company.name }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Tracking -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Time Tracking</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="h4 text-primary" id="currentTimer">00:00:00</div>
+                                    <small class="text-muted">Current Session</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="h4 text-success" id="todayHours">{{ hours_today|default:"0" }}</div>
+                                    <small class="text-muted">Hours Today</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="h4 text-info" id="weekHours">{{ hours_week|default:"0" }}</div>
+                                    <small class="text-muted">Hours This Week</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="h4 text-warning" id="monthHours">{{ hours_month|default:"0" }}</div>
+                                    <small class="text-muted">Hours This Month</small>
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <button class="btn btn-success me-2" onclick="startTimeTracking()" id="startBtn">
+                                    <i class="fas fa-play me-2"></i>Start Timer
+                                </button>
+                                <button class="btn btn-danger me-2" onclick="stopTimeTracking()" id="stopBtn" style="display: none;">
+                                    <i class="fas fa-stop me-2"></i>Stop Timer
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="pauseTimeTracking()" id="pauseBtn" style="display: none;">
+                                    <i class="fas fa-pause me-2"></i>Pause
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - ProjectManager Pro</title>
+    
+    {% load static %}
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- About CSS -->
+    <link href="{% static 'css/pages/about.css' %}" rel="stylesheet">
+    
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 4rem 0;
+        }
+        
+        .feature-card {
+            transition: transform 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        
+        .bg-primary-gradient {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        }
+        
+        .bg-success-gradient {
+            background: linear-gradient(135deg, #10b981, #34d399);
+        }
+        
+        .bg-info-gradient {
+            background: linear-gradient(135deg, #06b6d4, #22d3ee);
+        }
+        
+        .bg-warning-gradient {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="{% url 'core:home' %}">
+                <i class="fas fa-crown me-2"></i>ProjectManager Pro
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'core:about' %}">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:contact' %}">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:login' %}">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-4">About ProjectManager Pro</h1>
+            <p class="lead mb-4">The ultimate project management solution for modern businesses</p>
+            <p class="fs-5">Empowering teams to collaborate, track progress, and achieve their goals with ease.</p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="h1 fw-bold mb-3">Why Choose ProjectManager Pro?</h2>
+                    <p class="lead text-muted">We provide comprehensive project management tools designed for businesses of all sizes.</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="icon-circle bg-primary-gradient text-white">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Multi-Tenant Architecture</h5>
+                        <p class="text-muted">Secure, isolated environments for each company with dedicated admin controls.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="icon-circle bg-success-gradient text-white">
+                            <i class="fas fa-shield-alt fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Enterprise Security</h5>
+                        <p class="text-muted">Advanced security features with role-based access control and data encryption.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="icon-circle bg-info-gradient text-white">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Advanced Analytics</h5>
+                        <p class="text-muted">Comprehensive reporting and analytics to track performance and make data-driven decisions.</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="icon-circle bg-warning-gradient text-white">
+                            <i class="fas fa-mobile-alt fa-2x"></i>
+                        </div>
+                        <h5 class="fw-bold">Mobile Responsive</h5>
+                        <p class="text-muted">Access your projects anywhere, anytime with our fully responsive design.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="h2 fw-bold text-primary">100+</div>
+                    <p class="text-muted">Companies Trust Us</p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="h2 fw-bold text-success">10K+</div>
+                    <p class="text-muted">Active Users</p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="h2 fw-bold text-info">99.9%</div>
+                    <p class="text-muted">Uptime Guarantee</p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="h2 fw-bold text-warning">24/7</div>
+                    <p class="text-muted">Support Available</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="h1 fw-bold mb-3">Our Mission</h2>
+                    <p class="lead text-muted">To revolutionize project management by providing intuitive, powerful tools that enable teams to work more efficiently and achieve their goals.</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-lightbulb fa-3x text-warning mb-3"></i>
+                            <h5 class="fw-bold">Innovation</h5>
+                            <p class="text-muted">We continuously innovate to provide cutting-edge project management solutions.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+                            <h5 class="fw-bold">Customer Focus</h5>
+                            <p class="text-muted">Our customers are at the heart of everything we do. We listen, learn, and adapt.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-rocket fa-3x text-primary mb-3"></i>
+                            <h5 class="fw-bold">Excellence</h5>
+                            <p class="text-muted">We strive for excellence in every feature, every interaction, and every solution.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container text-center">
+            <h2 class="h1 fw-bold mb-3">Ready to Get Started?</h2>
+            <p class="lead mb-4">Join thousands of companies already using ProjectManager Pro to streamline their project management.</p>
+            <a href="{% url 'core:login' %}" class="btn btn-light btn-lg">
+                <i class="fas fa-sign-in-alt me-2"></i>Get Started Today
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-crown me-2"></i>ProjectManager Pro</h5>
+                    <p class="text-muted">Empowering teams to achieve their goals through better project management.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">&copy; 2024 ProjectManager Pro. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Project Manager</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- System Logs CSS -->
+    <link href="{% static 'css/pages/system_logs.css' %}" rel="stylesheet">
+    <style>
+        .owner-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+        }
+        
+        .breadcrumb-item a {
+            color: #6c757d;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: #495057;
+        }
+        
+        .log-card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 0.5rem;
+        }
+        
+        .log-card .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+        
+        .log-entry {
+            border-left: 4px solid #dee2e6;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: #fff;
+            border-radius: 0.25rem;
+        }
+        
+        .log-entry.debug { border-left-color: #6c757d; }
+        .log-entry.info { border-left-color: #0dcaf0; }
+        .log-entry.warning { border-left-color: #ffc107; }
+        .log-entry.error { border-left-color: #dc3545; }
+        .log-entry.critical { border-left-color: #000; }
+        
+        .log-level {
+            font-weight: bold;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            text-transform: uppercase;
+        }
+        
+        .log-timestamp {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .log-message {
+            margin: 0.5rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .log-meta {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .filter-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+        
+        .btn-outline-primary {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .pagination .page-link {
+            color: #667eea;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="owner-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-file-alt me-2"></i>{{ title }}
+                    </h1>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="d-flex align-items-center justify-content-md-end">
+                        <div class="me-3">
+                            <small class="text-light">Welcome, {{ user.username }}</small>
+                        </div>
+                        <a href="{% url 'core:owner_dashboard' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:owner_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Statistics Cards -->
+            <div class="col-lg-12 mb-4">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-alt fa-2x mb-2"></i>
+                                <h4 class="mb-0">{{ total_logs }}</h4>
+                                <small>Total Logs</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                <h4 class="mb-0">{{ warning_logs }}</h4>
+                                <small>Warnings</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-times-circle fa-2x mb-2"></i>
+                                <h4 class="mb-0">{{ error_logs }}</h4>
+                                <small>Errors</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-skull fa-2x mb-2"></i>
+                                <h4 class="mb-0">{{ critical_logs }}</h4>
+                                <small>Critical</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="col-lg-3 mb-4">
+                <div class="card filter-card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Filters</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" id="filterForm">
+                            <div class="mb-3">
+                                <label for="level" class="form-label">Log Level</label>
+                                <select class="form-select" id="level" name="level">
+                                    <option value="">All Levels</option>
+                                    {% for level_code, level_name in log_levels %}
+                                    <option value="{{ level_code }}" {% if level_filter == level_code %}selected{% endif %}>
+                                        {{ level_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="">All Categories</option>
+                                    {% for category_code, category_name in log_categories %}
+                                    <option value="{{ category_code }}" {% if category_filter == category_code %}selected{% endif %}>
+                                        {{ category_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="search" class="form-label">Search Message</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ search_query }}" placeholder="Search in messages...">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="date_from" class="form-label">From Date</label>
+                                <input type="date" class="form-control" id="date_from" name="date_from" 
+                                       value="{{ date_from }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="date_to" class="form-label">To Date</label>
+                                <input type="date" class="form-control" id="date_to" name="date_to" 
+                                       value="{{ date_to }}">
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-1"></i>Apply Filters
+                                </button>
+                                <a href="{% url 'core:system_logs' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i>Clear Filters
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs List -->
+            <div class="col-lg-9">
+                <div class="card log-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>System Logs</h5>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportLogs()">
+                                <i class="fas fa-download me-1"></i>Export
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="clearOldLogs()">
+                                <i class="fas fa-trash me-1"></i>Clear Old
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if logs %}
+                        {% for log in logs %}
+                        <div class="log-entry {{ log.level|lower }}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center">
+                                    <span class="log-level badge bg-{{ log.level_color }} me-2">{{ log.level }}</span>
+                                    <i class="{{ log.category_icon }} me-2 text-muted"></i>
+                                    <span class="text-muted">{{ log.get_category_display }}</span>
+                                </div>
+                                <span class="log-timestamp">{{ log.timestamp|date:"M d, Y H:i:s" }}</span>
+                            </div>
+                            
+                            <div class="log-message">{{ log.message }}</div>
+                            
+                            <div class="log-meta">
+                                {% if log.user %}
+                                <span class="me-3"><i class="fas fa-user me-1"></i>{{ log.user.username }}</span>
+                                {% endif %}
+                                {% if log.ip_address %}
+                                <span class="me-3"><i class="fas fa-globe me-1"></i>{{ log.ip_address }}</span>
+                                {% endif %}
+                                {% if log.request_path %}
+                                <span class="me-3"><i class="fas fa-route me-1"></i>{{ log.request_method }} {{ log.request_path }}</span>
+                                {% endif %}
+                                {% if log.execution_time %}
+                                <span class="me-3"><i class="fas fa-clock me-1"></i>{{ log.execution_time|floatformat:3 }}s</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <nav aria-label="Logs pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if level_filter %}&level={{ level_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">First</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if level_filter %}&level={{ level_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">Previous</a>
+                                </li>
+                                {% endif %}
+                                
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                    </span>
+                                </li>
+                                
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if level_filter %}&level={{ level_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">Next</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if level_filter %}&level={{ level_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">Last</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                        
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No logs found</h5>
+                            <p class="text-muted">No system logs match your current filters.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2025 Project Manager. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">System Logs Management</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/pages/system_logs.js' %}"></script>
+    <script>
+        function exportLogs() {
+            // Get current filter parameters
+            const params = new URLSearchParams(window.location.search);
+            params.set('export', 'csv');
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = '{% url "core:system_logs" %}?' + params.toString();
+            link.download = 'system_logs.csv';
+            link.click();
+        }
+        
+        function clearOldLogs() {
+            if (confirm('Are you sure you want to clear logs older than 30 days? This action cannot be undone.')) {
+                // This would need to be implemented as a POST request to a clear_logs view
+                showErrorToast('Clear old logs functionality will be implemented in the next update.');
+            }
+        }
+        
+        // Auto-refresh logs every 30 seconds
+        setInterval(function() {
+            if (document.visibilityState === 'visible') {
+                location.reload();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

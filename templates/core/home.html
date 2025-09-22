@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Project Management System{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/home.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-6">
+                <div class="hero-content fade-in-up">
+                    <h1 class="display-4 fw-bold mb-4 text-shadow">
+                        Streamline Your Projects with 
+                        <span class="text-warning">ProjectManager Pro</span>
+                    </h1>
+                    <p class="lead mb-4 text-shadow">
+                        The ultimate offline project management solution for teams who value privacy, 
+                        security, and complete control over their data.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        {% if not user.is_authenticated %}
+                            <a href="{% url 'core:registration_selection' %}" class="btn btn-warning btn-lg px-4 btn-loading">
+                                <i class="fas fa-rocket me-2"></i>Start Free Trial
+                            </a>
+                            <a href="{% url 'core:login' %}" class="btn btn-outline-light btn-lg px-4">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </a>
+                        {% else %}
+                            <a href="#" class="btn btn-warning btn-lg px-4">
+                                <i class="fas fa-plus me-2"></i>Create Project
+                            </a>
+                            <a href="#" class="btn btn-outline-light btn-lg px-4">
+                                <i class="fas fa-eye me-2"></i>View Dashboard
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center slide-in-right">
+                    <div class="hero-icon-container mb-4">
+                        <i class="fas fa-project-diagram display-1 text-warning"></i>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <div class="home-feature-card glass">
+                                <i class="fas fa-tasks text-warning fs-2 mb-2"></i>
+                                <h6 class="fw-bold">Task Management</h6>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="home-feature-card glass">
+                                <i class="fas fa-users text-warning fs-2 mb-2"></i>
+                                <h6 class="fw-bold">Team Collaboration</h6>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="home-feature-card glass">
+                                <i class="fas fa-chart-line text-warning fs-2 mb-2"></i>
+                                <h6 class="fw-bold">Analytics</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3">Why Choose ProjectManager Pro?</h2>
+                <p class="lead text-muted">
+                    Built for companies that demand the highest standards of data security and privacy.
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="home-feature-box text-center h-100">
+                    <div class="home-feature-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="fas fa-shield-alt text-primary fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">100% Offline</h4>
+                    <p class="text-muted">
+                        Your data never leaves your server. Complete privacy and security with no cloud dependencies.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="home-feature-box text-center h-100">
+                    <div class="home-feature-icon bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="fas fa-rocket text-success fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Enterprise Ready</h4>
+                    <p class="text-muted">
+                        Scalable architecture designed for teams of any size. From startups to Fortune 500 companies.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="home-feature-box text-center h-100">
+                    <div class="home-feature-icon bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="fas fa-cogs text-warning fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Fully Customizable</h4>
+                    <p class="text-muted">
+                        Tailor the system to your company's unique workflow and requirements.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="home-feature-box text-center h-100">
+                    <div class="home-feature-icon bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="fas fa-credit-card text-info fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Flexible Pricing</h4>
+                    <p class="text-muted">
+                        Start free and scale as you grow. Choose from our flexible subscription plans designed for every team size.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="home-feature-box text-center h-100">
+                    <div class="home-feature-icon bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="fas fa-headset text-danger fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">24/7 Support</h4>
+                    <p class="text-muted">
+                        Dedicated support team to ensure your success with implementation and ongoing usage.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="home-feature-box text-center h-100">
+                    <div class="home-feature-icon bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                        <i class="fas fa-sync text-secondary fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Regular Updates</h4>
+                    <p class="text-muted">
+                        Continuous improvements and new features delivered through our update system.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Overview Section -->
+<section class="py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3">Start Free, Scale as You Grow</h2>
+                <p class="lead text-muted">
+                    Choose the perfect plan for your team. Start with our free plan and upgrade anytime.
+                </p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="pricing-overview">
+                    <div class="row g-4">
+                        <!-- Free Plan Overview -->
+                        <div class="col-lg-3 col-md-6">
+                            <div class="pricing-card-overview free-plan">
+                                <div class="plan-icon">
+                                    <i class="fas fa-gift"></i>
+                                </div>
+                                <h3 class="plan-title">Free</h3>
+                                <p class="plan-subtitle">Perfect for individuals</p>
+                                <div class="price-display">
+                                    <span class="currency">$</span>
+                                    <span class="amount">0</span>
+                                    <span class="period">/month</span>
+                                </div>
+                                <div class="features-preview">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>3 Users</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>5 Projects</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>1GB Storage</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Community Support</span>
+                                    </div>
+                                </div>
+                                <a href="{% url 'core:pricing' %}" class="btn btn-outline-light btn-lg w-100">
+                                    <i class="fas fa-arrow-right me-2"></i>Get Started
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Starter Plan Overview -->
+                        <div class="col-lg-3 col-md-6">
+                            <div class="pricing-card-overview">
+                                <div class="plan-icon">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <h3 class="plan-title">Starter</h3>
+                                <p class="plan-subtitle">Great for small teams</p>
+                                <div class="price-display">
+                                    <span class="currency">$</span>
+                                    <span class="amount">19</span>
+                                    <span class="period">/month</span>
+                                </div>
+                                <div class="features-preview">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>10 Users</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>25 Projects</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>10GB Storage</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Email Support</span>
+                                    </div>
+                                </div>
+                                <a href="{% url 'core:pricing' %}" class="btn btn-outline-light btn-lg w-100">
+                                    <i class="fas fa-arrow-right me-2"></i>View Details
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Professional Plan Overview -->
+                        <div class="col-lg-3 col-md-6">
+                            <div class="pricing-card-overview popular">
+                                <div class="popular-badge">
+                                    <i class="fas fa-star"></i> Most Popular
+                                </div>
+                                <div class="plan-icon">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <h3 class="plan-title">Professional</h3>
+                                <p class="plan-subtitle">For growing businesses</p>
+                                <div class="price-display">
+                                    <span class="currency">$</span>
+                                    <span class="amount">49</span>
+                                    <span class="period">/month</span>
+                                </div>
+                                <div class="features-preview">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>50 Users</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>100 Projects</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>50GB Storage</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>Priority Support</span>
+                                    </div>
+                                </div>
+                                <a href="{% url 'core:pricing' %}" class="btn btn-warning btn-lg w-100">
+                                    <i class="fas fa-arrow-right me-2"></i>View Details
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Enterprise Plan Overview -->
+                        <div class="col-lg-3 col-md-6">
+                            <div class="pricing-card-overview">
+                                <div class="plan-icon">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                                <h3 class="plan-title">Enterprise</h3>
+                                <p class="plan-subtitle">For large organizations</p>
+                                <div class="price-display">
+                                    <span class="currency">$</span>
+                                    <span class="amount">99</span>
+                                    <span class="period">/month</span>
+                                </div>
+                                <div class="features-preview">
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>200 Users</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>500 Projects</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>200GB Storage</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check"></i>
+                                        <span>24/7 Support</span>
+                                    </div>
+                                </div>
+                                <a href="{% url 'core:pricing' %}" class="btn btn-outline-light btn-lg w-100">
+                                    <i class="fas fa-arrow-right me-2"></i>View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing CTA -->
+        <div class="row mt-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="pricing-cta">
+                    <h4 class="mb-3">Ready to get started?</h4>
+                    <p class="text-muted mb-4">
+                        Start with our free plan and upgrade as your team grows. Free plan requires no payment or trial.
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{% url 'core:registration_selection' %}" class="btn btn-success btn-lg">
+                            <i class="fas fa-gift me-2"></i>Get Free Access
+                        </a>
+                        <a href="{% url 'core:pricing' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-credit-card me-2"></i>View All Plans
+                        </a>
+                        <a href="{% url 'core:registration_selection' %}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Start Free Trial
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="home-stat-box">
+                    <h3 class="display-4 fw-bold text-primary mb-2">100+</h3>
+                    <p class="text-muted mb-0 fw-semibold">Companies Trust Us</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="home-stat-box">
+                    <h3 class="display-4 fw-bold text-success mb-2">1K+</h3>
+                    <p class="text-muted mb-0 fw-semibold">Projects Managed</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="home-stat-box">
+                    <h3 class="display-4 fw-bold text-warning mb-2">99.9%</h3>
+                    <p class="text-muted mb-0 fw-semibold">Uptime Guarantee</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="home-stat-box">
+                    <h3 class="display-4 fw-bold text-info mb-2">24/7</h3>
+                    <p class="text-muted mb-0 fw-semibold">Support Available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 home-cta-section text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h3 class="fw-bold mb-3">Ready to Transform Your Project Management?</h3>
+                <p class="mb-0 lead">
+                    Join hundreds of companies who have already made the switch to ProjectManager Pro.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'core:registration_selection' %}" class="btn btn-warning btn-lg px-4">
+                        <i class="fas fa-rocket me-2"></i>Start Free Trial
+                    </a>
+                {% else %}
+                    <a href="#" class="btn btn-warning btn-lg px-4">
+                        <i class="fas fa-plus me-2"></i>Create Project
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/home.js' %}"></script>
+{% endblock %}

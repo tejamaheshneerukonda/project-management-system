@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup & Restore - ProjectManager Pro</title>
+    
+    {% load static %}
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .owner-header {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .owner-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .owner-user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: white;
+        }
+        
+        .backup-card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+        }
+        
+        .backup-section {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1.5rem 0;
+        }
+        
+        .backup-section:last-child {
+            border-bottom: none;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #06b6d4, #22d3ee);
+            border: none;
+        }
+        
+        .btn-info:hover {
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            border: none;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #10b981);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            border: none;
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+        }
+        
+        .backup-status {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .backup-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .backup-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    {% load static %}
+    
+    <!-- Owner Header -->
+    <header class="owner-header">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand owner-brand" href="{% url 'core:owner_dashboard' %}">
+                    <i class="fas fa-crown me-2"></i>
+                    ProjectManager Pro
+                    <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">Owner Dashboard</small>
+                </a>
+                
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle owner-user-info" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-crown me-2"></i>{{ user.username }}
+                            <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">System Owner</small>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'core:owner_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:register_company' %}"><i class="fas fa-building me-2"></i>Register Company</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'core:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:owner_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Backup & Restore</li>
+            </ol>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1">Backup & Restore</h1>
+                <p class="text-muted mb-0">Manage system backups and data restoration</p>
+            </div>
+            <div>
+                <a href="{% url 'core:owner_system_settings' %}" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-cog me-2"></i>System Settings
+                </a>
+                <a href="{% url 'core:owner_security_settings' %}" class="btn btn-outline-warning">
+                    <i class="fas fa-shield-alt me-2"></i>Security
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Create Backup -->
+                <div class="card backup-card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Create New Backup</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="create_backup">
+                            
+                            <div class="backup-section">
+                                <h6 class="fw-bold mb-3">Backup Configuration</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="backup_name" class="form-label">Backup Name</label>
+                                        <input type="text" class="form-control" id="backup_name" name="backup_name" placeholder="Enter backup name">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="backup_type" class="form-label">Backup Type</label>
+                                        <select class="form-select" id="backup_type" name="backup_type">
+                                            <option value="full">Full Backup</option>
+                                            <option value="incremental">Incremental Backup</option>
+                                            <option value="differential">Differential Backup</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="backup_location" class="form-label">Backup Location</label>
+                                    <select class="form-select" id="backup_location" name="backup_location">
+                                        <option value="">Local Backups Folder</option>
+                                        {% for drive in external_drives %}
+                                        <option value="{{ drive.path }}">
+                                            <i class="{{ drive.icon }}"></i> {{ drive.name }} ({{ drive.free_gb }} GB free)
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <small class="text-muted">Select drive or use local backups folder</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Include in Backup</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="include_database" name="include_database" checked>
+                                        <label class="form-check-label" for="include_database">
+                                            Database (SQLite)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="include_files" name="include_files" checked>
+                                        <label class="form-check-label" for="include_files">
+                                            User Files (Media)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="include_settings" name="include_settings" checked>
+                                        <label class="form-check-label" for="include_settings">
+                                            Static Files & Settings
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-info">
+                                    <i class="fas fa-download me-2"></i>Create Backup
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Existing Backups -->
+                <div class="card backup-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-archive me-2"></i>Existing Backups</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for backup in backups %}
+                        <div class="backup-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <h6 class="mb-1">{{ backup.name }}</h6>
+                                    <small class="text-muted">{{ backup.type }} Backup</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="badge bg-primary status-badge">{{ backup.size }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">{{ backup.created }}</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="d-flex gap-2">
+                                        <form method="post" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="restore_backup">
+                                            <input type="hidden" name="backup_id" value="{{ backup.id }}">
+                                            <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Are you sure you want to restore this backup? This will overwrite current data.')">
+                                                <i class="fas fa-undo me-1"></i>Restore
+                                            </button>
+                                        </form>
+                                        <form method="post" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete_backup">
+                                            <input type="hidden" name="backup_id" value="{{ backup.id }}">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this backup?')">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-archive fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Backups Found</h5>
+                            <p class="text-muted">Create your first backup to get started.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- Backup Status -->
+                <div class="backup-status mb-4">
+                    <h6 class="fw-bold mb-3">Storage Status</h6>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>System Storage</span>
+                            <span class="badge bg-info">{{ storage_info.used_gb }} GB / {{ storage_info.total_gb }} GB</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ storage_info.usage_percent }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ storage_info.free_gb }} GB free</small>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>Backup Storage Used</span>
+                            <span class="badge bg-warning">{{ storage_info.backup_size_gb }} GB</span>
+                        </div>
+                    </div>
+                    {% if external_drives %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>Available Drives</span>
+                            <span class="badge bg-success">{{ external_drives|length }} Connected</span>
+                        </div>
+                        <div class="row">
+                            {% for drive in external_drives %}
+                            <div class="col-6 mb-1">
+                                <small class="text-muted">
+                                    <i class="{{ drive.icon }} me-1"></i>{{ drive.type }}: {{ drive.free_gb }} GB free
+                                </small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- All Drives -->
+                {% if external_drives %}
+                <div class="card backup-card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-hdd me-2"></i>Available Drives</h6>
+                    </div>
+                    <div class="card-body">
+                        {% for drive in external_drives %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="{{ drive.icon }} me-2 text-primary"></i>
+                                <div>
+                                    <small class="fw-bold">{{ drive.name }}</small>
+                                    <br>
+                                    <small class="text-muted">{{ drive.free_gb }} GB free of {{ drive.total_gb }} GB</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="progress" style="width: 100px; height: 8px;">
+                                    <div class="progress-bar {% if drive.usage_percent > 80 %}bg-danger{% elif drive.usage_percent > 60 %}bg-warning{% else %}bg-success{% endif %}" 
+                                         role="progressbar" style="width: {{ drive.usage_percent }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ drive.usage_percent }}% used</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Backup Schedule -->
+                <div class="card backup-card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-clock me-2"></i>Backup Schedule</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="auto_backup" checked>
+                                <label class="form-check-label" for="auto_backup">
+                                    Enable Automatic Backups
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Frequency</label>
+                            <select class="form-select form-select-sm">
+                                <option value="daily" selected>Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Time</label>
+                            <input type="time" class="form-control form-control-sm" value="02:00">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Retention (days)</label>
+                            <input type="number" class="form-control form-control-sm" value="30" min="7" max="365">
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-save me-2"></i>Save Schedule
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="card backup-card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-info btn-sm" onclick="createQuickBackup()">
+                                <i class="fas fa-bolt me-2"></i>Quick Backup
+                            </button>
+                            <a href="{% url 'core:system_logs' %}" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-file-alt me-2"></i>Backup Logs
+                            </a>
+                            <a href="{% url 'core:maintenance' %}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-tools me-2"></i>Storage Cleanup
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            });
+        });
+
+        // Quick backup function
+        function createQuickBackup() {
+            if (confirm('Create a quick backup now?')) {
+                // Create a form and submit it
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.innerHTML = `
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_backup">
+                    <input type="hidden" name="backup_name" value="Quick Backup - ${new Date().toLocaleString()}">
+                    <input type="hidden" name="backup_type" value="full">
+                `;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const backupName = document.getElementById('backup_name').value.trim();
+            if (!backupName) {
+                showErrorToast('Please enter a backup name');
+                e.preventDefault();
+                return;
+            }
+        });
+
+        // Auto-generate backup name if empty
+        document.getElementById('backup_name').addEventListener('focus', function() {
+            if (!this.value) {
+                const now = new Date();
+                const timestamp = now.toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '_');
+                this.value = `backup_${timestamp}`;
+            }
+        });
+    </script>
+</body>
+</html>

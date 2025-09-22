@@ -1,0 +1,849 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}Add Payment Method{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/add_payment_method.css' %}?v={{ timestamp }}">
+<style>
+/* Essential CSS for animation */
+.creditcard {
+    transition: transform 0.6s ease-in-out !important;
+    transform-style: preserve-3d !important;
+    cursor: pointer;
+}
+.creditcard.flipped {
+    transform: rotateY(180deg) !important;
+}
+.container {
+    perspective: 1000px !important;
+}
+.creditcard .front,
+.creditcard .back {
+    backface-visibility: hidden !important;
+    position: absolute;
+    width: 100%;
+}
+.creditcard .back {
+    transform: rotateY(180deg) !important;
+}
+
+/* Form styling */
+.form-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: 90px 90px 90px 90px;
+    grid-template-areas: 
+        "name name"
+        "number number"
+        "expiration security"
+        "payment_type payment_type";
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #707070;
+}
+
+.field-container {
+    position: relative;
+}
+
+.field-container input {
+    box-sizing: border-box;
+    margin-top: 3px;
+    padding: 15px;
+    font-size: 16px;
+    width: 100%;
+    border-radius: 3px;
+    border: 1px solid #dcdcdc;
+    background-color: white;
+    color: #333;
+}
+
+.field-container label {
+    padding-bottom: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+}
+
+#generatecard {
+    cursor: pointer;
+    float: right;
+    font-size: 12px;
+    color: #fff;
+    padding: 2px 4px;
+    background-color: #909090;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+#generatecard:hover {
+    background-color: #777;
+}
+
+.ccicon {
+    height: 38px;
+    position: absolute;
+    right: 6px;
+    top: calc(50% - 17px);
+    width: 60px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="add-payment-method-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                        <div class="page-header">
+                            <h1>Add Payment Method</h1>
+                            <p class="text-muted">Add a new payment method to your account</p>
+                        </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="payment-card-container">
+                    <div class="payment-title">
+                        <h1>Payment Information</h1>
+                    </div>
+                    
+                    <div class="container preload">
+                        <div class="creditcard">
+                            <div class="front">
+                                <div id="ccsingle"></div>
+                                <svg version="1.1" id="cardfront" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    x="0px" y="0px" viewBox="0 0 750 471" style="enable-background:new 0 0 750 471;" xml:space="preserve">
+                                    <g id="Front">
+                                        <g id="CardBackground">
+                                            <g id="Page-1_1_">
+                                                <g id="amex_1_">
+                                                    <path id="Rectangle-1_1_" class="lightcolor grey" d="M40,0h670c22.1,0,40,17.9,40,40v391c0,22.1-17.9,40-40,40H40c-22.1,0-40-17.9-40-40V40
+                                            C0,17.9,17.9,0,40,0z" />
+                                                </g>
+                                            </g>
+                                            <path class="darkcolor greydark" d="M750,431V193.2c-217.6-57.5-556.4-13.5-750,24.9V431c0,22.1,17.9,40,40,40h670C732.1,471,750,453.1,750,431z" />
+                                        </g>
+                                        <text transform="matrix(1 0 0 1 60.106 295.0121)" id="svgnumber" class="st2 st3 st4">0123 4567 8910 1112</text>
+                                        <text transform="matrix(1 0 0 1 54.1064 428.1723)" id="svgname" class="st2 st5 st6">JOHN DOE</text>
+                                        <text transform="matrix(1 0 0 1 54.1074 389.8793)" class="st7 st5 st8">cardholder name</text>
+                                        <text transform="matrix(1 0 0 1 479.7754 388.8793)" class="st7 st5 st8">expiration</text>
+                                        <text transform="matrix(1 0 0 1 65.1054 241.5)" class="st7 st5 st8">card number</text>
+                                        <g>
+                                            <text transform="matrix(1 0 0 1 574.4219 433.8095)" id="svgexpire" class="st2 st5 st9">01/23</text>
+                                            <text transform="matrix(1 0 0 1 479.3848 417.0097)" class="st2 st10 st11">VALID</text>
+                                            <text transform="matrix(1 0 0 1 479.3848 435.6762)" class="st2 st10 st11">THRU</text>
+                                            <polygon class="st2" points="554.5,421 540.4,414.2 540.4,427.9 		" />
+                                        </g>
+                                        <g id="cchip">
+                                            <g>
+                                                <path class="st2" d="M168.1,143.6H82.9c-10.2,0-18.5-8.3-18.5-18.5V74.9c0-10.2,8.3-18.5,18.5-18.5h85.3
+                                        c10.2,0,18.5,8.3,18.5,18.5v50.2C186.6,135.3,178.3,143.6,168.1,143.6z" />
+                                            </g>
+                                            <g>
+                                                <g>
+                                                    <rect x="82" y="70" class="st12" width="1.5" height="60" />
+                                                </g>
+                                                <g>
+                                                    <rect x="167.4" y="70" class="st12" width="1.5" height="60" />
+                                                </g>
+                                                <g>
+                                                    <path class="st12" d="M125.5,130.8c-10.2,0-18.5-8.3-18.5-18.5c0-4.6,1.7-8.9,4.7-12.3c-3-3.4-4.7-7.7-4.7-12.3
+                                            c0-10.2,8.3-18.5,18.5-18.5s18.5,8.3,18.5,18.5c0,4.6-1.7,8.9-4.7,12.3c3,3.4,4.7,7.7,4.7,12.3
+                                            C143.9,122.5,135.7,130.8,125.5,130.8z M125.5,70.8c-9.3,0-16.9,7.6-16.9,16.9c0,4.4,1.7,8.6,4.8,11.8l0.5,0.5l-0.5,0.5
+                                            c-3.1,3.2-4.8,7.4-4.8,11.8c0,9.3,7.6,16.9,16.9,16.9s16.9-7.6,16.9-16.9c0-4.4-1.7-8.6-4.8-11.8l-0.5-0.5l0.5-0.5
+                                            c3.1-3.2,4.8-7.4,4.8-11.8C142.4,78.4,134.8,70.8,125.5,70.8z" />
+                                                </g>
+                                                <g>
+                                                    <rect x="82.8" y="82.1" class="st12" width="25.8" height="1.5" />
+                                                </g>
+                                                <g>
+                                                    <rect x="82.8" y="117.9" class="st12" width="26.1" height="1.5" />
+                                                </g>
+                                                <g>
+                                                    <rect x="142.4" y="82.1" class="st12" width="25.8" height="1.5" />
+                                                </g>
+                                                <g>
+                                                    <rect x="142" y="117.9" class="st12" width="26.2" height="1.5" />
+                                                </g>
+                                            </g>
+                                        </g>
+                                        
+                                        <!-- Card Type Logos - Larger and more visible -->
+                                        <g id="card-logos">
+                                            <!-- Visa Logo - Much larger and more visible -->
+                                            <g id="visa-logo" class="card-logo" style="display: none;">
+                                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#1A1F71"/>
+                                                <text x="590" y="40" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">VISA</text>
+                                                <!-- Orange notch on V -->
+                                                <rect x="570" y="20" width="4" height="12" fill="#FF6B35"/>
+                                            </g>
+                                            
+                                            <!-- Mastercard Logo - Much larger and more visible -->
+                                            <g id="mastercard-logo" class="card-logo" style="display: none;">
+                                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#000000"/>
+                                                <circle cx="570" cy="40" r="12" fill="#EB001B"/>
+                                                <circle cx="590" cy="40" r="12" fill="#F79E1B"/>
+                                                <path d="M580,28 A12,12 0 0,1 580,52 A12,12 0 0,1 580,28 Z" fill="#FF5F00"/>
+                                                <text x="620" y="55" font-family="Arial, sans-serif" font-size="10" fill="white">mastercard</text>
+                                            </g>
+                                            
+                                            <!-- American Express Logo - Much larger and more visible -->
+                                            <g id="amex-logo" class="card-logo" style="display: none;">
+                                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#006FCF"/>
+                                                <text x="590" y="40" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle">AMEX</text>
+                                            </g>
+                                            
+                                            <!-- Discover Logo - Much larger and more visible -->
+                                            <g id="discover-logo" class="card-logo" style="display: none;">
+                                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#000000"/>
+                                                <text x="550" y="40" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">DIS</text>
+                                                <circle cx="580" cy="40" r="8" fill="#FF6B35"/>
+                                                <text x="600" y="40" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">VER</text>
+                                            </g>
+                                            
+                                            <!-- Diners Club Logo - Much larger and more visible -->
+                                            <g id="diners-logo" class="card-logo" style="display: none;">
+                                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#0079BE"/>
+                                                <circle cx="560" cy="40" r="10" fill="white"/>
+                                                <text x="560" y="47" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0079BE" text-anchor="middle">D</text>
+                                                <text x="580" y="40" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Diners Club</text>
+                                            </g>
+                                            
+                                            <!-- Maestro Logo - Much larger and more visible -->
+                                            <g id="maestro-logo" class="card-logo" style="display: none;">
+                                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#000000"/>
+                                                <circle cx="570" cy="40" r="12" fill="#EB001B"/>
+                                                <circle cx="590" cy="40" r="12" fill="#87CEEB"/>
+                                                <path d="M580,28 A12,12 0 0,1 580,52 A12,12 0 0,1 580,28 Z" fill="#4682B4"/>
+                                                <text x="620" y="55" font-family="Arial, sans-serif" font-size="10" fill="white">maestro</text>
+                                            </g>
+                                            
+                                            <!-- UnionPay Logo - Much larger and more visible like in your image -->
+                                            <g id="unionpay-logo" class="card-logo" style="display: none;">
+                                                <defs>
+                                                    <linearGradient id="unionpayGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#E60012;stop-opacity:1" />
+                                                        <stop offset="50%" style="stop-color:#0066CC;stop-opacity:1" />
+                                                        <stop offset="100%" style="stop-color:#4B0082;stop-opacity:1" />
+                                                    </linearGradient>
+                                                </defs>
+                                                <rect x="520" y="15" width="140" height="50" rx="8" fill="url(#unionpayGradient)"/>
+                                                <text x="590" y="35" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">UnionPay</text>
+                                                <text x="590" y="50" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle">银联</text>
+                                            </g>
+                                            
+                                            <!-- Default/Unknown Logo -->
+                                            <g id="default-logo" class="card-logo">
+                                                <rect x="580" y="20" width="100" height="35" rx="6" fill="#666666"/>
+                                                <text x="630" y="42" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">CARD</text>
+                                            </g>
+                        </g>
+                        
+                        <!-- Card Type Logos - Much larger and more visible -->
+                        <g id="card-logos">
+                            <!-- Visa Logo - Much larger and more visible -->
+                            <g id="visa-logo" class="card-logo" style="display: none;">
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#1A1F71"/>
+                                <text x="590" y="40" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white" text-anchor="middle">VISA</text>
+                                <!-- Orange notch on V -->
+                                <rect x="570" y="20" width="4" height="12" fill="#FF6B35"/>
+                            </g>
+                            
+                            <!-- Mastercard Logo - Much larger and more visible -->
+                            <g id="mastercard-logo" class="card-logo" style="display: none;">
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#000000"/>
+                                <circle cx="570" cy="40" r="12" fill="#EB001B"/>
+                                <circle cx="590" cy="40" r="12" fill="#F79E1B"/>
+                                <path d="M580,28 A12,12 0 0,1 580,52 A12,12 0 0,1 580,28 Z" fill="#FF5F00"/>
+                                <text x="620" y="55" font-family="Arial, sans-serif" font-size="10" fill="white">mastercard</text>
+                            </g>
+                            
+                            <!-- American Express Logo - Much larger and more visible -->
+                            <g id="amex-logo" class="card-logo" style="display: none;">
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#006FCF"/>
+                                <text x="590" y="40" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white" text-anchor="middle">AMEX</text>
+                            </g>
+                            
+                            <!-- Discover Logo - Much larger and more visible -->
+                            <g id="discover-logo" class="card-logo" style="display: none;">
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#000000"/>
+                                <text x="550" y="40" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">DIS</text>
+                                <circle cx="580" cy="40" r="8" fill="#FF6B35"/>
+                                <text x="600" y="40" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">VER</text>
+                            </g>
+                            
+                            <!-- Diners Club Logo - Much larger and more visible -->
+                            <g id="diners-logo" class="card-logo" style="display: none;">
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#0079BE"/>
+                                <circle cx="560" cy="40" r="10" fill="white"/>
+                                <text x="560" y="47" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0079BE" text-anchor="middle">D</text>
+                                <text x="580" y="40" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">Diners Club</text>
+                            </g>
+                            
+                            <!-- Maestro Logo - Much larger and more visible -->
+                            <g id="maestro-logo" class="card-logo" style="display: none;">
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#000000"/>
+                                <circle cx="570" cy="40" r="12" fill="#EB001B"/>
+                                <circle cx="590" cy="40" r="12" fill="#87CEEB"/>
+                                <path d="M580,28 A12,12 0 0,1 580,52 A12,12 0 0,1 580,28 Z" fill="#4682B4"/>
+                                <text x="620" y="55" font-family="Arial, sans-serif" font-size="10" fill="white">maestro</text>
+                            </g>
+                            
+                            <!-- UnionPay Logo - Much larger and more visible like in your image -->
+                            <g id="unionpay-logo" class="card-logo" style="display: none;">
+                                <defs>
+                                    <linearGradient id="unionpayGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#E60012;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#0066CC;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#4B0082;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="url(#unionpayGradient)"/>
+                                <text x="590" y="35" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">UnionPay</text>
+                                <text x="590" y="50" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle">银联</text>
+                            </g>
+                            
+                            <!-- RuPay Logo - Indian payment system -->
+                            <g id="rupay-logo" class="card-logo" style="display: none;">
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#6B46C1"/>
+                                <text x="590" y="35" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">RuPay</text>
+                                <text x="590" y="50" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle">रुपे</text>
+                            </g>
+                            
+                            <!-- Indian Bank Logo -->
+                            <g id="indian-bank-logo" class="card-logo" style="display: none;">
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#F97316"/>
+                                <text x="590" y="35" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">Indian Bank</text>
+                                <text x="590" y="50" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle">भारतीय बैंक</text>
+                            </g>
+                            
+                            <!-- Default/Unknown Logo -->
+                            <g id="default-logo" class="card-logo">
+                                <rect x="520" y="15" width="140" height="50" rx="8" fill="#666666"/>
+                                <text x="590" y="40" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">CARD</text>
+                            </g>
+                        </g>
+                    </g>
+                    <g id="Back">
+                    </g>
+                </svg>
+                            </div>
+                            <div class="back">
+                                <svg version="1.1" id="cardback" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    x="0px" y="0px" viewBox="0 0 750 471" style="enable-background:new 0 0 750 471;" xml:space="preserve">
+                                    <g id="Front">
+                                        <line class="st0" x1="35.3" y1="10.4" x2="36.7" y2="11" />
+                                    </g>
+                                    <g id="Back">
+                                        <g id="Page-1_2_">
+                                            <g id="amex_2_">
+                                                <path id="Rectangle-1_2_" class="darkcolor greydark" d="M40,0h670c22.1,0,40,17.9,40,40v391c0,22.1-17.9,40-40,40H40c-22.1,0-40-17.9-40-40V40
+                                        C0,17.9,17.9,0,40,0z" />
+                                            </g>
+                                        </g>
+                                        <rect y="61.6" class="st2" width="750" height="78" />
+                                        <g>
+                                            <path class="st3" d="M701.1,249.1H48.9c-3.3,0-6-2.7-6-6v-52.5c0-3.3,2.7-6,6-6h652.1c3.3,0,6,2.7,6,6v52.5
+                                    C707.1,246.4,704.4,249.1,701.1,249.1z" />
+                                            <rect x="42.9" y="198.6" class="st4" width="664.1" height="10.5" />
+                                            <rect x="42.9" y="224.5" class="st4" width="664.1" height="10.5" />
+                                            <path class="st5" d="M701.1,184.6H618h-8h-10v64.5h10h8h83.1c3.3,0,6-2.7,6-6v-52.5C707.1,187.3,704.4,184.6,701.1,184.6z" />
+                                        </g>
+                                        <text transform="matrix(1 0 0 1 621.999 227.2734)" id="svgsecurity" class="st6 st7">985</text>
+                                        <g class="st8">
+                                            <text transform="matrix(1 0 0 1 518.083 280.0879)" class="st9 st6 st10">security code</text>
+                                        </g>
+                                        <rect x="58.1" y="378.6" class="st11" width="375.5" height="13.5" />
+                                        <rect x="58.1" y="405.6" class="st11" width="421.7" height="13.5" />
+                                        <text transform="matrix(1 0 0 1 59.5073 228.6099)" id="svgnameback" class="st12 st13">John Doe</text>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="paymentMethodForm" class="form-container">
+                    {% csrf_token %}
+                    <div class="field-container">
+                        <label for="name">Name</label>
+                        <input id="name" maxlength="20" type="text" required>
+                    </div>
+                    <div class="field-container">
+                        <label for="cardnumber">Card Number</label>
+                        <span id="generatecard">generate random</span>
+                        <div class="card-input-wrapper">
+                            <input id="cardnumber" type="text" pattern="[0-9]*" inputmode="numeric" required>
+                            <div id="card-type-icon" class="card-type-icon">
+                                <!-- Card type logos will be inserted here -->
+                                <div id="input-visa-logo" class="input-card-logo" style="display: none;">
+                                    <div class="visa-logo">
+                                        <div class="visa-blue"></div>
+                                        <div class="visa-white">VISA</div>
+                                    </div>
+                                </div>
+                                <div id="input-mastercard-logo" class="input-card-logo" style="display: none;">
+                                    <div class="mastercard-logo">
+                                        <div class="mc-circle mc-red"></div>
+                                        <div class="mc-circle mc-orange"></div>
+                                    </div>
+                                </div>
+                                <div id="input-amex-logo" class="input-card-logo" style="display: none;">
+                                    <div class="amex-logo">
+                                        <div class="amex-blue"></div>
+                                        <div class="amex-white">AMEX</div>
+                                    </div>
+                                </div>
+                                <div id="input-discover-logo" class="input-card-logo" style="display: none;">
+                                    <div class="discover-logo">
+                                        <div class="discover-orange"></div>
+                                        <div class="discover-white">DISCOVER</div>
+                                    </div>
+                                </div>
+                                <div id="input-diners-logo" class="input-card-logo" style="display: none;">
+                                    <div class="diners-logo">
+                                        <div class="diners-blue"></div>
+                                        <div class="diners-white">DINERS</div>
+                                    </div>
+                                </div>
+                                <div id="input-maestro-logo" class="input-card-logo" style="display: none;">
+                                    <div class="maestro-logo">
+                                        <div class="maestro-red"></div>
+                                        <div class="maestro-white">MAESTRO</div>
+                                    </div>
+                                </div>
+                                <div id="input-unionpay-logo" class="input-card-logo" style="display: none;">
+                                    <div class="unionpay-logo">
+                                        <div class="up-red"></div>
+                                        <div class="up-blue"></div>
+                                        <div class="up-green"></div>
+                                        <div class="up-text">银联</div>
+                                    </div>
+                                </div>
+                                <!-- RuPay Logo for Input -->
+                                <div id="input-rupay-logo" class="input-card-logo" style="display: none;">
+                                    <div class="rupay-logo">RuPay</div>
+                                </div>
+                                
+                                <!-- Indian Bank Logo for Input -->
+                                <div id="input-indian-bank-logo" class="input-card-logo" style="display: none;">
+                                    <div class="indian-bank-logo">Indian Bank</div>
+                                </div>
+                                
+                                <div id="input-default-logo" class="input-card-logo">
+                                    <div class="default-logo">
+                                        <div class="default-grey"></div>
+                                        <div class="default-white">CARD</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <svg id="ccicon" class="ccicon" width="750" height="471" viewBox="0 0 750 471" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink">
+                        </svg>
+                    </div>
+                    <div class="field-container">
+                        <label for="expirationdate">Expiration (mm/yy)</label>
+                        <input id="expirationdate" type="text" placeholder="MM/YY" required>
+                        <small class="text-muted">Format: MM/YY (e.g., 12/25)</small>
+                    </div>
+                    <div class="field-container">
+                        <label for="securitycode">Security Code</label>
+                        <input id="securitycode" type="text" pattern="[0-9]*" inputmode="numeric" required>
+                    </div>
+                    <div class="field-container">
+                        <label for="payment_type">Payment Type</label>
+                        <select id="payment_type" required>
+                            <option value="">Select Payment Type</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="debit_card">Debit Card</option>
+                        </select>
+                    </div>
+                    <div class="field-container">
+                        <label for="is_default">
+                            <input type="checkbox" id="is_default" name="is_default">
+                            Set as default payment method
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                        <button type="button" id="addPaymentMethodBtn" class="btn btn-primary">Add Payment Method</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                    <p>Payment method has been added successfully!</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="window.location.href='{% url 'core:billing_subscriptions' %}'">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-circle text-danger fa-3x mb-3"></i>
+                    <p id="errorMessage">An error occurred while adding the payment method.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/imask@7.4.0/dist/imask.min.js"></script>
+<script src="{% static 'js/pages/add_payment_method_advanced.js' %}?v={{ timestamp }}"></script>
+<script>
+// Payment method JavaScript loaded
+
+window.onload = function() {
+    // Get elements
+    const name = document.getElementById('name');
+    const cardnumber = document.getElementById('cardnumber');
+    const expirationdate = document.getElementById('expirationdate');
+    const securitycode = document.getElementById('securitycode');
+    const generatecard = document.getElementById('generatecard');
+    const creditCard = document.querySelector('.creditcard');
+    const preloadElement = document.querySelector('.preload');
+    
+    if (!creditCard) {
+        console.error('Credit card element not found');
+        return;
+    }
+    
+    console.log('All elements found, setting up...');
+    
+    // Remove preload class
+    if (preloadElement) {
+        preloadElement.classList.remove('preload');
+        console.log('Removed preload class');
+    }
+    
+    // Card click to flip
+    creditCard.addEventListener('click', function() {
+        console.log('Card clicked');
+        if (this.classList.contains('flipped')) {
+            this.classList.remove('flipped');
+            console.log('Removed flipped class');
+        } else {
+            this.classList.add('flipped');
+            console.log('Added flipped class');
+        }
+    });
+    
+    // Focus events
+    if (name) {
+        name.addEventListener('focus', function() {
+            console.log('Name focused - removing flipped');
+            creditCard.classList.remove('flipped');
+        });
+    }
+    
+    if (cardnumber) {
+        cardnumber.addEventListener('focus', function() {
+            console.log('Card number focused - removing flipped');
+            creditCard.classList.remove('flipped');
+        });
+    }
+    
+    if (expirationdate) {
+        expirationdate.addEventListener('focus', function() {
+            console.log('Expiration focused - removing flipped');
+            creditCard.classList.remove('flipped');
+        });
+    }
+    
+    if (securitycode) {
+        securitycode.addEventListener('focus', function() {
+            console.log('Security code focused - adding flipped');
+            creditCard.classList.add('flipped');
+        });
+    }
+    
+    // Generate random card
+    if (generatecard) {
+        generatecard.addEventListener('click', function() {
+            console.log('Generate card clicked');
+            
+            // Test card numbers for different card types
+            const testCards = [
+                { number: '4000056655665556', type: 'visa', name: 'JOHN DOE' },
+                { number: '5200828282828210', type: 'mastercard', name: 'JANE SMITH' },
+                { number: '371449635398431', type: 'amex', name: 'MIKE JOHNSON' },
+                { number: '6011000990139424', type: 'discover', name: 'SARAH WILSON' },
+                { number: '30569309025904', type: 'diners', name: 'DAVID BROWN' },
+                { number: '6759649826438453', type: 'maestro', name: 'LISA DAVIS' }
+            ];
+            
+            // Pick a random card
+            const randomCard = testCards[Math.floor(Math.random() * testCards.length)];
+            
+            // Fill the form fields
+            if (cardnumber) cardnumber.value = randomCard.number;
+            if (name) name.value = randomCard.name;
+            if (expirationdate) expirationdate.value = '12/25';
+            if (securitycode) securitycode.value = '123';
+            
+            // Update card display immediately
+            updateCardDisplay(randomCard.number, randomCard.name, '12/25', '123');
+            
+            // Update card type and colors
+            updateCardType(randomCard.type);
+            
+            console.log('Generated card:', randomCard);
+        });
+    }
+    
+    // Function to update card display
+    function updateCardDisplay(cardNumber, cardName, expiry, security) {
+        // Update card number
+        const svgNumber = document.getElementById('svgnumber');
+        if (svgNumber) {
+            svgNumber.innerHTML = cardNumber.replace(/(.{4})/g, '$1 ').trim();
+        }
+        
+        // Update cardholder name
+        const svgName = document.getElementById('svgname');
+        const svgNameBack = document.getElementById('svgnameback');
+        if (svgName) svgName.innerHTML = cardName;
+        if (svgNameBack) svgNameBack.innerHTML = cardName;
+        
+        // Update expiry date
+        const svgExpire = document.getElementById('svgexpire');
+        if (svgExpire) svgExpire.innerHTML = expiry;
+        
+        // Update security code
+        const svgSecurity = document.getElementById('svgsecurity');
+        if (svgSecurity) svgSecurity.innerHTML = security;
+    }
+    
+    // Function to update card type and colors
+    function updateCardType(cardType) {
+        const creditCard = document.querySelector('.creditcard');
+        if (!creditCard) return;
+        
+        console.log('Updating card type to:', cardType);
+        
+        // Remove existing card type classes
+        creditCard.classList.remove('visa', 'mastercard', 'amex', 'discover', 'diners', 'jcb', 'maestro', 'unionpay');
+        
+        // Add new card type class
+        creditCard.classList.add(cardType);
+        
+        // Hide all card logos first (both SVG and input logos)
+        const allLogos = document.querySelectorAll('.card-logo');
+        allLogos.forEach(logo => {
+            logo.style.display = 'none';
+        });
+        
+        const allInputLogos = document.querySelectorAll('.input-card-logo');
+        allInputLogos.forEach(logo => {
+            logo.style.display = 'none';
+        });
+        
+        // Show the appropriate SVG logo on the card
+        const logoId = cardType + '-logo';
+        const targetLogo = document.getElementById(logoId);
+        if (targetLogo) {
+            targetLogo.style.display = 'block';
+            console.log('Showing SVG logo:', logoId);
+        } else {
+            // Show default logo if specific logo not found
+            const defaultLogo = document.getElementById('default-logo');
+            if (defaultLogo) {
+                defaultLogo.style.display = 'block';
+                console.log('Showing default SVG logo');
+            }
+        }
+        
+        // Show the appropriate input field logo
+        const inputLogoId = 'input-' + cardType + '-logo';
+        const targetInputLogo = document.getElementById(inputLogoId);
+        if (targetInputLogo) {
+            targetInputLogo.style.display = 'flex';
+            console.log('Showing input logo:', inputLogoId);
+        } else {
+            // Show default input logo if specific logo not found
+            const defaultInputLogo = document.getElementById('input-default-logo');
+            if (defaultInputLogo) {
+                defaultInputLogo.style.display = 'flex';
+                console.log('Showing default input logo');
+            }
+        }
+        
+        // Update colors based on card type
+        const lightColor = document.querySelector('.lightcolor');
+        const darkColor = document.querySelector('.darkcolor');
+        
+        console.log('Found light color element:', lightColor);
+        console.log('Found dark color element:', darkColor);
+        
+        if (lightColor && darkColor) {
+            // Remove existing color classes using classList
+            lightColor.classList.remove('grey', 'blue', 'red', 'green', 'orange', 'purple', 'lime');
+            darkColor.classList.remove('greydark', 'bluedark', 'reddark', 'greendark', 'orangedark', 'purpledark', 'limedark');
+            
+            // Add new color classes
+            switch(cardType) {
+                case 'visa':
+                    lightColor.classList.add('lime');
+                    darkColor.classList.add('limedark');
+                    console.log('Applied Visa colors: lime/limedark');
+                    break;
+                case 'mastercard':
+                    lightColor.classList.add('lightblue');
+                    darkColor.classList.add('lightbluedark');
+                    console.log('Applied Mastercard colors: lightblue/lightbluedark');
+                    break;
+                case 'amex':
+                    lightColor.classList.add('green');
+                    darkColor.classList.add('greendark');
+                    console.log('Applied Amex colors: green/greendark');
+                    break;
+                case 'discover':
+                    lightColor.classList.add('purple');
+                    darkColor.classList.add('purpledark');
+                    console.log('Applied Discover colors: purple/purpledark');
+                    break;
+                case 'diners':
+                    lightColor.classList.add('orange');
+                    darkColor.classList.add('orangedark');
+                    console.log('Applied Diners colors: orange/orangedark');
+                    break;
+                case 'maestro':
+                    lightColor.classList.add('yellow');
+                    darkColor.classList.add('yellowdark');
+                    console.log('Applied Maestro colors: yellow/yellowdark');
+                    break;
+                case 'unionpay':
+                    lightColor.classList.add('red');
+                    darkColor.classList.add('reddark');
+                    console.log('Applied UnionPay colors: red/reddark');
+                    break;
+                case 'rupay':
+                    lightColor.classList.add('purple');
+                    darkColor.classList.add('purpledark');
+                    console.log('Applied RuPay colors: purple/purpledark');
+                    break;
+                case 'indian_bank':
+                    lightColor.classList.add('orange');
+                    darkColor.classList.add('orangedark');
+                    console.log('Applied Indian Bank colors: orange/orangedark');
+                    break;
+                default:
+                    lightColor.classList.add('grey');
+                    darkColor.classList.add('greydark');
+                    console.log('Applied default colors: grey/greydark');
+            }
+            
+            console.log('Light color classes:', lightColor.className);
+            console.log('Dark color classes:', darkColor.className);
+        }
+        
+        console.log('Card classes after update:', creditCard.className);
+    }
+    
+    // Input events to update card display
+    if (name) {
+        name.addEventListener('input', function() {
+            const svgName = document.getElementById('svgname');
+            const svgNameBack = document.getElementById('svgnameback');
+            if (svgName) svgName.innerHTML = this.value || 'JOHN DOE';
+            if (svgNameBack) svgNameBack.innerHTML = this.value || 'John Doe';
+        });
+    }
+    
+    if (cardnumber) {
+        cardnumber.addEventListener('input', function() {
+            const svgNumber = document.getElementById('svgnumber');
+            if (svgNumber) {
+                // Format the number with spaces
+                const formatted = this.value.replace(/(.{4})/g, '$1 ').trim();
+                svgNumber.innerHTML = formatted || '0123 4567 8910 1112';
+            }
+            
+            // Detect card type based on number
+            const cardType = detectCardType(this.value);
+            if (cardType) {
+                updateCardType(cardType);
+            }
+        });
+    }
+    
+    if (expirationdate) {
+        expirationdate.addEventListener('input', function() {
+            const svgExpire = document.getElementById('svgexpire');
+            if (svgExpire) svgExpire.innerHTML = this.value || '01/23';
+        });
+    }
+    
+    if (securitycode) {
+        securitycode.addEventListener('input', function() {
+            const svgSecurity = document.getElementById('svgsecurity');
+            if (svgSecurity) svgSecurity.innerHTML = this.value || '985';
+        });
+    }
+    
+    // Function to detect card type from number
+    function detectCardType(cardNumber) {
+        const number = cardNumber.replace(/\s/g, '');
+        
+        if (/^4/.test(number)) return 'visa';
+        if (/^5[1-5]/.test(number)) return 'mastercard';
+        if (/^3[47]/.test(number)) return 'amex';
+        if (/^6(?:011|5)/.test(number)) return 'discover';
+        if (/^3[0689]/.test(number)) return 'diners';
+        if (/^(?:5[0678]|6304|67)/.test(number)) return 'maestro';
+        if (/^62/.test(number)) return 'unionpay'; // UnionPay cards start with 62
+        
+        return 'default';
+    }
+    
+    // Test animation after 2 seconds
+    setTimeout(() => {
+        console.log('Testing animation...');
+        creditCard.classList.add('flipped');
+        setTimeout(() => {
+            creditCard.classList.remove('flipped');
+            console.log('Animation test complete');
+        }, 1000);
+    }, 2000);
+    
+    // Automatic card type test removed to prevent interference with user input
+    
+    console.log('Setup complete!');
+};
+</script>
+{% endblock %}

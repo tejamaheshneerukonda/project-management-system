@@ -1,0 +1,284 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_leave_details.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                        Leave Request Details
+                    </h2>
+                    <p class="text-muted mb-0">View detailed information about your leave request</p>
+                </div>
+                <div>
+                    <a href="{% url 'core:employee_leave' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Leave Management
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Leave Request Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Request Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <label class="form-label fw-bold text-muted">Leave Type</label>
+                                <div class="info-value">
+                                    <span class="badge bg-info fs-6">{{ leave_request.get_leave_type_display }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item mb-3">
+                                <label class="form-label fw-bold text-muted">Start Date</label>
+                                <div class="info-value">
+                                    <i class="fas fa-calendar-day me-2 text-primary"></i>
+                                    {{ leave_request.start_date|date:"F d, Y" }}
+                                </div>
+                            </div>
+                            
+                            <div class="info-item mb-3">
+                                <label class="form-label fw-bold text-muted">End Date</label>
+                                <div class="info-value">
+                                    <i class="fas fa-calendar-day me-2 text-primary"></i>
+                                    {{ leave_request.end_date|date:"F d, Y" }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="info-item mb-3">
+                                <label class="form-label fw-bold text-muted">Total Days</label>
+                                <div class="info-value">
+                                    <i class="fas fa-clock me-2 text-success"></i>
+                                    <span class="badge bg-success fs-6">{{ leave_request.total_days }} day{{ leave_request.total_days|pluralize }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item mb-3">
+                                <label class="form-label fw-bold text-muted">Status</label>
+                                <div class="info-value">
+                                    {% if leave_request.status == 'PENDING' %}
+                                        <span class="badge bg-warning fs-6">
+                                            <i class="fas fa-clock me-1"></i>Pending
+                                        </span>
+                                    {% elif leave_request.status == 'APPROVED' %}
+                                        <span class="badge bg-success fs-6">
+                                            <i class="fas fa-check me-1"></i>Approved
+                                        </span>
+                                    {% elif leave_request.status == 'REJECTED' %}
+                                        <span class="badge bg-danger fs-6">
+                                            <i class="fas fa-times me-1"></i>Rejected
+                                        </span>
+                                    {% elif leave_request.status == 'CANCELLED' %}
+                                        <span class="badge bg-secondary fs-6">
+                                            <i class="fas fa-ban me-1"></i>Cancelled
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="info-item mb-3">
+                                <label class="form-label fw-bold text-muted">Applied Date</label>
+                                <div class="info-value">
+                                    <i class="fas fa-calendar-plus me-2 text-info"></i>
+                                    {{ leave_request.created_at|date:"F d, Y" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reason -->
+                    <div class="info-item">
+                        <label class="form-label fw-bold text-muted">Reason</label>
+                        <div class="info-value">
+                            <div class="bg-light p-3 rounded">
+                                <i class="fas fa-comment me-2 text-muted"></i>
+                                {{ leave_request.reason|default:"No reason provided" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Contact Information -->
+            {% if leave_request.emergency_contact or leave_request.emergency_phone %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-phone me-2"></i>
+                        Emergency Contact
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if leave_request.emergency_contact %}
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="form-label fw-bold text-muted">Contact Person</label>
+                                <div class="info-value">
+                                    <i class="fas fa-user me-2 text-primary"></i>
+                                    {{ leave_request.emergency_contact }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if leave_request.emergency_phone %}
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="form-label fw-bold text-muted">Phone Number</label>
+                                <div class="info-value">
+                                    <i class="fas fa-phone me-2 text-success"></i>
+                                    <a href="tel:{{ leave_request.emergency_phone }}" class="text-decoration-none">
+                                        {{ leave_request.emergency_phone }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            {% if leave_request.status == 'PENDING' %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>
+                        Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-warning" onclick="cancelLeaveRequest({{ leave_request.id }})">
+                            <i class="fas fa-times me-1"></i>Cancel Request
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="editLeaveRequest({{ leave_request.id }})">
+                            <i class="fas fa-edit me-1"></i>Edit Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Leave Balance -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Leave Balance
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-primary mb-1">20</h4>
+                                <small class="text-muted">Annual Leave</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-info mb-1">10</h4>
+                            <small class="text-muted">Sick Leave</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Requests -->
+            {% if related_requests %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Requests
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for request in related_requests %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 {% if not forloop.last %}border-bottom{% endif %}">
+                        <div>
+                            <div class="fw-bold">{{ request.get_leave_type_display }}</div>
+                            <small class="text-muted">{{ request.start_date|date:"M d" }} - {{ request.end_date|date:"M d" }}</small>
+                        </div>
+                        <div>
+                            {% if request.status == 'PENDING' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% elif request.status == 'APPROVED' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif request.status == 'REJECTED' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% elif request.status == 'CANCELLED' %}
+                                <span class="badge bg-secondary">Cancelled</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function cancelLeaveRequest(requestId) {
+    if (confirm('Are you sure you want to cancel this leave request?')) {
+        fetch(`/api/leave/${requestId}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessToast('Leave request cancelled successfully!');
+                setTimeout(() => {
+                    window.location.href = "{% url 'core:employee_leave' %}";
+                }, 1500);
+            } else {
+                showErrorToast('Error cancelling leave request: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorToast('Error cancelling leave request. Please try again.');
+        });
+    }
+}
+
+function editLeaveRequest(requestId) {
+    window.location.href = `/employee/leave/${requestId}/edit/`;
+}
+</script>
+{% endblock %}

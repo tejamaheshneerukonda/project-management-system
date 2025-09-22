@@ -1,0 +1,30 @@
+{
+  "name": "ProjectManager Pro",
+  "short_name": "ProjectManager",
+  "description": "Professional project management solution for modern teams.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#165DFF",
+  "theme_color": "#165DFF",
+  "icons": [
+    {
+      "src": "/static/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "scope": "/",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "categories": [
+    "business",
+    "productivity",
+    "project management"
+  ]
+}

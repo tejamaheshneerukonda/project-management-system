@@ -1,0 +1,671 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block extra_js %}
+<script>
+// Immediate cleanup - run before DOM is ready
+(function() {
+    console.log('Billing Subscriptions: Cleaning up old modal references');
+    
+    // Remove any lingering references to the old modal immediately
+    const oldModal = document.getElementById('addPaymentMethodModal');
+    if (oldModal) {
+        console.log('Found and removing old modal');
+        oldModal.remove();
+    }
+    
+    // Clear any cached references
+    if (window.showAddPaymentMethodModal) {
+        console.log('Clearing old showAddPaymentMethodModal function');
+        delete window.showAddPaymentMethodModal;
+    }
+    if (window.addPaymentMethod) {
+        console.log('Clearing old addPaymentMethod function');
+        delete window.addPaymentMethod;
+    }
+})();
+
+// Also run on DOM ready as a backup
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Ready: Final cleanup check');
+    
+    // Remove any lingering references to the old modal
+    const oldModal = document.getElementById('addPaymentMethodModal');
+    if (oldModal) {
+        console.log('DOM Ready: Found and removing old modal');
+        oldModal.remove();
+    }
+    
+    // Clear any cached references
+    if (window.showAddPaymentMethodModal) {
+        console.log('DOM Ready: Clearing old showAddPaymentMethodModal function');
+        delete window.showAddPaymentMethodModal;
+    }
+    if (window.addPaymentMethod) {
+        console.log('DOM Ready: Clearing old addPaymentMethod function');
+        delete window.addPaymentMethod;
+    }
+    
+    // Add a mutation observer to catch any dynamically added modals
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+                if (node.nodeType === 1 && node.id === 'addPaymentMethodModal') {
+                    console.log('Mutation Observer: Found and removing dynamically added modal');
+                    node.remove();
+                }
+            });
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+});
+
+// Billing subscription functions
+function selectPlan() {
+    window.location.href = '{% url "core:pricing" %}';
+}
+
+function changePlan() {
+    window.location.href = '{% url "core:pricing" %}';
+}
+
+function changeToPlan(planName) {
+    if (confirm(`Are you sure you want to change to the ${planName} plan?`)) {
+        // TODO: Implement plan change
+        showInfoToast(`Changing to ${planName} plan...`);
+    }
+}
+
+function downloadInvoice(invoiceId) {
+    // TODO: Implement invoice download
+    showErrorToast('Downloading invoice: ' + invoiceId);
+}
+
+function updatePaymentMethod(paymentMethodId) {
+    // Get payment method data and populate modal
+    fetch('{% url "api:get_payment_methods" %}')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const method = data.payment_methods.find(m => m.id === paymentMethodId);
+            if (method) {
+                document.getElementById('updatePaymentMethodId').value = method.id;
+                document.getElementById('updateCardholderName').value = method.cardholder_name || '';
+                document.getElementById('updateIsDefault').checked = method.is_default;
+                
+                const modal = new bootstrap.Modal(document.getElementById('updatePaymentMethodModal'));
+                modal.show();
+            }
+        }
+    });
+}
+
+function updatePaymentMethodSubmit() {
+    const form = document.getElementById('updatePaymentMethodForm');
+    const formData = new FormData(form);
+    
+    const data = {
+        payment_method_id: parseInt(formData.get('payment_method_id')),
+        cardholder_name: formData.get('cardholder_name'),
+        is_default: formData.get('is_default') === 'on'
+    };
+    
+    fetch('{% url "api:update_payment_method" %}', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Payment method updated successfully', 'success');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('updatePaymentMethodModal'));
+            modal.hide();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.message || 'Error updating payment method', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error updating payment method', 'error');
+    });
+}
+
+function setDefaultPaymentMethod(paymentMethodId) {
+    if (confirm('Are you sure you want to set this as your default payment method?')) {
+        fetch('{% url "api:update_payment_method" %}', {
+            method: 'POST',
+            body: JSON.stringify({
+                payment_method_id: paymentMethodId,
+                is_default: true
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Default payment method updated successfully', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showNotification(data.message || 'Error updating default payment method', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error updating default payment method', 'error');
+        });
+    }
+}
+
+function removePaymentMethod(paymentMethodId) {
+    if (confirm('Are you sure you want to remove this payment method? This action cannot be undone.')) {
+        fetch('{% url "api:remove_payment_method" %}', {
+            method: 'POST',
+            body: JSON.stringify({
+                payment_method_id: paymentMethodId
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Payment method removed successfully', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showNotification(data.message || 'Error removing payment method', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error removing payment method', 'error');
+        });
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}
+
+{% block extra_head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- Force browser refresh with timestamp -->
+<meta name="cache-buster" content="{% now 'Y-m-d H:i:s' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-credit-card me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Manage your subscription and billing information</p>
+                </div>
+                <div>
+                    {% if subscription %}
+                        <button class="btn btn-outline-primary" onclick="changePlan()">
+                            <i class="fas fa-exchange-alt me-1"></i>Change Plan
+                        </button>
+                    {% else %}
+                        <button class="btn btn-primary" onclick="selectPlan()">
+                            <i class="fas fa-plus me-1"></i>Select Plan
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Subscription -->
+    {% if subscription and subscription_plan %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-crown me-2"></i>Current Subscription
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="subscription-icon me-3">
+                                    {% if subscription_plan.name == 'Free' %}
+                                        <i class="fas fa-gift fa-3x text-success"></i>
+                                    {% elif subscription_plan.name == 'Starter' %}
+                                        <i class="fas fa-star fa-3x text-primary"></i>
+                                    {% elif subscription_plan.name == 'Professional' %}
+                                        <i class="fas fa-crown fa-3x text-warning"></i>
+                                    {% elif subscription_plan.name == 'Enterprise' %}
+                                        <i class="fas fa-gem fa-3x text-danger"></i>
+                                    {% else %}
+                                        <i class="fas fa-box fa-3x text-secondary"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h4 class="mb-0">{{ subscription_plan.name }} Plan</h4>
+                                    <p class="text-muted mb-0">{{ subscription_plan.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <h5 class="mb-0">${{ subscription_plan.price }}</h5>
+                                    <small class="text-muted">per {{ subscription_plan.billing_period|lower }}</small>
+                                </div>
+                                <div class="col-4">
+                                    <h5 class="mb-0">{{ subscription_plan.max_users }}</h5>
+                                    <small class="text-muted">max users</small>
+                                </div>
+                                <div class="col-4">
+                                    <h5 class="mb-0">{{ subscription_plan.max_projects }}</h5>
+                                    <small class="text-muted">max projects</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Status:</span>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Next Billing:</span>
+                                <span>{{ subscription.next_billing_date|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between">
+                                <span>Billing Period:</span>
+                                <span>{{ subscription_plan.billing_period|title }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Auto-renewal:</span>
+                                <span class="badge bg-info">Enabled</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>No Active Subscription
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
+                    <h5>You're currently on the Free Plan</h5>
+                    <p class="text-muted">Upgrade to unlock more features and increase your limits.</p>
+                    <button class="btn btn-primary" onclick="selectPlan()">
+                        <i class="fas fa-arrow-up me-1"></i>Upgrade Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Billing Information -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Billing History
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if billing_history %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Invoice</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bill in billing_history %}
+                                        <tr>
+                                            <td>{{ bill.created_at|date:"M d, Y" }}</td>
+                                            <td>{{ bill.title }}</td>
+                                            <td>${{ bill.content|default:"0.00" }}</td>
+                                            <td>
+                                                {% if bill.is_active %}
+                                                    <span class="badge bg-success">Paid</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-outline-primary btn-sm" onclick="downloadInvoice('{{ bill.id }}')">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No billing history found</h6>
+                            <p class="text-muted">Your billing history will appear here once you start using paid features.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>Payment Method
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if payment_methods %}
+                        {% for method in payment_methods %}
+                        <div class="d-flex align-items-center mb-3 {% if method.is_default %}border border-primary rounded p-2{% endif %}">
+                            <i class="fab fa-cc-{{ method.card_type|lower }} fa-2x text-primary me-3"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">
+                                    {{ method.get_display_name }}
+                                    {% if method.is_default %}<span class="badge bg-primary ms-2">Default</span>{% endif %}
+                                </h6>
+                                <small class="text-muted">
+                                    Expires {{ method.get_expiry_display }}
+                                    {% if method.cardholder_name %} • {{ method.cardholder_name }}{% endif %}
+                                </small>
+                            </div>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-outline-primary btn-sm" onclick="updatePaymentMethod({{ method.id }})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                {% if not method.is_default %}
+                                <button class="btn btn-outline-success btn-sm" onclick="setDefaultPaymentMethod({{ method.id }})">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn btn-outline-danger btn-sm" onclick="removePaymentMethod({{ method.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="window.location.href='{% url 'core:add_payment_method_page' %}'">
+                            <i class="fas fa-plus me-1"></i>Add Payment Method
+                        </button>
+                    {% else %}
+                        <div class="text-center">
+                            <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No payment methods</h6>
+                            <p class="text-muted">Add a payment method to start using paid features.</p>
+                            <button class="btn btn-primary" onclick="window.location.href='{% url 'core:add_payment_method_page' %}'">
+                                <i class="fas fa-plus me-1"></i>Add Payment Method
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Usage Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Users</span>
+                            <span>{{ total_users }}/{{ user_limit|default:"Unlimited" }}</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-primary" role="progressbar" 
+                                 style="width: {% widthratio total_users user_limit 100|default:0 %}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Projects</span>
+                            <span>{{ total_projects }}/{{ project_limit|default:"Unlimited" }}</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {% widthratio total_projects project_limit 100|default:0 %}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Storage</span>
+                            <span>{{ storage_usage_gb }} GB / {{ storage_limit_gb|default:"Unlimited" }} GB</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 style="width: {% widthratio storage_usage_gb storage_limit_gb 100|default:0 %}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Plans -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box me-2"></i>Available Plans
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card border-success h-100">
+                                <div class="card-header bg-success text-white text-center">
+                                    <h5 class="mb-0">Free</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h3 class="mb-0">$0</h3>
+                                    <p class="text-muted">per month</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Up to 5 users</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>3 projects</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>1 GB storage</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Basic support</li>
+                                    </ul>
+                                    {% if not subscription or subscription_plan.name == 'Free' %}
+                                        <button class="btn btn-success" disabled>Current Plan</button>
+                                    {% else %}
+                                        <button class="btn btn-outline-success" onclick="changeToPlan('Free')">Downgrade</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-primary h-100">
+                                <div class="card-header bg-primary text-white text-center">
+                                    <h5 class="mb-0">Starter</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h3 class="mb-0">$29</h3>
+                                    <p class="text-muted">per month</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Up to 25 users</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Unlimited projects</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>10 GB storage</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Priority support</li>
+                                    </ul>
+                                    {% if subscription and subscription_plan.name == 'Starter' %}
+                                        <button class="btn btn-primary" disabled>Current Plan</button>
+                                    {% else %}
+                                        <button class="btn btn-outline-primary" onclick="changeToPlan('Starter')">Upgrade</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-warning h-100">
+                                <div class="card-header bg-warning text-dark text-center">
+                                    <h5 class="mb-0">Professional</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h3 class="mb-0">$99</h3>
+                                    <p class="text-muted">per month</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Up to 100 users</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Unlimited projects</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>100 GB storage</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>24/7 support</li>
+                                    </ul>
+                                    {% if subscription and subscription_plan.name == 'Professional' %}
+                                        <button class="btn btn-warning" disabled>Current Plan</button>
+                                    {% else %}
+                                        <button class="btn btn-outline-warning" onclick="changeToPlan('Professional')">Upgrade</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-danger h-100">
+                                <div class="card-header bg-danger text-white text-center">
+                                    <h5 class="mb-0">Enterprise</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h3 class="mb-0">$299</h3>
+                                    <p class="text-muted">per month</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Unlimited users</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Unlimited projects</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Unlimited storage</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Dedicated support</li>
+                                    </ul>
+                                    {% if subscription and subscription_plan.name == 'Enterprise' %}
+                                        <button class="btn btn-danger" disabled>Current Plan</button>
+                                    {% else %}
+                                        <button class="btn btn-outline-danger" onclick="changeToPlan('Enterprise')">Upgrade</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Update Payment Method Modal -->
+<div class="modal fade" id="updatePaymentMethodModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Payment Method</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updatePaymentMethodForm">
+                    <input type="hidden" name="payment_method_id" id="updatePaymentMethodId">
+                    <div class="mb-3">
+                        <label class="form-label">Cardholder Name</label>
+                        <input type="text" class="form-control" name="cardholder_name" id="updateCardholderName">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_default" id="updateIsDefault">
+                            <label class="form-check-label" for="updateIsDefault">
+                                Set as default payment method
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="updatePaymentMethodSubmit()">Update Payment Method</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.subscription-icon {
+    width: 60px;
+    text-align: center;
+}
+
+.card.h-100 {
+    height: 100%;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+}
+</style>
+
+{% endblock %}

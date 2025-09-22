@@ -1,0 +1,465 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Welcome to ProjectManager Pro{% endblock %}
+
+{% block page_title %}Welcome to ProjectManager Pro{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="skipOnboarding()">
+        <i class="fas fa-forward me-2"></i>Skip Tour
+    </button>
+    <button type="button" class="btn btn-outline-secondary" onclick="restartOnboarding()">
+        <i class="fas fa-redo me-2"></i>Restart
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Onboarding Progress -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">Getting Started</h6>
+                    <span class="badge bg-primary" id="progressText">Step 1 of 6</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 16.67%" id="progressBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Onboarding Steps -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <!-- Step 1: Welcome -->
+                <div class="onboarding-step active" id="step1">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <div class="text-center">
+                                <i class="fas fa-rocket fa-4x text-primary mb-4"></i>
+                                <h3 class="text-primary mb-3">Welcome to ProjectManager Pro!</h3>
+                                <p class="lead">We're excited to have you on board. Let's take a quick tour to get you familiar with your new workspace.</p>
+                                <div class="mt-4">
+                                    <button class="btn btn-primary btn-lg" onclick="nextStep()">
+                                        <i class="fas fa-arrow-right me-2"></i>Let's Get Started
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="onboarding-preview">
+                                <img src="https://via.placeholder.com/500x300/007bff/ffffff?text=Dashboard+Preview" 
+                                     class="img-fluid rounded shadow" alt="Dashboard Preview">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Dashboard Overview -->
+                <div class="onboarding-step" id="step2" style="display: none;">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <div class="onboarding-preview">
+                                <img src="https://via.placeholder.com/500x300/28a745/ffffff?text=Dashboard+Features" 
+                                     class="img-fluid rounded shadow" alt="Dashboard Features">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <h3 class="text-success mb-3">Your Dashboard</h3>
+                            <p class="lead">Your dashboard is your command center. Here you can:</p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>View your tasks and deadlines</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Track your productivity metrics</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>See team announcements</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Access quick actions</li>
+                            </ul>
+                            <div class="mt-4">
+                                <button class="btn btn-outline-secondary me-2" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button class="btn btn-success" onclick="nextStep()">
+                                    Next<i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Task Management -->
+                <div class="onboarding-step" id="step3" style="display: none;">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <h3 class="text-info mb-3">Task Management</h3>
+                            <p class="lead">Stay organized with powerful task management tools:</p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-tasks text-info me-2"></i>Create and assign tasks</li>
+                                <li class="mb-2"><i class="fas fa-calendar text-info me-2"></i>Set deadlines and priorities</li>
+                                <li class="mb-2"><i class="fas fa-chart-bar text-info me-2"></i>Track progress with Kanban boards</li>
+                                <li class="mb-2"><i class="fas fa-users text-info me-2"></i>Collaborate with team members</li>
+                            </ul>
+                            <div class="mt-4">
+                                <button class="btn btn-outline-secondary me-2" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button class="btn btn-info" onclick="nextStep()">
+                                    Next<i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="onboarding-preview">
+                                <img src="https://via.placeholder.com/500x300/17a2b8/ffffff?text=Task+Management" 
+                                     class="img-fluid rounded shadow" alt="Task Management">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Team Collaboration -->
+                <div class="onboarding-step" id="step4" style="display: none;">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <div class="onboarding-preview">
+                                <img src="https://via.placeholder.com/500x300/ffc107/ffffff?text=Team+Collaboration" 
+                                     class="img-fluid rounded shadow" alt="Team Collaboration">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <h3 class="text-warning mb-3">Team Collaboration</h3>
+                            <p class="lead">Connect and collaborate with your team:</p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-users text-warning me-2"></i>Browse team directory</li>
+                                <li class="mb-2"><i class="fas fa-comments text-warning me-2"></i>Send messages and updates</li>
+                                <li class="mb-2"><i class="fas fa-calendar-alt text-warning me-2"></i>Schedule meetings</li>
+                                <li class="mb-2"><i class="fas fa-bell text-warning me-2"></i>Stay updated with notifications</li>
+                            </ul>
+                            <div class="mt-4">
+                                <button class="btn btn-outline-secondary me-2" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button class="btn btn-warning" onclick="nextStep()">
+                                    Next<i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Productivity Tools -->
+                <div class="onboarding-step" id="step5" style="display: none;">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <h3 class="text-danger mb-3">Productivity Tools</h3>
+                            <p class="lead">Boost your productivity with advanced tools:</p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-chart-line text-danger me-2"></i>Analytics and insights</li>
+                                <li class="mb-2"><i class="fas fa-clock text-danger me-2"></i>Focus timer and tracking</li>
+                                <li class="mb-2"><i class="fas fa-trophy text-danger me-2"></i>Achievements and gamification</li>
+                                <li class="mb-2"><i class="fas fa-file text-danger me-2"></i>Document management</li>
+                            </ul>
+                            <div class="mt-4">
+                                <button class="btn btn-outline-secondary me-2" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button class="btn btn-danger" onclick="nextStep()">
+                                    Next<i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="onboarding-preview">
+                                <img src="https://via.placeholder.com/500x300/dc3545/ffffff?text=Productivity+Tools" 
+                                     class="img-fluid rounded shadow" alt="Productivity Tools">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Completion -->
+                <div class="onboarding-step" id="step6" style="display: none;">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6">
+                            <div class="onboarding-preview">
+                                <img src="https://via.placeholder.com/500x300/6f42c1/ffffff?text=All+Set!" 
+                                     class="img-fluid rounded shadow" alt="Completion">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <h3 class="text-purple mb-3">You're All Set!</h3>
+                            <p class="lead">Congratulations! You're ready to start using ProjectManager Pro.</p>
+                            <div class="completion-checklist">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="check1" checked disabled>
+                                    <label class="form-check-label" for="check1">Dashboard overview completed</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="check2" checked disabled>
+                                    <label class="form-check-label" for="check2">Task management explained</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="check3" checked disabled>
+                                    <label class="form-check-label" for="check3">Team collaboration reviewed</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="check4" checked disabled>
+                                    <label class="form-check-label" for="check4">Productivity tools introduced</label>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button class="btn btn-outline-secondary me-2" onclick="prevStep()">
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button class="btn btn-success btn-lg" onclick="completeOnboarding()">
+                                    <i class="fas fa-check me-2"></i>Complete Setup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Tips -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Tips</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="tip-card text-center p-3 border rounded">
+                            <i class="fas fa-keyboard fa-2x text-primary mb-2"></i>
+                            <h6>Keyboard Shortcuts</h6>
+                            <p class="text-muted small">Use Ctrl+K for global search</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="tip-card text-center p-3 border rounded">
+                            <i class="fas fa-mobile-alt fa-2x text-success mb-2"></i>
+                            <h6>Mobile Friendly</h6>
+                            <p class="text-muted small">Access from any device</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="tip-card text-center p-3 border rounded">
+                            <i class="fas fa-cog fa-2x text-info mb-2"></i>
+                            <h6>Customizable</h6>
+                            <p class="text-muted small">Personalize your experience</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="tip-card text-center p-3 border rounded">
+                            <i class="fas fa-question-circle fa-2x text-warning mb-2"></i>
+                            <h6>Need Help?</h6>
+                            <p class="text-muted small">Press F1 anytime</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentStep = 1;
+const totalSteps = 6;
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateProgress();
+    
+    // Add keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextStep();
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevStep();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            skipOnboarding();
+        }
+    });
+});
+
+function nextStep() {
+    if (currentStep < totalSteps) {
+        // Hide current step
+        document.getElementById(`step${currentStep}`).style.display = 'none';
+        
+        // Show next step
+        currentStep++;
+        document.getElementById(`step${currentStep}`).style.display = 'block';
+        
+        updateProgress();
+        
+        // Add animation
+        const currentStepElement = document.getElementById(`step${currentStep}`);
+        currentStepElement.style.opacity = '0';
+        currentStepElement.style.transform = 'translateX(50px)';
+        
+        setTimeout(() => {
+            currentStepElement.style.transition = 'all 0.3s ease-in-out';
+            currentStepElement.style.opacity = '1';
+            currentStepElement.style.transform = 'translateX(0)';
+        }, 50);
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        // Hide current step
+        document.getElementById(`step${currentStep}`).style.display = 'none';
+        
+        // Show previous step
+        currentStep--;
+        document.getElementById(`step${currentStep}`).style.display = 'block';
+        
+        updateProgress();
+        
+        // Add animation
+        const currentStepElement = document.getElementById(`step${currentStep}`);
+        currentStepElement.style.opacity = '0';
+        currentStepElement.style.transform = 'translateX(-50px)';
+        
+        setTimeout(() => {
+            currentStepElement.style.transition = 'all 0.3s ease-in-out';
+            currentStepElement.style.opacity = '1';
+            currentStepElement.style.transform = 'translateX(0)';
+        }, 50);
+    }
+}
+
+function updateProgress() {
+    const progressPercentage = (currentStep / totalSteps) * 100;
+    document.getElementById('progressBar').style.width = `${progressPercentage}%`;
+    document.getElementById('progressText').textContent = `Step ${currentStep} of ${totalSteps}`;
+}
+
+function skipOnboarding() {
+    if (confirm('Are you sure you want to skip the onboarding tour? You can always access it later from the help menu.')) {
+        completeOnboarding();
+    }
+}
+
+function restartOnboarding() {
+    if (confirm('Restart the onboarding tour from the beginning?')) {
+        // Hide all steps
+        for (let i = 1; i <= totalSteps; i++) {
+            document.getElementById(`step${i}`).style.display = 'none';
+        }
+        
+        // Show first step
+        currentStep = 1;
+        document.getElementById('step1').style.display = 'block';
+        updateProgress();
+    }
+}
+
+function completeOnboarding() {
+    // Mark onboarding as completed
+    localStorage.setItem('onboardingCompleted', 'true');
+    
+    // Show completion message
+    showAlert('Welcome to ProjectManager Pro! You\'re all set to start being productive.', 'success');
+    
+    // Redirect to dashboard after a short delay
+    setTimeout(() => {
+        window.location.href = "{% url 'core:employee_dashboard' %}";
+    }, 2000);
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+
+<style>
+.onboarding-step {
+    min-height: 400px;
+    padding: 2rem 0;
+}
+
+.onboarding-preview img {
+    transition: transform 0.3s ease-in-out;
+}
+
+.onboarding-preview img:hover {
+    transform: scale(1.05);
+}
+
+.tip-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.tip-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.completion-checklist .form-check {
+    padding-left: 2rem;
+}
+
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.progress-bar-striped {
+    background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+    background-size: 1rem 1rem;
+}
+
+.card {
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+@media (max-width: 768px) {
+    .onboarding-step {
+        min-height: 300px;
+        padding: 1rem 0;
+    }
+    
+    .onboarding-preview {
+        margin-top: 2rem;
+    }
+}
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_onboarding.css' %}">
+{% endblock %}
+{% endblock %}

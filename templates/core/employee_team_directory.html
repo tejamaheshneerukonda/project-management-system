@@ -1,0 +1,325 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Team Directory{% endblock %}
+
+{% block page_title %}Team Directory{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="toggleView('grid')">
+        <i class="fas fa-th me-2"></i>Grid View
+    </button>
+    <button type="button" class="btn btn-outline-secondary" onclick="toggleView('list')">
+        <i class="fas fa-list me-2"></i>List View
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Search and Filter -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search team members...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select class="form-select" id="departmentFilter">
+                                    <option value="">All Departments</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept.department }}">{{ dept.department }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="available">Available</option>
+                                    <option value="busy">Busy</option>
+                                    <option value="away">Away</option>
+                                    <option value="offline">Offline</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Team Statistics -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Team Members</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ team_members|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Online Now</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="onlineCount">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-circle text-success fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Departments</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ departments|length }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-building fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Active Projects</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="activeProjects">0</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-project-diagram fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Team Members Grid/List View -->
+<div class="row" id="teamMembersContainer">
+    {% for member in team_members %}
+    <div class="col-xl-3 col-lg-4 col-md-6 mb-4 team-member-card" 
+         data-name="{{ member.first_name }} {{ member.last_name }}"
+         data-department="{{ member.department }}"
+         data-status="available">
+        <div class="card shadow h-100">
+            <div class="card-body text-center">
+                <div class="position-relative mb-3">
+                    <img src="{% if member.profile_picture %}{{ member.profile_picture.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" 
+                         class="rounded-circle" width="80" height="80" alt="{{ member.first_name }}">
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle status-indicator">
+                        <span class="visually-hidden">Online</span>
+                    </span>
+                </div>
+                
+                <h5 class="card-title mb-1">{{ member.first_name }} {{ member.last_name }}</h5>
+                <p class="text-muted mb-2">{{ member.job_title|default:"Employee" }}</p>
+                <p class="text-primary mb-3">{{ member.department|default:"General" }}</p>
+                
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="sendMessage({{ member.id }})">
+                            <i class="fas fa-comment"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="viewProfile({{ member.id }})">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="scheduleMeeting({{ member.id }})">
+                            <i class="fas fa-calendar"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="row text-center">
+                    <div class="col-4">
+                        <small class="text-muted">Tasks</small>
+                        <div class="fw-bold">{{ member.task_set.count }}</div>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted">Projects</small>
+                        <div class="fw-bold">{{ member.project_set.count }}</div>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted">Hours</small>
+                        <div class="fw-bold">{{ member.timesheet_set.aggregate.total|default:"0" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No team members found</h5>
+            <p class="text-muted">Team members will appear here once they're added to your company.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Department Breakdown -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Department Breakdown</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for dept in departments %}
+                    <div class="col-md-3 mb-3">
+                        <div class="card border-left-info">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            {{ dept.department }}
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            {{ team_members|length|add:"-1" }} members
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="fas fa-building fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function() {
+        filterTeamMembers();
+    });
+    
+    // Filter functionality
+    document.getElementById('departmentFilter').addEventListener('change', filterTeamMembers);
+    document.getElementById('statusFilter').addEventListener('change', filterTeamMembers);
+    
+    // Initialize online count
+    updateOnlineCount();
+});
+
+function toggleView(view) {
+    const container = document.getElementById('teamMembersContainer');
+    const cards = container.querySelectorAll('.team-member-card');
+    
+    if (view === 'grid') {
+        cards.forEach(card => {
+            card.className = 'col-xl-3 col-lg-4 col-md-6 mb-4 team-member-card';
+        });
+    } else {
+        cards.forEach(card => {
+            card.className = 'col-12 mb-3 team-member-card';
+        });
+    }
+}
+
+function filterTeamMembers() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const departmentFilter = document.getElementById('departmentFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const cards = document.querySelectorAll('.team-member-card');
+    
+    cards.forEach(card => {
+        const name = card.dataset.name.toLowerCase();
+        const department = card.dataset.department;
+        const status = card.dataset.status;
+        
+        let show = true;
+        
+        // Search filter
+        if (searchTerm && !name.includes(searchTerm)) {
+            show = false;
+        }
+        
+        // Department filter
+        if (departmentFilter && department !== departmentFilter) {
+            show = false;
+        }
+        
+        // Status filter
+        if (statusFilter && status !== statusFilter) {
+            show = false;
+        }
+        
+        card.style.display = show ? 'block' : 'none';
+    });
+}
+
+function sendMessage(memberId) {
+    // Implement messaging functionality
+    console.log('Sending message to member:', memberId);
+    // This would open a messaging modal or redirect to messaging page
+}
+
+function viewProfile(memberId) {
+    // Implement profile view functionality
+    console.log('Viewing profile for member:', memberId);
+    // This would open a profile modal or redirect to profile page
+}
+
+function scheduleMeeting(memberId) {
+    // Implement meeting scheduling functionality
+    console.log('Scheduling meeting with member:', memberId);
+    // This would open a meeting scheduling modal
+}
+
+function updateOnlineCount() {
+    // Simulate online count - in real implementation, this would come from WebSocket
+    const onlineCount = Math.floor(Math.random() * {{ team_members|length }}) + 1;
+    document.getElementById('onlineCount').textContent = onlineCount;
+}
+
+// Simulate real-time status updates
+setInterval(() => {
+    updateOnlineCount();
+}, 30000); // Update every 30 seconds
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_team_directory.css' %}">
+{% endblock %}
+{% endblock %}

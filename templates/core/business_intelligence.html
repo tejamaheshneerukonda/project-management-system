@@ -1,0 +1,495 @@
+{% extends 'base_company_admin.html' %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-brain me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Advanced business intelligence and strategic insights</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="generateInsights()">
+                        <i class="fas fa-lightbulb me-1"></i>Generate Insights
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Performance Indicators -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ business_intelligence.revenue_growth }}%</h3>
+                    <p class="mb-0">Revenue Growth</p>
+                    <small><i class="fas fa-arrow-up me-1"></i>+2.3% vs last quarter</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ business_intelligence.customer_acquisition }}%</h3>
+                    <p class="mb-0">Customer Acquisition</p>
+                    <small><i class="fas fa-arrow-up me-1"></i>+5.1% vs last quarter</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ business_intelligence.employee_retention }}%</h3>
+                    <p class="mb-0">Employee Retention</p>
+                    <small><i class="fas fa-arrow-up me-1"></i>+1.2% vs last quarter</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ business_intelligence.market_share }}%</h3>
+                    <p class="mb-0">Market Share</p>
+                    <small><i class="fas fa-arrow-up me-1"></i>+0.8% vs last quarter</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ business_intelligence.operational_efficiency }}%</h3>
+                    <p class="mb-0">Operational Efficiency</p>
+                    <small><i class="fas fa-arrow-up me-1"></i>+3.4% vs last quarter</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ business_intelligence.innovation_index }}%</h3>
+                    <p class="mb-0">Innovation Index</p>
+                    <small><i class="fas fa-arrow-up me-1"></i>+2.1% vs last quarter</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Intelligence Dashboard -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Business Performance Trends
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="businessTrendsChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-target me-2"></i>Strategic Goals
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Revenue Target</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Customer Growth</span>
+                            <span>92%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Market Expansion</span>
+                            <span>78%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 78%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Innovation Pipeline</span>
+                            <span>65%</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Analysis -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Market Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="marketAnalysisChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Customer Segmentation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center mb-3">
+                                <h4 class="text-primary">45%</h4>
+                                <small class="text-muted">Enterprise</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center mb-3">
+                                <h4 class="text-success">35%</h4>
+                                <small class="text-muted">SMB</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center mb-3">
+                                <h4 class="text-warning">15%</h4>
+                                <small class="text-muted">Startup</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center mb-3">
+                                <h4 class="text-info">5%</h4>
+                                <small class="text-muted">Individual</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Insights -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>AI-Powered Business Insights
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if business_insights %}
+                        {% for insight in business_insights %}
+                            <div class="alert alert-info mb-3">
+                                <div class="d-flex">
+                                    <i class="fas fa-lightbulb me-3 mt-1"></i>
+                                    <div>
+                                        <h6 class="alert-heading">{{ insight.title }}</h6>
+                                        <p class="mb-0">{{ insight.content }}</p>
+                                        <small class="text-muted">{{ insight.created_at|date:"M d, Y" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-lightbulb fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No insights available</h6>
+                            <p class="text-muted">AI-powered insights will appear here based on your business data.</p>
+                            <button class="btn btn-primary" onclick="generateInsights()">
+                                <i class="fas fa-magic me-1"></i>Generate Insights
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Performance Rankings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="rank-badge bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                1
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Revenue Growth</h6>
+                                <small class="text-muted">Top performer</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="rank-badge bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                2
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Customer Acquisition</h6>
+                                <small class="text-muted">Strong growth</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="rank-badge bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                3
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Employee Retention</h6>
+                                <small class="text-muted">Excellent</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="rank-badge bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                4
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Operational Efficiency</h6>
+                                <small class="text-muted">Good</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Quick Analytics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="viewRevenueAnalysis()">
+                            <i class="fas fa-dollar-sign me-1"></i>Revenue Analysis
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="viewCustomerInsights()">
+                            <i class="fas fa-users me-1"></i>Customer Insights
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="viewMarketTrends()">
+                            <i class="fas fa-chart-line me-1"></i>Market Trends
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm" onclick="viewCompetitiveAnalysis()">
+                            <i class="fas fa-chess me-1"></i>Competitive Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Predictive Analytics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-crystal-ball me-2"></i>Predictive Analytics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="prediction-card p-3 border rounded">
+                                    <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                                    <h5>Revenue Forecast</h5>
+                                    <p class="text-success mb-0">+18% next quarter</p>
+                                    <small class="text-muted">Based on current trends</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="prediction-card p-3 border rounded">
+                                    <i class="fas fa-users fa-2x text-success mb-2"></i>
+                                    <h5>Customer Growth</h5>
+                                    <p class="text-success mb-0">+25% next quarter</p>
+                                    <small class="text-muted">Expected new customers</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="prediction-card p-3 border rounded">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                                    <h5>Risk Assessment</h5>
+                                    <p class="text-warning mb-0">Low Risk</p>
+                                    <small class="text-muted">Market stability</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="prediction-card p-3 border rounded">
+                                    <i class="fas fa-lightbulb fa-2x text-info mb-2"></i>
+                                    <h5>Opportunity Score</h5>
+                                    <p class="text-info mb-0">85/100</p>
+                                    <small class="text-muted">Growth potential</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rank-badge {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.prediction-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.prediction-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Business Trends Chart
+const businessTrendsCtx = document.getElementById('businessTrendsChart').getContext('2d');
+new Chart(businessTrendsCtx, {
+    type: 'line',
+    data: {
+        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+        datasets: [{
+            label: 'Revenue Growth',
+            data: [12, 15, 18, 15.2],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 2,
+            fill: false
+        }, {
+            label: 'Customer Acquisition',
+            data: [18, 22, 25, 23.5],
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            fill: false
+        }, {
+            label: 'Operational Efficiency',
+            data: [82, 85, 87, 87.6],
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 2,
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Market Analysis Chart
+const marketAnalysisCtx = document.getElementById('marketAnalysisChart').getContext('2d');
+new Chart(marketAnalysisCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Enterprise', 'SMB', 'Startup', 'Individual'],
+        datasets: [{
+            data: [45, 35, 15, 5],
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(153, 102, 255, 0.8)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+function generateInsights() {
+    showErrorToast('AI-powered insights generation will be implemented soon.');
+}
+
+function viewRevenueAnalysis() {
+    showErrorToast('Revenue analysis functionality will be implemented soon.');
+}
+
+function viewCustomerInsights() {
+    showErrorToast('Customer insights functionality will be implemented soon.');
+}
+
+function viewMarketTrends() {
+    showErrorToast('Market trends functionality will be implemented soon.');
+}
+
+function viewCompetitiveAnalysis() {
+    showErrorToast('Competitive analysis functionality will be implemented soon.');
+}
+</script>
+{% endblock %}
+{% endblock %}

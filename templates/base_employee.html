@@ -1,0 +1,469 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ProjectManager Pro - Employee Dashboard{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Employee Specific CSS -->
+    <link href="{% static 'css/pages/employee_dashboard.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        .employee-header {
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .employee-sidebar {
+            background: linear-gradient(180deg, #faf5ff, #f3e8ff);
+            border-right: 1px solid #f3e8ff;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .main-content {
+            margin-left: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                margin-left: 25%;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .main-content {
+                margin-left: 16.666667%;
+            }
+        }
+        
+        .employee-nav-link {
+            color: #6b21a8;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .employee-nav-link:hover {
+            background-color: rgba(124, 58, 237, 0.1);
+            color: #7c3aed;
+            border-left-color: #7c3aed;
+        }
+        
+        .employee-nav-link.active {
+            background-color: rgba(124, 58, 237, 0.15);
+            color: #7c3aed;
+            border-left-color: #7c3aed;
+            font-weight: 600;
+        }
+        
+        .employee-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .employee-user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: white;
+        }
+        
+        .employee-footer {
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+        
+        .employee-stats-card {
+            background: linear-gradient(135deg, #ffffff, #faf5ff);
+            border: 1px solid #f3e8ff;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .employee-stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .employee-badge {
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .task-card {
+            background: linear-gradient(135deg, #ffffff, #faf5ff);
+            border: 1px solid #f3e8ff;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Employee Header -->
+    <header class="employee-header">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand employee-brand" href="{% url 'core:employee_dashboard' %}">
+                    <i class="fas fa-user me-2"></i>
+                    ProjectManager Pro
+                    <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">Employee Portal</small>
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#employeeNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="employeeNavbar">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:employee_dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:employee_tasks' %}">
+                                <i class="fas fa-tasks me-1"></i>My Tasks
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'core:employee_projects' %}">
+                                <i class="fas fa-project-diagram me-1"></i>Projects
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Global Search -->
+                    <form class="d-none d-md-inline-block form-inline mx-3" action="{% url 'core:employee_search' %}" method="GET">
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-sm bg-light border-0" name="q" placeholder="Search..." aria-label="Search" value="{{ request.GET.q|default:'' }}">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-light btn-sm" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle position-relative" href="#" role="button" data-bs-toggle="dropdown" id="notificationDropdown">
+                                <i class="fas fa-bell text-white"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {% if unread_notifications_count %}{{ unread_notifications_count }}{% else %}3{% endif %}
+                                    <span class="visually-hidden">unread notifications</span>
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end w-50">
+                                <li class="dropdown-header">Notifications</li>
+                                <li class="notification-item unread p-3">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-tasks text-primary"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="mb-1"><strong>New Task Assigned</strong></p>
+                                            <p class="text-sm text-muted mb-1">You've been assigned to a new task: UI Improvements</p>
+                                            <p class="text-xs text-muted">10 minutes ago</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="notification-item unread p-3">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-calendar-alt text-warning"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="mb-1"><strong>Meeting Reminder</strong></p>
+                                            <p class="text-sm text-muted mb-1">Project kickoff meeting in 1 hour</p>
+                                            <p class="text-xs text-muted">30 minutes ago</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="notification-item p-3">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-file-alt text-info"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="mb-1"><strong>Document Updated</strong></p>
+                                            <p class="text-sm text-muted mb-1">The project requirements document has been updated</p>
+                                            <p class="text-xs text-muted">2 hours ago</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center" href="{% url 'core:employee_notifications' %}">View all notifications</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle employee-user-info" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-2"></i>{{ user.username }}
+                                <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">Employee</small>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'core:employee_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:employee_tasks' %}"><i class="fas fa-tasks me-2"></i>My Tasks</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'core:user_preferences' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:notification_preferences' %}"><i class="fas fa-bell me-2"></i>Notification Settings</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:user_preferences' %}"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'core:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Employee Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block employee-sidebar sidebar collapse" id="employeeSidebar">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <div class="employee-stats-card p-3">
+                            <div class="employee-badge mb-2">{% if user.employee_profile %}{{ user.employee_profile.company.name }}{% else %}Company Name{% endif %}</div>
+                            <h6 class="text-purple mb-1">My Overview</h6>
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="h6 mb-0 text-purple">{{ my_tasks|default:"0" }}</div>
+                                    <small class="text-muted">Tasks</small>
+                                </div>
+                                <div class="col-6">
+                                    <div class="h6 mb-0 text-success">{{ completed_tasks|default:"0" }}</div>
+                                    <small class="text-muted">Completed</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>My Work</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_dashboard' %}active{% endif %}" href="{% url 'core:employee_dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_tasks' %}active{% endif %}" href="{% url 'core:employee_tasks' %}">
+                                <i class="fas fa-tasks me-2"></i>My Tasks
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_projects' %}active{% endif %}" href="{% url 'core:employee_projects' %}">
+                                <i class="fas fa-project-diagram me-2"></i>My Projects
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_timesheet' %}active{% endif %}" href="{% url 'core:employee_timesheet' %}">
+                                <i class="fas fa-clock me-2"></i>Time Tracking
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_goals' %}active{% endif %}" href="{% url 'core:employee_goals' %}">
+                                <i class="fas fa-bullseye me-2"></i>My Goals
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_leave' %}active{% endif %}" href="{% url 'core:employee_leave' %}">
+                                <i class="fas fa-calendar-times me-2"></i>Leave Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_analytics' %}active{% endif %}" href="{% url 'core:employee_analytics' %}">
+                                <i class="fas fa-chart-line me-2"></i>Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_kanban_board' %}active{% endif %}" href="{% url 'core:employee_kanban_board' %}">
+                                <i class="fas fa-columns me-2"></i>Task Board
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Collaboration</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_notifications' %}active{% endif %}" href="{% url 'core:employee_notifications' %}">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_team_directory' %}active{% endif %}" href="{% url 'core:employee_team_directory' %}">
+                                <i class="fas fa-users me-2"></i>Team Directory
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'chat_dashboard' %}active{% endif %}" href="{% url 'core:chat_dashboard' %}">
+                                <i class="fas fa-comments me-2"></i>Chat
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_calendar' %}active{% endif %}" href="{% url 'core:employee_calendar' %}">
+                                <i class="fas fa-calendar-alt me-2"></i>Calendar
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link" href="{% url 'core:employee_notifications' %}">
+                                <i class="fas fa-comments me-2"></i>Messages
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Recognition</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_gamification' %}active{% endif %}" href="{% url 'core:employee_gamification' %}">
+                                <i class="fas fa-trophy me-2"></i>Achievements
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Tools</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_documents' %}active{% endif %}" href="{% url 'core:employee_documents' %}">
+                                <i class="fas fa-folder me-2"></i>Documents
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_productivity' %}active{% endif %}" href="{% url 'core:employee_productivity' %}">
+                                <i class="fas fa-chart-line me-2"></i>Productivity
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_settings' %}active{% endif %}" href="{% url 'core:employee_settings' %}">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_shortcuts' %}active{% endif %}" href="{% url 'core:employee_shortcuts' %}">
+                                <i class="fas fa-keyboard me-2"></i>Shortcuts
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_onboarding' %}active{% endif %}" href="{% url 'core:employee_onboarding' %}">
+                                <i class="fas fa-graduation-cap me-2"></i>Tour
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link" href="#" onclick="showHelp()">
+                                <i class="fas fa-question-circle me-2"></i>Help
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Personal</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link" href="{% url 'core:employee_settings' %}">
+                                <i class="fas fa-user me-2"></i>Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link" href="{% url 'core:employee_analytics' %}">
+                                <i class="fas fa-chart-line me-2"></i>Performance
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link employee-nav-link" href="{% url 'core:employee_settings' %}">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">{% block page_title %}Employee Dashboard{% endblock %}</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        {% block page_actions %}{% endblock %}
+                    </div>
+                </div>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Employee Footer -->
+    <footer class="employee-footer mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-user me-2"></i>{% if user.employee_profile %}{{ user.employee_profile.company.name }}{% else %}Company Name{% endif %}</h5>
+                    <p class="mb-0">Employee Portal - ProjectManager Pro</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-2">
+                        <small>Employee: {{ user.get_full_name|default:user.username }}</small>
+                    </div>
+                    <div>
+                        <small>&copy; 2024 ProjectManager Pro. All rights reserved.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Employee Specific JS -->
+    <script src="{% static 'js/pages/employee.js' %}"></script>
+    
+    <script>
+        function showHelp() {
+            // Show help modal or redirect to help page
+            window.location.href = "{% url 'core:employee_shortcuts' %}";
+        }
+    </script>
+    
+    <!-- Toast Utility -->
+    <script src="{% static 'js/utils/toast.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,824 @@
+{% extends 'base_company_admin.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/team_performance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="team-performance-page">
+    <div class="container-fluid">
+        <!-- Performance Header -->
+        <div class="performance-header fade-in">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="performance-title">
+                            <i class="fas fa-chart-line me-3"></i>{{ title }}
+                        </h1>
+                        <p class="performance-subtitle">Track and analyze team performance metrics with comprehensive insights</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="performance-actions">
+                            <button class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#addPerformanceModal">
+                                <i class="fas fa-plus me-2"></i>Add Review
+                            </button>
+                            <button class="btn btn-outline-light btn-lg" onclick="exportPerformanceData()">
+                                <i class="fas fa-download me-2"></i>Export
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Statistics -->
+        <div class="stats-grid slide-up">
+            <div class="stat-card primary">
+                <div class="stat-value">{{ department_performance|length }}</div>
+                <div class="stat-label">Departments Tracked</div>
+                <div class="stat-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value">
+                    {% if department_performance %}
+                        {{ department_performance.0.avg_value|floatformat:1|default:"0.0" }}
+                    {% else %}
+                        0.0
+                    {% endif %}
+                </div>
+                <div class="stat-label">Average Score</div>
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value">{{ recent_reviews|length }}</div>
+                <div class="stat-label">Recent Reviews</div>
+                <div class="stat-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-value">
+                    {% if department_performance %}
+                        {% for dept in department_performance %}{{ dept.total_metrics|add:0 }}{% if not forloop.last %}+{% endif %}{% endfor %}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="stat-label">Total Metrics</div>
+                <div class="stat-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Charts -->
+        <div class="charts-section slide-up">
+            <div class="row">
+                <div class="col-12">
+                    <h3 class="mb-4">
+                        <i class="fas fa-chart-pie me-2"></i>Performance Analytics
+                    </h3>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Department Performance Distribution</div>
+                    <canvas id="departmentChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Performance Trends</div>
+                    <canvas id="trendChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Performance Table -->
+        <div class="performance-table-card slide-up">
+            <div class="performance-table-header">
+                <h3 class="performance-table-title">
+                    <i class="fas fa-table me-2"></i>Department Performance Overview
+                </h3>
+            </div>
+            {% if department_performance %}
+                <div class="table-responsive">
+                    <table class="performance-table">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Average Score</th>
+                                <th>Productivity</th>
+                                <th>Quality</th>
+                                <th>Attendance</th>
+                                <th>Total Reviews</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dept in department_performance %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="department-avatar">
+                                                {{ dept.employee__department|first|upper|default:"U" }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ dept.employee__department|default:"Unassigned" }}</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="performance-progress">
+                                                <div class="performance-progress-bar {% if dept.avg_value >= 80 %}excellent{% elif dept.avg_value >= 60 %}good{% elif dept.avg_value >= 40 %}average{% else %}poor{% endif %}" 
+                                                     style="width: {{ dept.avg_value|floatformat:0 }}%"></div>
+                                            </div>
+                                            <span class="fw-bold ms-2">{{ dept.avg_value|floatformat:1 }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="performance-badge {% if dept.avg_productivity >= 80 %}excellent{% elif dept.avg_productivity >= 60 %}good{% elif dept.avg_productivity >= 40 %}average{% else %}poor{% endif %}">
+                                            {{ dept.avg_productivity|floatformat:1|default:"N/A" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="performance-badge {% if dept.avg_quality >= 80 %}excellent{% elif dept.avg_quality >= 60 %}good{% elif dept.avg_quality >= 40 %}average{% else %}poor{% endif %}">
+                                            {{ dept.avg_quality|floatformat:1|default:"N/A" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="performance-badge {% if dept.avg_attendance >= 80 %}excellent{% elif dept.avg_attendance >= 60 %}good{% elif dept.avg_attendance >= 40 %}average{% else %}poor{% endif %}">
+                                            {{ dept.avg_attendance|floatformat:1|default:"N/A" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="performance-badge good">{{ dept.total_metrics }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="action-btn view" onclick="viewDepartmentPerformance('{{ dept.employee__department }}')" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="action-btn edit" onclick="editDepartmentPerformance('{{ dept.employee__department }}')" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4 class="empty-state-title">No Performance Data Available</h4>
+                    <p class="empty-state-description">Start by adding performance reviews for your team members to see analytics and insights.</p>
+                    <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addPerformanceModal">
+                        <i class="fas fa-plus me-2"></i>Add First Performance Review
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Performance Reviews -->
+        <div class="performance-table-card slide-up">
+            <div class="performance-table-header">
+                <h3 class="performance-table-title">
+                    <i class="fas fa-history me-2"></i>Recent Performance Reviews
+                </h3>
+            </div>
+            {% if recent_reviews %}
+                <div class="table-responsive">
+                    <table class="performance-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Overall Score</th>
+                                <th>Productivity</th>
+                                <th>Quality</th>
+                                <th>Attendance</th>
+                                <th>Review Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for review in recent_reviews %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="department-avatar">
+                                                {{ review.employee.first_name|first }}{{ review.employee.last_name|first }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ review.employee.first_name }} {{ review.employee.last_name }}</strong>
+                                                <br><small class="text-muted">{{ review.employee.employee_id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="performance-badge good">{{ review.employee.department|default:"N/A" }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="performance-progress">
+                                                <div class="performance-progress-bar {% if review.value >= 80 %}excellent{% elif review.value >= 60 %}good{% elif review.value >= 40 %}average{% else %}poor{% endif %}" 
+                                                     style="width: {{ review.value }}%"></div>
+                                            </div>
+                                            <span class="fw-bold ms-2">{{ review.value }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="performance-badge {% if review.metric_type == 'PRODUCTIVITY' %}excellent{% else %}good{% endif %}">
+                                            {{ review.metric_type|default:"N/A" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="performance-badge {% if review.metric_type == 'TASK_COMPLETION' %}excellent{% else %}good{% endif %}">
+                                            {{ review.metric_type|default:"N/A" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="performance-badge {% if review.metric_type == 'ATTENDANCE' %}excellent{% else %}good{% endif %}">
+                                            {{ review.metric_type|default:"N/A" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>{{ review.created_at|date:"M d, Y" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="action-btn view" onclick="viewPerformanceReview({{ review.id }})" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="action-btn edit" onclick="editPerformanceReview({{ review.id }})" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="action-btn delete" onclick="deletePerformanceReview({{ review.id }})" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h4 class="empty-state-title">No Recent Performance Reviews</h4>
+                    <p class="empty-state-description">Performance reviews will appear here once they are added to the system.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Performance Review Modal -->
+<div class="modal fade performance-modal" id="addPerformanceModal" tabindex="-1" aria-labelledby="addPerformanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPerformanceModalLabel">
+                    <i class="fas fa-star me-2"></i>Add Performance Review
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPerformanceForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="employee_id" class="form-label">Employee *</label>
+                                <select class="form-select" id="employee_id" name="employee_id" required>
+                                    <option value="">Select Employee</option>
+                                    <!-- TODO: Populate with employees -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="metric_type" class="form-label">Metric Type *</label>
+                                <select class="form-select" id="metric_type" name="metric_type" required>
+                                    <option value="">Select Metric Type</option>
+                                    <option value="PRODUCTIVITY">Productivity</option>
+                                    <option value="TASK_COMPLETION">Task Completion</option>
+                                    <option value="ATTENDANCE">Attendance</option>
+                                    <option value="QUALITY">Quality</option>
+                                    <option value="TEAMWORK">Teamwork</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="value" class="form-label">Score (0-100) *</label>
+                                <input type="number" class="form-control" id="value" name="value" min="0" max="100" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="review_date" class="form-label">Review Date *</label>
+                                <input type="date" class="form-control" id="review_date" name="review_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comments" class="form-label">Comments</label>
+                        <textarea class="form-control" id="comments" name="comments" rows="3" placeholder="Add any additional comments about this performance review..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addPerformanceReview()">
+                    <i class="fas fa-plus me-1"></i>Add Review
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Performance Charts
+{% if department_performance %}
+document.addEventListener('DOMContentLoaded', function() {
+    // Department Performance Chart
+    const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+    const departmentChart = new Chart(departmentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {% for dept in department_performance %}
+                    '{{ dept.employee__department|default:"Unassigned" }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for dept in department_performance %}
+                        {{ dept.avg_value|floatformat:1 }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    '#3b82f6', '#10b981', '#f59e0b', '#06b6d4', '#ef4444', '#8b5cf6'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 1,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        boxWidth: 12
+                    }
+                }
+            }
+        }
+    });
+
+    // Performance Trend Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Average Performance',
+                data: [65, 72, 68, 75, 78, 82],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }, {
+                label: 'Productivity',
+                data: [70, 75, 72, 78, 80, 85],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 1.5,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Performance Score'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        boxWidth: 12
+                    }
+                }
+            }
+        }
+    });
+});
+{% else %}
+// Show placeholder charts when no data is available
+document.addEventListener('DOMContentLoaded', function() {
+    // Department Performance Chart - Empty State
+    const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+    const departmentChart = new Chart(departmentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['No Data Available'],
+            datasets: [{
+                data: [1],
+                backgroundColor: ['#e2e8f0'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 1,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Performance Trend Chart - Empty State
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: ['No Data'],
+            datasets: [{
+                label: 'No Performance Data',
+                data: [0],
+                borderColor: '#e2e8f0',
+                backgroundColor: 'rgba(226, 232, 240, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: 1.5,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Performance Score'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time Period'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+});
+{% endif %}
+
+// Performance Review Functions
+function addPerformanceReview() {
+    const form = document.getElementById('addPerformanceForm');
+    const formData = new FormData(form);
+    
+    // Check if we're editing an existing performance review
+    const performanceId = document.getElementById('addPerformanceModal').getAttribute('data-performance-id');
+    const isEdit = performanceId !== null;
+    
+    // Add loading state
+    const submitBtn = document.querySelector('#addPerformanceModal .btn-primary');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + (isEdit ? 'Updating...' : 'Adding...');
+    submitBtn.disabled = true;
+    
+    let url, method;
+    if (isEdit) {
+        url = `{% url 'api:update_performance' 0 %}`.replace('0', performanceId);
+        method = 'PUT';
+    } else {
+        url = '{% url "api:create_performance" %}';
+        method = 'POST';
+    }
+    
+    fetch(url, {
+        method: method,
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        if (data.success) {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addPerformanceModal'));
+            modal.hide();
+            
+            // Show success message
+            showNotification(isEdit ? 'Performance review updated successfully!' : 'Performance review added successfully!', 'success');
+            
+            // Reset modal for next use
+            resetModal();
+            
+            // Reload page to show updated data
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.error || 'Operation failed', 'error');
+        }
+    })
+    .catch(error => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        showNotification('An error occurred', 'error');
+    });
+}
+
+function resetModal() {
+    // Reset form
+    document.getElementById('addPerformanceForm').reset();
+    
+    // Reset modal title and button text
+    document.getElementById('addPerformanceModalLabel').innerHTML = '<i class="fas fa-plus me-2"></i>Add Performance Review';
+    document.querySelector('#addPerformanceModal .btn-primary').innerHTML = '<i class="fas fa-plus me-1"></i>Add Review';
+    
+    // Remove performance ID
+    document.getElementById('addPerformanceModal').removeAttribute('data-performance-id');
+}
+
+function viewDepartmentPerformance(departmentName) {
+    showNotification(`Viewing performance details for ${departmentName} department`, 'info');
+    // TODO: Implement department performance details view
+}
+
+function editDepartmentPerformance(departmentName) {
+    showNotification(`Editing performance settings for ${departmentName} department`, 'warning');
+    // TODO: Implement department performance edit
+}
+
+function viewPerformanceReview(reviewId) {
+    if (!reviewId) {
+        showNotification('Performance review ID not available', 'warning');
+        return;
+    }
+    
+    fetch(`{% url 'api:get_performance' 0 %}`.replace('0', reviewId), {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showPerformanceDetailsModal(data.performance);
+        } else {
+            showNotification(data.error || 'Failed to load performance review', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error loading performance review', 'error');
+    });
+}
+
+function editPerformanceReview(reviewId) {
+    if (!reviewId) {
+        showNotification('Performance review ID not available', 'warning');
+        return;
+    }
+    
+    fetch(`{% url 'api:get_performance' 0 %}`.replace('0', reviewId), {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            populateEditModal(data.performance);
+        } else {
+            showNotification(data.error || 'Failed to load performance review', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error loading performance review', 'error');
+    });
+}
+
+function deletePerformanceReview(reviewId) {
+    if (!reviewId) {
+        showNotification('Performance review ID not available', 'warning');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to delete this performance review? This action cannot be undone.')) {
+        fetch(`{% url 'api:delete_performance' 0 %}`.replace('0', reviewId), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Performance review deleted successfully', 'success');
+                // Reload page to show updated data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showNotification(data.error || 'Failed to delete performance review', 'error');
+            }
+        })
+        .catch(error => {
+            showNotification('Error deleting performance review', 'error');
+        });
+    }
+}
+
+function showPerformanceDetailsModal(performance) {
+    const modalHtml = `
+        <div class="modal fade" id="performanceDetailsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-star me-2"></i>Performance Review Details
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Employee</h6>
+                                <p class="text-muted">${performance.employee_name}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Metric Type</h6>
+                                <p class="text-muted">${performance.metric_type}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Score</h6>
+                                <p class="text-muted">${performance.value}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Target Value</h6>
+                                <p class="text-muted">${performance.target_value || 'Not set'}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Period Start</h6>
+                                <p class="text-muted">${new Date(performance.period_start).toLocaleDateString()}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Period End</h6>
+                                <p class="text-muted">${new Date(performance.period_end).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>Notes</h6>
+                                <p class="text-muted">${performance.notes || 'No notes provided'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if it exists
+    const existingModal = document.getElementById('performanceDetailsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add new modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('performanceDetailsModal'));
+    modal.show();
+}
+
+function populateEditModal(performance) {
+    // Populate the existing add modal with performance data for editing
+    document.getElementById('employee_id').value = performance.employee_id;
+    document.getElementById('metric_type').value = performance.metric_type;
+    document.getElementById('value').value = performance.value;
+    document.getElementById('review_date').value = performance.period_start;
+    document.getElementById('comments').value = performance.notes || '';
+    
+    // Change modal title and button text
+    document.getElementById('addPerformanceModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Performance Review';
+    document.querySelector('#addPerformanceModal .btn-primary').innerHTML = '<i class="fas fa-save me-1"></i>Update Review';
+    
+    // Store performance ID for update
+    document.getElementById('addPerformanceModal').setAttribute('data-performance-id', performance.id);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('addPerformanceModal'));
+    modal.show();
+}
+
+function exportPerformanceData() {
+    showNotification('Exporting performance data...', 'info');
+    // TODO: Implement data export functionality
+}
+
+// Initialize page animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Add staggered animation to cards
+    const cards = document.querySelectorAll('.stat-card, .performance-table-card, .charts-section');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Add hover effects to table rows
+    const tableRows = document.querySelectorAll('tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+        });
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}

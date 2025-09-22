@@ -1,0 +1,613 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Settings & Preferences{% endblock %}
+
+{% block page_title %}Settings & Preferences{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="saveAllSettings()">
+        <i class="fas fa-save me-2"></i>Save All
+    </button>
+    <button type="button" class="btn btn-outline-secondary" onclick="resetToDefaults()">
+        <i class="fas fa-undo me-2"></i>Reset to Defaults
+    </button>
+    <button type="button" class="btn btn-outline-info" onclick="exportSettings()">
+        <i class="fas fa-download me-2"></i>Export Settings
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Settings Navigation -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <ul class="nav nav-pills nav-fill" id="settingsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="dashboard-tab" data-bs-toggle="pill" data-bs-target="#dashboard" type="button" role="tab">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notifications-tab" data-bs-toggle="pill" data-bs-target="#notifications" type="button" role="tab">
+                            <i class="fas fa-bell me-2"></i>Notifications
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="privacy-tab" data-bs-toggle="pill" data-bs-target="#privacy" type="button" role="tab">
+                            <i class="fas fa-shield-alt me-2"></i>Privacy
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="appearance-tab" data-bs-toggle="pill" data-bs-target="#appearance" type="button" role="tab">
+                            <i class="fas fa-palette me-2"></i>Appearance
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="account-tab" data-bs-toggle="pill" data-bs-target="#account" type="button" role="tab">
+                            <i class="fas fa-user me-2"></i>Account
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Content -->
+<div class="tab-content" id="settingsTabContent">
+    <!-- Dashboard Settings -->
+    <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Dashboard Layout</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Theme</label>
+                            <select class="form-select" id="themeSelect">
+                                <option value="light" {% if dashboard_preferences.theme == 'light' %}selected{% endif %}>Light</option>
+                                <option value="dark" {% if dashboard_preferences.theme == 'dark' %}selected{% endif %}>Dark</option>
+                                <option value="auto" {% if dashboard_preferences.theme == 'auto' %}selected{% endif %}>Auto</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Layout Style</label>
+                            <select class="form-select" id="layoutSelect">
+                                <option value="grid" {% if dashboard_preferences.layout == 'grid' %}selected{% endif %}>Grid</option>
+                                <option value="list" {% if dashboard_preferences.layout == 'list' %}selected{% endif %}>List</option>
+                                <option value="compact" {% if dashboard_preferences.layout == 'compact' %}selected{% endif %}>Compact</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Default Widgets</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="widgetTasks" {% if 'tasks' in dashboard_preferences.widgets %}checked{% endif %}>
+                                <label class="form-check-label" for="widgetTasks">Tasks</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="widgetCalendar" {% if 'calendar' in dashboard_preferences.widgets %}checked{% endif %}>
+                                <label class="form-check-label" for="widgetCalendar">Calendar</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="widgetNotifications" {% if 'notifications' in dashboard_preferences.widgets %}checked{% endif %}>
+                                <label class="form-check-label" for="widgetNotifications">Notifications</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="widgetAnalytics" {% if 'analytics' in dashboard_preferences.widgets %}checked{% endif %}>
+                                <label class="form-check-label" for="widgetAnalytics">Analytics</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Auto-Refresh Settings</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="autoRefresh" {% if dashboard_preferences.auto_refresh %}checked{% endif %}>
+                                <label class="form-check-label" for="autoRefresh">Enable Auto-refresh</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Refresh Interval</label>
+                            <select class="form-select" id="refreshInterval">
+                                <option value="15" {% if dashboard_preferences.refresh_interval == 15 %}selected{% endif %}>15 seconds</option>
+                                <option value="30" {% if dashboard_preferences.refresh_interval == 30 %}selected{% endif %}>30 seconds</option>
+                                <option value="60" {% if dashboard_preferences.refresh_interval == 60 %}selected{% endif %}>1 minute</option>
+                                <option value="300" {% if dashboard_preferences.refresh_interval == 300 %}selected{% endif %}>5 minutes</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Quick Actions</label>
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-outline-primary" onclick="previewLayout()">
+                                    <i class="fas fa-eye me-1"></i>Preview
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetLayout()">
+                                    <i class="fas fa-undo me-1"></i>Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Settings -->
+    <div class="tab-pane fade" id="notifications" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Notification Channels</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="emailNotifications" {% if notification_preferences.email_notifications %}checked{% endif %}>
+                                <label class="form-check-label" for="emailNotifications">Email Notifications</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="pushNotifications" {% if notification_preferences.push_notifications %}checked{% endif %}>
+                                <label class="form-check-label" for="pushNotifications">Push Notifications</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="smsNotifications" {% if notification_preferences.sms_notifications %}checked{% endif %}>
+                                <label class="form-check-label" for="smsNotifications">SMS Notifications</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Notification Types</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="taskReminders" {% if notification_preferences.task_reminders %}checked{% endif %}>
+                                <label class="form-check-label" for="taskReminders">Task Reminders</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="deadlineAlerts" {% if notification_preferences.deadline_alerts %}checked{% endif %}>
+                                <label class="form-check-label" for="deadlineAlerts">Deadline Alerts</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="meetingReminders" {% if notification_preferences.meeting_reminders %}checked{% endif %}>
+                                <label class="form-check-label" for="meetingReminders">Meeting Reminders</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="teamUpdates" {% if notification_preferences.team_updates %}checked{% endif %}>
+                                <label class="form-check-label" for="teamUpdates">Team Updates</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quiet Hours -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Quiet Hours</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" class="form-control" id="quietHoursStart" value="{{ notification_preferences.quiet_hours_start }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">End Time</label>
+                                <input type="time" class="form-control" id="quietHoursEnd" value="{{ notification_preferences.quiet_hours_end }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Settings -->
+    <div class="tab-pane fade" id="privacy" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Profile Visibility</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Profile Visibility</label>
+                            <select class="form-select" id="profileVisibility">
+                                <option value="public" {% if privacy_settings.profile_visibility == 'public' %}selected{% endif %}>Public</option>
+                                <option value="team" {% if privacy_settings.profile_visibility == 'team' %}selected{% endif %}>Team Only</option>
+                                <option value="private" {% if privacy_settings.profile_visibility == 'private' %}selected{% endif %}>Private</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Activity Status</label>
+                            <select class="form-select" id="activityStatus">
+                                <option value="visible" {% if privacy_settings.activity_status == 'visible' %}selected{% endif %}>Visible</option>
+                                <option value="hidden" {% if privacy_settings.activity_status == 'hidden' %}selected{% endif %}>Hidden</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Data Sharing</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="workHoursVisible" {% if privacy_settings.work_hours_visible %}checked{% endif %}>
+                                <label class="form-check-label" for="workHoursVisible">Show Work Hours</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="taskProgressVisible" {% if privacy_settings.task_progress_visible %}checked{% endif %}>
+                                <label class="form-check-label" for="taskProgressVisible">Show Task Progress</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="achievementsPublic" {% if privacy_settings.achievements_public %}checked{% endif %}>
+                                <label class="form-check-label" for="achievementsPublic">Public Achievements</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appearance Settings -->
+    <div class="tab-pane fade" id="appearance" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Color Scheme</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Primary Color</label>
+                            <div class="color-picker">
+                                <input type="color" class="form-control form-control-color" id="primaryColor" value="#007bff">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Accent Color</label>
+                            <div class="color-picker">
+                                <input type="color" class="form-control form-control-color" id="accentColor" value="#28a745">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Font Size</label>
+                            <select class="form-select" id="fontSize">
+                                <option value="small">Small</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="large">Large</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Layout Preferences</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="compactMode">
+                                <label class="form-check-label" for="compactMode">Compact Mode</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="sidebarCollapsed">
+                                <label class="form-check-label" for="sidebarCollapsed">Collapsed Sidebar</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="animationsEnabled" checked>
+                                <label class="form-check-label" for="animationsEnabled">Enable Animations</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Settings -->
+    <div class="tab-pane fade" id="account" role="tabpanel">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Account Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" value="{{ user.first_name }} {{ user.last_name }}" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Security</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-primary w-100" onclick="changePassword()">
+                                <i class="fas fa-key me-2"></i>Change Password
+                            </button>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-info w-100" onclick="enableTwoFactor()">
+                                <i class="fas fa-shield-alt me-2"></i>Enable Two-Factor Auth
+                            </button>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-warning w-100" onclick="exportData()">
+                                <i class="fas fa-download me-2"></i>Export My Data
+                            </button>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-danger w-100" onclick="deleteAccount()">
+                                <i class="fas fa-trash me-2"></i>Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize settings tabs
+    const settingsTabs = document.querySelectorAll('#settingsTabs button[data-bs-toggle="pill"]');
+    settingsTabs.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(event) {
+            console.log('Switched to tab:', event.target.textContent.trim());
+        });
+    });
+});
+
+function saveAllSettings() {
+    const settings = {
+        dashboard: {
+            theme: document.getElementById('themeSelect').value,
+            layout: document.getElementById('layoutSelect').value,
+            widgets: getSelectedWidgets(),
+            auto_refresh: document.getElementById('autoRefresh').checked,
+            refresh_interval: parseInt(document.getElementById('refreshInterval').value)
+        },
+        notifications: {
+            email_notifications: document.getElementById('emailNotifications').checked,
+            push_notifications: document.getElementById('pushNotifications').checked,
+            sms_notifications: document.getElementById('smsNotifications').checked,
+            task_reminders: document.getElementById('taskReminders').checked,
+            deadline_alerts: document.getElementById('deadlineAlerts').checked,
+            meeting_reminders: document.getElementById('meetingReminders').checked,
+            team_updates: document.getElementById('teamUpdates').checked,
+            quiet_hours_start: document.getElementById('quietHoursStart').value,
+            quiet_hours_end: document.getElementById('quietHoursEnd').value
+        },
+        privacy: {
+            profile_visibility: document.getElementById('profileVisibility').value,
+            activity_status: document.getElementById('activityStatus').value,
+            work_hours_visible: document.getElementById('workHoursVisible').checked,
+            task_progress_visible: document.getElementById('taskProgressVisible').checked,
+            achievements_public: document.getElementById('achievementsPublic').checked
+        },
+        appearance: {
+            primary_color: document.getElementById('primaryColor').value,
+            accent_color: document.getElementById('accentColor').value,
+            font_size: document.getElementById('fontSize').value,
+            compact_mode: document.getElementById('compactMode').checked,
+            sidebar_collapsed: document.getElementById('sidebarCollapsed').checked,
+            animations_enabled: document.getElementById('animationsEnabled').checked
+        }
+    };
+    
+    // Save settings to backend
+    fetch('/api/employee/settings/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Settings saved successfully!', 'success');
+        } else {
+            showAlert('Error saving settings', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error saving settings', 'error');
+    });
+}
+
+function getSelectedWidgets() {
+    const widgets = [];
+    if (document.getElementById('widgetTasks').checked) widgets.push('tasks');
+    if (document.getElementById('widgetCalendar').checked) widgets.push('calendar');
+    if (document.getElementById('widgetNotifications').checked) widgets.push('notifications');
+    if (document.getElementById('widgetAnalytics').checked) widgets.push('analytics');
+    return widgets;
+}
+
+function resetToDefaults() {
+    if (confirm('Are you sure you want to reset all settings to defaults?')) {
+        // Reset all form elements to default values
+        document.getElementById('themeSelect').value = 'light';
+        document.getElementById('layoutSelect').value = 'grid';
+        document.getElementById('autoRefresh').checked = true;
+        document.getElementById('refreshInterval').value = '30';
+        
+        // Reset checkboxes
+        document.getElementById('widgetTasks').checked = true;
+        document.getElementById('widgetCalendar').checked = true;
+        document.getElementById('widgetNotifications').checked = true;
+        document.getElementById('widgetAnalytics').checked = true;
+        
+        showAlert('Settings reset to defaults', 'info');
+    }
+}
+
+function exportSettings() {
+    const settings = {
+        dashboard: {
+            theme: document.getElementById('themeSelect').value,
+            layout: document.getElementById('layoutSelect').value,
+            widgets: getSelectedWidgets(),
+            auto_refresh: document.getElementById('autoRefresh').checked,
+            refresh_interval: parseInt(document.getElementById('refreshInterval').value)
+        }
+    };
+    
+    const dataStr = JSON.stringify(settings, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'employee_settings.json';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function previewLayout() {
+    console.log('Previewing layout');
+    // Implement layout preview functionality
+}
+
+function resetLayout() {
+    if (confirm('Reset dashboard layout to default?')) {
+        document.getElementById('layoutSelect').value = 'grid';
+        document.getElementById('themeSelect').value = 'light';
+        showAlert('Layout reset to default', 'info');
+    }
+}
+
+function changePassword() {
+    console.log('Changing password');
+    // Implement password change modal
+}
+
+function enableTwoFactor() {
+    console.log('Enabling two-factor authentication');
+    // Implement 2FA setup
+}
+
+function exportData() {
+    console.log('Exporting user data');
+    // Implement data export functionality
+}
+
+function deleteAccount() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+        console.log('Deleting account');
+        // Implement account deletion
+    }
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.row'));
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/employee_settings.css' %}">
+{% endblock %}
+{% endblock %}

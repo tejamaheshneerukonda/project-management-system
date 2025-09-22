@@ -1,0 +1,324 @@
+{% extends 'base_company_admin.html' %}
+
+{% block title %}{{ title }} - {{ company.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-envelope me-2"></i>{{ title }}
+                    </h2>
+                    <p class="text-muted mb-0">Communicate with your team members</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#composeMessageModal">
+                        <i class="fas fa-plus me-1"></i>Compose Message
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_messages }}</h4>
+                            <p class="mb-0">Total Messages</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-envelope fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ unread_messages }}</h4>
+                            <p class="mb-0">Unread Messages</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-envelope-open fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ employees|length }}</h4>
+                            <p class="mb-0">Team Members</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ recent_messages|length }}</h4>
+                            <p class="mb-0">Recent Messages</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Message List -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-inbox me-2"></i>Recent Messages
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_messages %}
+                        <div class="list-group list-group-flush">
+                            {% for message in recent_messages %}
+                                <div class="list-group-item {% if not message.is_read %}bg-light{% endif %}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                {{ message.user.username|first|upper }}
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    {{ message.user.username }}
+                                                    {% if not message.is_read %}
+                                                        <span class="badge bg-warning ms-2">New</span>
+                                                    {% endif %}
+                                                </h6>
+                                                <p class="mb-1">{{ message.message|truncatechars:100 }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">{{ message.created_at|date:"M d, H:i" }}</small>
+                                            <div class="btn-group btn-group-sm mt-1">
+                                                <button class="btn btn-outline-primary" onclick="viewMessage({{ message.id }})" title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary" onclick="replyMessage({{ message.id }})" title="Reply">
+                                                    <i class="fas fa-reply"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="deleteMessage({{ message.id }})" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-envelope fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No messages yet</h5>
+                            <p class="text-muted">Start a conversation with your team members.</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#composeMessageModal">
+                                <i class="fas fa-plus me-1"></i>Send First Message
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Members -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Team Members
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if employees %}
+                        <div class="list-group list-group-flush">
+                            {% for employee in employees %}
+                                <div class="list-group-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                            {{ employee.first_name|first }}{{ employee.last_name|first }}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0">{{ employee.first_name }} {{ employee.last_name }}</h6>
+                                            <small class="text-muted">{{ employee.department|default:"No Department" }}</small>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="messageEmployee({{ employee.id }})" title="Send Message">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No team members available.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Compose Message Modal -->
+<div class="modal fade" id="composeMessageModal" tabindex="-1" aria-labelledby="composeMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="composeMessageModalLabel">
+                    <i class="fas fa-edit me-2"></i>Compose Message
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="composeMessageForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="recipient" class="form-label">To *</label>
+                        <select class="form-select" id="recipient" name="recipient" required>
+                            <option value="">Select Recipient</option>
+                            {% for employee in employees %}
+                                <option value="{{ employee.id }}">{{ employee.first_name }} {{ employee.last_name }} ({{ employee.department|default:"No Department" }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="subject" name="subject" placeholder="Message subject">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message *</label>
+                        <textarea class="form-control" id="message" name="message" rows="6" required placeholder="Type your message here..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="urgent" name="urgent">
+                            <label class="form-check-label" for="urgent">
+                                Mark as urgent
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane me-1"></i>Send Message
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script>
+function sendMessage() {
+    const form = document.getElementById('composeMessageForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "api:send_message" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            showErrorToast('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showErrorToast('An error occurred while sending the message.');
+    });
+}
+
+function messageEmployee(employeeId) {
+    document.getElementById('recipient').value = employeeId;
+    $('#composeMessageModal').modal('show');
+}
+
+function viewMessage(messageId) {
+    // TODO: Implement message details view
+    showErrorToast('View message details for ID: ' + messageId);
+}
+
+function replyMessage(messageId) {
+    // TODO: Implement message reply
+    showErrorToast('Reply to message ID: ' + messageId);
+}
+
+function deleteMessage(messageId) {
+    if (confirm('Are you sure you want to delete this message?')) {
+        // TODO: Implement message deletion
+        showErrorToast('Delete message with ID: ' + messageId);
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

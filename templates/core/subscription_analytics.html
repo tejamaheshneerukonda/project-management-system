@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Project Management System{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/pages/subscription_analytics.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">
+                        <i class="fas fa-chart-line text-primary me-2"></i>
+                        Subscription Analytics
+                    </h1>
+                    <p class="text-muted mb-0">Comprehensive insights into subscription performance and revenue</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'core:company_subscriptions' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-1"></i>View Subscriptions
+                    </a>
+                    <a href="{% url 'core:subscription_plans' %}" class="btn btn-primary">
+                        <i class="fas fa-cog me-1"></i>Manage Plans
+                    </a>
+                </div>
+            </div>
+
+            <!-- Revenue Overview -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-3">
+                    <div class="revenue-card monthly">
+                        <div class="revenue-icon">
+                            <i class="fas fa-calendar-month"></i>
+                        </div>
+                        <div class="revenue-content">
+                            <h2 class="revenue-amount">${{ monthly_revenue|floatformat:2 }}</h2>
+                            <p class="revenue-label">Monthly Recurring Revenue</p>
+                            <div class="revenue-trend">
+                                <i class="fas fa-arrow-up text-success me-1"></i>
+                                <span class="text-success">MRR</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="revenue-card annual">
+                        <div class="revenue-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="revenue-content">
+                            <h2 class="revenue-amount">${{ annual_revenue|floatformat:2 }}</h2>
+                            <p class="revenue-label">Projected Annual Revenue</p>
+                            <div class="revenue-trend">
+                                <i class="fas fa-chart-line text-info me-1"></i>
+                                <span class="text-info">ARR</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscription Statistics -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-icon bg-primary">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h3 class="stats-number">{{ total_subscriptions }}</h3>
+                            <p class="stats-label">Total Subscriptions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-icon bg-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h3 class="stats-number">{{ active_subscriptions }}</h3>
+                            <p class="stats-label">Active Subscriptions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-icon bg-warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h3 class="stats-number">{{ trial_subscriptions }}</h3>
+                            <p class="stats-label">Trial Subscriptions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="stats-card">
+                        <div class="stats-icon bg-danger">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stats-content">
+                            <h3 class="stats-number">{{ expired_subscriptions }}</h3>
+                            <p class="stats-label">Expired Subscriptions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Growth Analytics -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-3">
+                    <div class="growth-card">
+                        <div class="growth-header">
+                            <h5 class="growth-title">
+                                <i class="fas fa-trending-up me-2"></i>
+                                Monthly Growth
+                            </h5>
+                        </div>
+                        <div class="growth-content">
+                            <div class="growth-stats">
+                                <div class="growth-stat">
+                                    <h4 class="growth-number">{{ current_month_subscriptions }}</h4>
+                                    <p class="growth-label">This Month</p>
+                                </div>
+                                <div class="growth-stat">
+                                    <h4 class="growth-number">{{ last_month_subscriptions }}</h4>
+                                    <p class="growth-label">Last Month</p>
+                                </div>
+                                <div class="growth-stat">
+                                    <h4 class="growth-number {% if growth_rate >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {% if growth_rate >= 0 %}+{% endif %}{{ growth_rate|floatformat:1 }}%
+                                    </h4>
+                                    <p class="growth-label">Growth Rate</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-3">
+                    <div class="conversion-card">
+                        <div class="conversion-header">
+                            <h5 class="conversion-title">
+                                <i class="fas fa-percentage me-2"></i>
+                                Conversion Metrics
+                            </h5>
+                        </div>
+                        <div class="conversion-content">
+                            <div class="conversion-stats">
+                                <div class="conversion-stat">
+                                    <div class="conversion-circle">
+                                        <span class="conversion-percentage">
+                                            {% if total_subscriptions > 0 %}
+                                                {{ active_subscriptions|floatformat:0 }}/{{ total_subscriptions }}
+                                            {% else %}
+                                                0/0
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <p class="conversion-label">Active Rate</p>
+                                </div>
+                                <div class="conversion-stat">
+                                    <div class="conversion-circle">
+                                        <span class="conversion-percentage">
+                                            {% if total_subscriptions > 0 %}
+                                                {{ trial_subscriptions|floatformat:0 }}/{{ total_subscriptions }}
+                                            {% else %}
+                                                0/0
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <p class="conversion-label">Trial Rate</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plan Popularity -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                Plan Popularity
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if plan_stats %}
+                            <div class="plan-stats">
+                                {% for plan in plan_stats %}
+                                <div class="plan-stat-item">
+                                    <div class="plan-info">
+                                        <div class="plan-icon">
+                                            {% if plan.plan_type == 'FREE' %}
+                                                <i class="fas fa-gift"></i>
+                                            {% elif plan.plan_type == 'STARTER' %}
+                                                <i class="fas fa-rocket"></i>
+                                            {% elif plan.plan_type == 'PROFESSIONAL' %}
+                                                <i class="fas fa-briefcase"></i>
+                                            {% elif plan.plan_type == 'ENTERPRISE' %}
+                                                <i class="fas fa-crown"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="plan-details">
+                                            <h6 class="plan-name">{{ plan.name }}</h6>
+                                            <p class="plan-type">{{ plan.plan_type }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="plan-metrics">
+                                        <div class="plan-subscribers">
+                                            <span class="subscriber-count">{{ plan.subscription_count }}</span>
+                                            <span class="subscriber-label">subscribers</span>
+                                        </div>
+                                        <div class="plan-revenue">
+                                            <span class="revenue-amount">${{ plan.price|floatformat:2 }}</span>
+                                            <span class="revenue-period">{{ plan.get_billing_cycle_display }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="plan-progress">
+                                        <div class="progress">
+                                            <div class="progress-bar" 
+                                                 data-width="{% if plan_stats.0.subscription_count > 0 %}{{ plan.subscription_count|floatformat:0 }}{% else %}0{% endif %}"
+                                                 data-total="{{ plan_stats.0.subscription_count|floatformat:0 }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Plan Data Available</h5>
+                                <p class="text-muted">Create subscription plans to see analytics.</p>
+                                <a href="{% url 'core:subscription_plans' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Create Plans
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="quick-actions">
+                        <h5 class="mb-3">
+                            <i class="fas fa-bolt me-2"></i>
+                            Quick Actions
+                        </h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'core:company_subscriptions' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-list me-1"></i>View All Subscriptions
+                            </a>
+                            <a href="{% url 'core:subscription_plans' %}" class="btn btn-outline-success">
+                                <i class="fas fa-cog me-1"></i>Manage Plans
+                            </a>
+                            <a href="{% url 'core:register_company' %}" class="btn btn-outline-info">
+                                <i class="fas fa-building me-1"></i>Register Company
+                            </a>
+                            <button class="btn btn-outline-warning" onclick="exportAnalytics()">
+                                <i class="fas fa-download me-1"></i>Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/subscription_analytics.js' %}"></script>
+{% endblock %}

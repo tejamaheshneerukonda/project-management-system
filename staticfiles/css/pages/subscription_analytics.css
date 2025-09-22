@@ -1,0 +1,476 @@
+/* Subscription Analytics Page Styles */
+
+/* Revenue Cards */
+.revenue-card {
+    border-radius: 16px;
+    padding: 2rem;
+    color: white;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.revenue-card.monthly {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.revenue-card.annual {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.revenue-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.revenue-card .revenue-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.revenue-card .revenue-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.revenue-card .revenue-content {
+    position: relative;
+    z-index: 2;
+}
+
+.revenue-card .revenue-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.revenue-card .revenue-label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.revenue-card .revenue-trend {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Stats Cards */
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.stats-card .stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.stats-card .stats-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stats-card .stats-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.stats-card .stats-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+/* Growth Card */
+.growth-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    height: 100%;
+}
+
+.growth-header {
+    margin-bottom: 1.5rem;
+}
+
+.growth-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.growth-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.growth-stat {
+    text-align: center;
+}
+
+.growth-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.growth-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+/* Conversion Card */
+.conversion-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    height: 100%;
+}
+
+.conversion-header {
+    margin-bottom: 1.5rem;
+}
+
+.conversion-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.conversion-stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.conversion-stat {
+    text-align: center;
+}
+
+.conversion-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.conversion-percentage {
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.conversion-label {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+/* Plan Stats */
+.plan-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.plan-stat-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.plan-stat-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.plan-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.plan-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.plan-details {
+    flex: 1;
+}
+
+.plan-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.plan-type {
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+.plan-metrics {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 1rem;
+}
+
+.plan-subscribers {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.subscriber-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    display: block;
+}
+
+.subscriber-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.plan-revenue {
+    text-align: center;
+}
+
+.revenue-amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #28a745;
+    display: block;
+}
+
+.revenue-period {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.plan-progress {
+    width: 100px;
+}
+
+.progress {
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transition: width 0.6s ease;
+}
+
+/* Quick Actions */
+.quick-actions {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.quick-actions h5 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .revenue-card {
+        padding: 1.5rem;
+    }
+    
+    .revenue-card .revenue-amount {
+        font-size: 2rem;
+    }
+    
+    .revenue-card .revenue-icon {
+        width: 50px;
+        height: 50px;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+    
+    .revenue-card .revenue-icon i {
+        font-size: 1.25rem;
+    }
+    
+    .stats-card {
+        padding: 1rem;
+    }
+    
+    .stats-card .stats-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .stats-card .stats-icon i {
+        font-size: 1.25rem;
+    }
+    
+    .stats-card .stats-number {
+        font-size: 1.5rem;
+    }
+    
+    .growth-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .conversion-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .conversion-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .plan-stat-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .plan-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .plan-icon {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .plan-metrics {
+        margin-right: 0;
+        flex-direction: row;
+        gap: 1rem;
+    }
+    
+    .plan-progress {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .d-flex.justify-content-between .d-flex {
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .revenue-card .revenue-amount {
+        font-size: 1.75rem;
+    }
+    
+    .stats-card .stats-number {
+        font-size: 1.25rem;
+    }
+    
+    .growth-number {
+        font-size: 1.5rem;
+    }
+    
+    .conversion-circle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .conversion-percentage {
+        font-size: 0.8rem;
+    }
+    
+    .plan-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .subscriber-count {
+        font-size: 1.25rem;
+    }
+    
+    .revenue-amount {
+        font-size: 1rem;
+    }
+}

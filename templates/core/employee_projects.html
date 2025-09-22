@@ -1,0 +1,153 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}My Projects{% endblock %}
+
+{% block page_title %}My Projects{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary" onclick="refreshProjects()">
+    <i class="fas fa-sync me-2"></i>Refresh
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Projects Overview -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">Projects Overview</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <div class="h4 text-primary">{{ project_stats|length }}</div>
+                        <small class="text-muted">Total Projects</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="h4 text-success">
+                            {% for stat in project_stats %}
+                                {% if forloop.first %}{{ stat.completed_tasks }}{% endif %}
+                            {% empty %}0{% endfor %}
+                        </div>
+                        <small class="text-muted">Completed Tasks</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="h4 text-warning">
+                            {% for stat in project_stats %}
+                                {% if forloop.first %}{{ stat.in_progress_tasks }}{% endif %}
+                            {% empty %}0{% endfor %}
+                        </div>
+                        <small class="text-muted">In Progress</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="h4 text-danger">
+                            {% for stat in project_stats %}
+                                {% if forloop.first %}{{ stat.overdue_tasks }}{% endif %}
+                            {% empty %}0{% endfor %}
+                        </div>
+                        <small class="text-muted">Overdue Tasks</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Projects List -->
+<div class="row">
+    {% for stat in project_stats %}
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">{{ stat.project.name }}</h6>
+                <span class="badge bg-info">{{ stat.project.status }}</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">{{ stat.project.description|truncatewords:20 }}</p>
+                
+                <!-- Project Stats -->
+                <div class="row mb-3">
+                    <div class="col-3 text-center">
+                        <div class="h6 text-primary">{{ stat.total_tasks }}</div>
+                        <small class="text-muted">Total</small>
+                    </div>
+                    <div class="col-3 text-center">
+                        <div class="h6 text-success">{{ stat.completed_tasks }}</div>
+                        <small class="text-muted">Done</small>
+                    </div>
+                    <div class="col-3 text-center">
+                        <div class="h6 text-warning">{{ stat.in_progress_tasks }}</div>
+                        <small class="text-muted">Progress</small>
+                    </div>
+                    <div class="col-3 text-center">
+                        <div class="h6 text-danger">{{ stat.overdue_tasks }}</div>
+                        <small class="text-muted">Overdue</small>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                {% if stat.total_tasks > 0 %}
+                <div class="progress mb-3" style="height: 8px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {% widthratio stat.completed_tasks stat.total_tasks 100 %}%">
+                    </div>
+                    <div class="progress-bar bg-warning" role="progressbar" 
+                         style="width: {% widthratio stat.in_progress_tasks stat.total_tasks 100 %}%">
+                    </div>
+                </div>
+                <div class="text-center">
+                    <small class="text-muted">
+                        {% widthratio stat.completed_tasks stat.total_tasks 100 %}% Complete
+                    </small>
+                </div>
+                {% else %}
+                <div class="text-center text-muted">
+                    <small>No tasks assigned yet</small>
+                </div>
+                {% endif %}
+
+                <!-- Project Details -->
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        {% if stat.project.start_date %}
+                            Started: {{ stat.project.start_date|date:"M d, Y" }}
+                        {% endif %}
+                        {% if stat.project.end_date %}
+                            | Due: {{ stat.project.end_date|date:"M d, Y" }}
+                        {% endif %}
+                    </small>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-3">
+                    <button class="btn btn-sm btn-outline-primary" onclick="viewProjectTasks({{ stat.project.id }})">
+                        <i class="fas fa-tasks me-1"></i>View Tasks
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" onclick="viewProjectDetails({{ stat.project.id }})">
+                        <i class="fas fa-info-circle me-1"></i>Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-project-diagram fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No Projects Assigned</h5>
+                <p class="text-muted">You haven't been assigned to any projects yet.</p>
+                <small class="text-muted">Your manager will assign projects to you soon.</small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/employee_projects.js' %}"></script>
+{% endblock %}
