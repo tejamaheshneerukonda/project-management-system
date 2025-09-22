@@ -24,32 +24,51 @@ class LeaveRequestConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    async def receive(self, text_data):
-        try:
-            data = json.loads(text_data)
-            action = data.get('action')
-            
-            if action == 'join_company':
-                company_id = data.get('company_id')
-                if company_id:
-                    # Join company-specific room
-                    company_room = f'leave_requests_company_{company_id}'
-                    await self.channel_layer.group_add(
-                        company_room,
-                        self.channel_name
-                    )
-                    self.company_room = company_room
-        except json.JSONDecodeError:
-            await self.send(text_data=json.dumps({
-                'type': 'error',
-                'message': 'Invalid JSON data'
-            }))
+        async def receive(self, text_data):
+            try:
+                data = json.loads(text_data)
+                action = data.get('action')
+                
+                if action == 'join_company':
+                    company_id = data.get('company_id')
+                    if company_id:
+                        # Join company-specific room
+                        company_room = f'leave_requests_company_{company_id}'
+                        await self.channel_layer.group_add(
+                            company_room,
+                            self.channel_name
+                        )
+                        self.company_room = company_room
+                elif action == 'join_employee':
+                    employee_id = data.get('employee_id')
+                    if employee_id:
+                        # Join employee-specific room for balance updates
+                        employee_room = f'employee_balance_{employee_id}'
+                        await self.channel_layer.group_add(
+                            employee_room,
+                            self.channel_name
+                        )
+                        self.employee_room = employee_room
+            except json.JSONDecodeError:
+                await self.send(text_data=json.dumps({
+                    'type': 'error',
+                    'message': 'Invalid JSON data'
+                }))
 
     # Receive message from room group
     async def leave_request_update(self, event):
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'leave_request_update',
+            'action': event['action'],
+            'data': event['data']
+        }))
+    
+    # Receive leave balance update from room group
+    async def leave_balance_update(self, event):
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'type': 'leave_balance_update',
             'action': event['action'],
             'data': event['data']
         }))

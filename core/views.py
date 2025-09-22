@@ -4291,12 +4291,51 @@ def employee_leave(request):
     # Get leave requests
     leave_requests = LeaveRequest.objects.filter(employee=employee).order_by('-created_at')
     
-    # Get leave balance (if available)
-    leave_balance = {
-        'annual': 20,  # Default annual leave
-        'sick': 10,    # Default sick leave
-        'personal': 5, # Default personal leave
-    }
+    # Calculate actual leave balance based on approved requests
+    def calculate_leave_balance():
+        # Default annual allocations
+        annual_allocation = 20
+        sick_allocation = 10
+        personal_allocation = 5
+        
+        # Calculate used leave days for each type
+        approved_annual = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_type='VACATION',
+            status='APPROVED'
+        ).aggregate(total=Sum('total_days'))['total'] or 0
+        
+        approved_sick = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_type='SICK_LEAVE',
+            status='APPROVED'
+        ).aggregate(total=Sum('total_days'))['total'] or 0
+        
+        approved_personal = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_type='PERSONAL',
+            status='APPROVED'
+        ).aggregate(total=Sum('total_days'))['total'] or 0
+        
+        return {
+            'annual': float(annual_allocation - approved_annual),
+            'sick': float(sick_allocation - approved_sick),
+            'personal': float(personal_allocation - approved_personal),
+            'annual_used': float(approved_annual),
+            'sick_used': float(approved_sick),
+            'personal_used': float(approved_personal),
+        }
+    
+    leave_balance = calculate_leave_balance()
+    
+    # Handle AJAX requests for real-time balance updates
+    if request.GET.get('ajax') == '1':
+        from django.http import JsonResponse
+        return JsonResponse({
+            'success': True,
+            'leave_balance': leave_balance,
+            'pending_requests': leave_requests.filter(status='PENDING').count(),
+        })
     
     context = {
         'title': 'Leave Management',

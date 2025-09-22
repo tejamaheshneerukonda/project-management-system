@@ -25,7 +25,7 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Annual Leave</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ leave_balance.annual }} days</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="annual-balance">{{ leave_balance.annual }} days</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
@@ -40,7 +40,7 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Sick Leave</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ leave_balance.sick }} days</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="sick-balance">{{ leave_balance.sick }} days</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-heartbeat fa-2x text-gray-300"></i>
@@ -55,7 +55,7 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Personal Leave</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ leave_balance.personal }} days</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="personal-balance">{{ leave_balance.personal }} days</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-user fa-2x text-gray-300"></i>
@@ -70,7 +70,7 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Requests</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ leave_requests|length }}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="pending-requests">{{ leave_requests|length }}</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -274,4 +274,127 @@
 
 {% block extra_js %}
 <script src="{% static 'js/pages/leave_management.js' %}"></script>
+
+<script>
+// Real-time leave balance updates
+document.addEventListener('DOMContentLoaded', function() {
+    initLeaveBalanceWebSocket();
+});
+
+// WebSocket for real-time leave balance updates
+if (typeof leaveBalanceSocket === 'undefined') {
+    var leaveBalanceSocket = null;
+}
+
+function initLeaveBalanceWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/leave-requests/`;
+    
+    try {
+        leaveBalanceSocket = new WebSocket(wsUrl);
+        
+        leaveBalanceSocket.onopen = function(e) {
+            console.log('Leave balance WebSocket connected');
+            // Join employee-specific room for balance updates
+            if (leaveBalanceSocket.readyState === WebSocket.OPEN) {
+                leaveBalanceSocket.send(JSON.stringify({
+                    action: 'join_employee',
+                    employee_id: {{ employee.id }}
+                }));
+            }
+        };
+        
+        leaveBalanceSocket.onmessage = function(e) {
+            try {
+                const data = JSON.parse(e.data);
+                
+                if (data.type === 'leave_balance_update') {
+                    handleLeaveBalanceUpdate(data);
+                }
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+            }
+        };
+        
+        leaveBalanceSocket.onclose = function(e) {
+            console.log('Leave balance WebSocket disconnected');
+            // Attempt to reconnect after 3 seconds
+            setTimeout(initLeaveBalanceWebSocket, 3000);
+        };
+        
+        leaveBalanceSocket.onerror = function(e) {
+            console.error('Leave balance WebSocket error:', e);
+        };
+    } catch (error) {
+        console.error('Failed to create leave balance WebSocket:', error);
+    }
+}
+
+function handleLeaveBalanceUpdate(data) {
+    if (data.action === 'balance_changed' && data.data) {
+        const balance = data.data.leave_balance;
+        
+        // Update balance displays with animation
+        updateBalanceDisplay('annual-balance', balance.annual);
+        updateBalanceDisplay('sick-balance', balance.sick);
+        updateBalanceDisplay('personal-balance', balance.personal);
+        
+        // Show notification
+        showSuccessToast(`Leave request approved! ${data.data.leave_type} balance updated.`);
+        
+        // Update pending requests count
+        fetch('/employee/leave/?ajax=1')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updatePendingRequests(data.pending_requests);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching updated pending count:', error);
+            });
+    }
+}
+
+function updateBalanceDisplay(elementId, newValue) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        // Add animation class
+        element.classList.add('balance-update-animation');
+        
+        // Update the value
+        element.textContent = `${newValue} days`;
+        
+        // Remove animation class after animation completes
+        setTimeout(() => {
+            element.classList.remove('balance-update-animation');
+        }, 1000);
+    }
+}
+
+function updatePendingRequests(newCount) {
+    const element = document.getElementById('pending-requests');
+    if (element) {
+        element.textContent = newCount;
+    }
+}
+
+// Add CSS for balance update animation
+const style = document.createElement('style');
+style.textContent = `
+    .balance-update-animation {
+        animation: balanceUpdate 1s ease-in-out;
+        background-color: #d4edda;
+        border-radius: 4px;
+        padding: 2px 4px;
+    }
+    
+    @keyframes balanceUpdate {
+        0% { background-color: #d4edda; transform: scale(1); }
+        50% { background-color: #c3e6cb; transform: scale(1.05); }
+        100% { background-color: transparent; transform: scale(1); }
+    }
+`;
+document.head.appendChild(style);
+</script>
 {% endblock %}
