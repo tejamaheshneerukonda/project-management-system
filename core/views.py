@@ -4328,13 +4328,16 @@ def employee_leave(request):
     
     leave_balance = calculate_leave_balance()
     
+    # Calculate pending requests count
+    pending_requests_count = leave_requests.filter(status='PENDING').count()
+    
     # Handle AJAX requests for real-time balance updates
     if request.GET.get('ajax') == '1':
         from django.http import JsonResponse
         return JsonResponse({
             'success': True,
             'leave_balance': leave_balance,
-            'pending_requests': leave_requests.filter(status='PENDING').count(),
+            'pending_requests': pending_requests_count,
         })
     
     context = {
@@ -4342,6 +4345,7 @@ def employee_leave(request):
         'employee': employee,
         'leave_requests': leave_requests,
         'leave_balance': leave_balance,
+        'pending_requests_count': pending_requests_count,
         'leave_types': LeaveRequest._meta.get_field('leave_type').choices,
         'leave_statuses': LeaveRequest._meta.get_field('status').choices,
     }
