@@ -189,7 +189,7 @@ python manage.py check
 **Quick Deploy to PythonAnywhere:**
 1. Sign up at [pythonanywhere.com](https://www.pythonanywhere.com)
 2. Clone this repository: `git clone https://github.com/tejamaheshneerukonda/project-management-system.git`
-3. Install dependencies: `pip3.10 install --user -r requirements-minimal.txt`
+3. Install dependencies: `pip3.10 install --user -r requirements-pythonanywhere-minimal.txt`
 4. Run migrations: `python3.10 manage.py migrate`
 5. Configure WSGI file (see [PYTHONANYWHERE_DEPLOYMENT.md](PYTHONANYWHERE_DEPLOYMENT.md))
 6. Reload your web app

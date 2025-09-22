@@ -45,11 +45,11 @@ cd project-management-system
 ### 4. Install Dependencies
 
 ```bash
-# Install Python packages
-pip3.10 install --user -r requirements.txt
+# Install Python packages (PythonAnywhere compatible)
+pip3.10 install --user -r requirements-pythonanywhere.txt
 
-# Or for minimal installation:
-pip3.10 install --user -r requirements-minimal.txt
+# Or for minimal installation (no WebSocket features):
+pip3.10 install --user -r requirements-pythonanywhere-minimal.txt
 ```
 
 ### 5. Configure Database
@@ -84,7 +84,7 @@ if path not in sys.path:
     sys.path.append(path)
 
 # Set the Django settings module
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_manager.settings_production')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_manager.settings_pythonanywhere')
 
 # Import Django's WSGI application
 from django.core.wsgi import get_wsgi_application
@@ -153,11 +153,26 @@ application = get_wsgi_application()
 
 ### Common Issues
 
-**1. Import Errors**
+**1. Dependency Conflicts**
+```bash
+# If you get Django version conflicts, use PythonAnywhere-specific requirements:
+pip3.10 install --user -r requirements-pythonanywhere-minimal.txt
+
+# This resolves conflicts between Django 5.2.6 and django-celery-beat
+```
+
+**2. ModuleNotFoundError: No module named 'channels'**
+```bash
+# Use the PythonAnywhere settings that don't require channels:
+# In WSGI file, use: project_manager.settings_pythonanywhere
+# This disables WebSocket features for free tier compatibility
+```
+
+**3. Import Errors**
 ```bash
 # Check Python path in WSGI file
 # Ensure all dependencies are installed
-pip3.10 install --user -r requirements.txt
+pip3.10 install --user -r requirements-pythonanywhere.txt
 ```
 
 **2. Static Files Not Loading**

@@ -10,7 +10,7 @@ if path not in sys.path:
     sys.path.append(path)
 
 # Set the Django settings module
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_manager.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project_manager.settings_pythonanywhere')
 
 # Import Django's WSGI application
 from django.core.wsgi import get_wsgi_application
