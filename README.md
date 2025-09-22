@@ -34,9 +34,15 @@ A comprehensive Django-based project management system with real-time features, 
 
 ## 📋 Prerequisites
 
-- Python 3.8+
+- **Python 3.13.7** (recommended) or Python 3.8+
 - pip (Python package installer)
 - Git
+
+### Python Version Compatibility
+- **Current Version**: Python 3.13.7 (64-bit)
+- **Minimum Required**: Python 3.8+
+- **Django Compatibility**: Django 5.2.6 supports Python 3.8+
+- **Platform**: Windows 10/11 (tested), macOS, Linux
 
 ## 🚀 Installation
 
@@ -48,11 +54,17 @@ A comprehensive Django-based project management system with real-time features, 
 
 2. **Create virtual environment**
    ```bash
+   # Using Python 3.13.7 (recommended)
    python -m venv venv
+   
    # On Windows
    venv\Scripts\activate
+   
    # On macOS/Linux
    source venv/bin/activate
+   
+   # Verify Python version
+   python --version
    ```
 
 3. **Install dependencies**
