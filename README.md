@@ -34,15 +34,9 @@ A comprehensive Django-based project management system with real-time features, 
 
 ## 📋 Prerequisites
 
-- **Python 3.13.7** (recommended) or Python 3.8+
+- Python 3.8+
 - pip (Python package installer)
 - Git
-
-### Python Version Compatibility
-- **Current Version**: Python 3.13.7 (64-bit)
-- **Minimum Required**: Python 3.8+
-- **Django Compatibility**: Django 5.2.6 supports Python 3.8+
-- **Platform**: Windows 10/11 (tested), macOS, Linux
 
 ## 🚀 Installation
 
@@ -54,34 +48,16 @@ A comprehensive Django-based project management system with real-time features, 
 
 2. **Create virtual environment**
    ```bash
-   # Using Python 3.13.7 (recommended)
    python -m venv venv
-   
    # On Windows
    venv\Scripts\activate
-   
    # On macOS/Linux
    source venv/bin/activate
-   
-   # Verify Python version
-   python --version
    ```
 
 3. **Install dependencies**
-
-   **For Production (Full Installation):**
    ```bash
    pip install -r requirements.txt
-   ```
-
-   **For Development (Includes Testing Tools):**
-   ```bash
-   pip install -r requirements-dev.txt
-   ```
-
-   **For Minimal Installation (Core Only):**
-   ```bash
-   pip install -r requirements-minimal.txt
    ```
 
 4. **Run migrations**
@@ -149,27 +125,8 @@ project-management-system/
 ├── templates/              # HTML templates
 ├── static/                 # Static files (CSS, JS, images)
 ├── project_manager/        # Django project settings
-├── requirements.txt        # Complete Python dependencies
-├── requirements-dev.txt    # Development-specific packages
-└── requirements-minimal.txt # Core packages only
+└── requirements.txt        # Python dependencies
 ```
-
-## 📦 Requirements Files
-
-### `requirements.txt` (Complete Installation)
-- **Purpose**: Full production installation with all features
-- **Includes**: Django, WebSocket, Database drivers, Payment processing, Analytics, ML libraries
-- **Use Case**: Production deployment, full feature development
-
-### `requirements-dev.txt` (Development)
-- **Purpose**: Development environment with testing and debugging tools
-- **Includes**: All production requirements + testing frameworks, code quality tools, debugging utilities
-- **Use Case**: Local development, testing, code quality checks
-
-### `requirements-minimal.txt` (Core Only)
-- **Purpose**: Minimal installation with core functionality only
-- **Includes**: Django core, WebSocket, basic database support, essential utilities
-- **Use Case**: Quick setup, limited environments, core functionality testing
 
 ## 🧪 Testing
 
@@ -184,17 +141,6 @@ python manage.py check
 ```
 
 ## 🚀 Deployment
-
-### PythonAnywhere (Free Tier)
-**Quick Deploy to PythonAnywhere:**
-1. Sign up at [pythonanywhere.com](https://www.pythonanywhere.com)
-2. Clone this repository: `git clone https://github.com/tejamaheshneerukonda/project-management-system.git`
-3. Install dependencies: `pip3.10 install --user -r requirements-pythonanywhere-minimal.txt`
-4. Run migrations: `python3.10 manage_pythonanywhere.py migrate`
-5. Configure WSGI file (see [PYTHONANYWHERE_DEPLOYMENT.md](PYTHONANYWHERE_DEPLOYMENT.md))
-6. Reload your web app
-
-**📋 Detailed Guide**: See [PYTHONANYWHERE_DEPLOYMENT.md](PYTHONANYWHERE_DEPLOYMENT.md) for complete deployment instructions.
 
 ### Production Settings
 1. Set `DEBUG=False` in settings

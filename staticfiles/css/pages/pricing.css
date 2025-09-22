@@ -472,3 +472,88 @@
         font-size: 1.5rem;
     }
 }
+
+/* Current Plan Badge */
+.current-plan-badge {
+    width: 100%;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.current-plan-badge i {
+    color: white;
+}
+
+/* Free Plan Info */
+.free-plan-info {
+    width: 100%;
+    background: linear-gradient(135deg, #6c757d, #495057);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.free-plan-info i {
+    color: white;
+}
+
+/* Plan Status Indicators */
+.pricing-card.current-plan {
+    border-color: #28a745;
+    box-shadow: 0 10px 30px rgba(40, 167, 69, 0.2);
+}
+
+.pricing-card.current-plan::before {
+    content: 'Current Plan';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.5rem 2rem;
+    border-radius: 0 0 15px 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    z-index: 10;
+}
+
+.pricing-card.free-plan {
+    border-color: #6c757d;
+    opacity: 0.8;
+}
+
+.pricing-card.free-plan::before {
+    content: 'Included';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    padding: 0.5rem 2rem;
+    border-radius: 0 0 15px 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+    z-index: 10;
+}

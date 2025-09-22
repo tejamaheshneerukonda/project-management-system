@@ -278,7 +278,7 @@ if (addCardBtn) {
         e.stopImmediatePropagation();
         
         console.log('Button clicked - handling payment method addition!');
-        alert('Form submitted! Check console for details.');
+        showInfoToast('Form submitted! Check console for details.');
         console.log('Form submitted!');
         
         // Get form data
@@ -299,22 +299,22 @@ if (addCardBtn) {
         // Step 1: Validate form
         console.log('Step 1: Validating form...');
         if (!cardNumber || cardNumber.length < 13) {
-            alert('Please enter a valid card number');
+            showErrorToast('Please enter a valid card number');
             return;
         }
         
         if (!expiryDate || expiryDate.length !== 5) {
-            alert('Please enter a valid expiry date (MM/YY)');
+            showErrorToast('Please enter a valid expiry date (MM/YY)');
             return;
         }
         
         if (!securityCode || securityCode.length < 3) {
-            alert('Please enter a valid security code');
+            showErrorToast('Please enter a valid security code');
             return;
         }
         
         if (!cardholderName) {
-            alert('Please enter the cardholder name');
+            showErrorToast('Please enter the cardholder name');
             return;
         }
         
@@ -393,7 +393,7 @@ if (addCardBtn) {
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error('Error response:', errorText);
-                alert('API Error: ' + response.status + ' - ' + errorText);
+                showErrorToast('API Error: ' + response.status + ' - ' + errorText);
                 return;
             }
             
@@ -406,7 +406,7 @@ if (addCardBtn) {
                 addCardBtn.classList.remove('btn-primary');
                 addCardBtn.classList.add('btn-success');
                 
-                alert(`Payment method added successfully!\n\nCard: ${result.payment_method.display_name}\nExpires: ${result.payment_method.expiry_display}\n\nRedirecting to billing page...`);
+                showSuccessToast(`Payment method added successfully!\n\nCard: ${result.payment_method.display_name}\nExpires: ${result.payment_method.expiry_display}\n\nRedirecting to billing page...`);
                 console.log('SUCCESS: Payment method created with ID:', result.payment_method.id);
                 
                 // Redirect to billing page after successful addition
@@ -416,11 +416,11 @@ if (addCardBtn) {
                 
                 return; // Don't reset form since we're redirecting
             } else {
-                alert('Error: ' + result.error);
+                showErrorToast('Error: ' + result.error);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred while adding the payment method');
+            showErrorToast('An error occurred while adding the payment method');
         } finally {
             // Reset button state
             addCardBtn.disabled = false;

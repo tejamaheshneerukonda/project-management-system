@@ -227,10 +227,41 @@
     height: 1.25rem;
     margin-top: 0.125rem;
     margin-left: -2rem;
+    border: 2px solid #dee2e6;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    position: relative;
 }
 
 .form-check-input:checked {
     background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    position: relative;
+}
+
+.form-check-input:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.form-check-input:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.form-check-input:hover {
     border-color: var(--primary-color);
 }
 

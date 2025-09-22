@@ -1,0 +1,315 @@
+/**
+ * Employee Gamification CSS
+ * Styles for achievements, points, and leaderboard functionality
+ */
+
+/* Achievement Animation */
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Achievement Icon Styles */
+.achievement-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+.achievement-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Card Border Styles */
+.card.border-left-primary {
+    border-left: 4px solid #4e73df !important;
+}
+
+.card.border-left-success {
+    border-left: 4px solid #1cc88a !important;
+}
+
+.card.border-left-warning {
+    border-left: 4px solid #f6c23e !important;
+}
+
+.card.border-left-info {
+    border-left: 4px solid #36b9cc !important;
+}
+
+/* Timeline Styles */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -22px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #007bff;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 3px #dee2e6;
+}
+
+.timeline-item.achievement::before {
+    background-color: #28a745;
+}
+
+.timeline-item.points::before {
+    background-color: #ffc107;
+}
+
+.timeline-item.level::before {
+    background-color: #dc3545;
+}
+
+.timeline-text {
+    margin-bottom: 5px;
+    color: #6c757d;
+}
+
+/* Points Display Styles */
+.points-display {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #007bff;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.points-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Achievement Card Styles */
+.achievement-card {
+    transition: all 0.3s ease-in-out;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.achievement-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.achievement-card.unlocked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.achievement-card.locked {
+    opacity: 0.6;
+    filter: grayscale(50%);
+}
+
+/* Leaderboard Styles */
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+.leaderboard-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.leaderboard-item.current-user {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.leaderboard-rank {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 1rem;
+    min-width: 40px;
+}
+
+.leaderboard-rank.first {
+    color: #ffd700;
+}
+
+.leaderboard-rank.second {
+    color: #c0c0c0;
+}
+
+.leaderboard-rank.third {
+    color: #cd7f32;
+}
+
+.leaderboard-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    object-fit: cover;
+}
+
+.leaderboard-info {
+    flex: 1;
+}
+
+.leaderboard-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.leaderboard-points {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Progress Bar Styles */
+.progress-custom {
+    height: 10px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-custom .progress-bar {
+    border-radius: 5px;
+    transition: width 0.6s ease;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Reward Card Styles */
+.reward-card {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.reward-card:hover {
+    border-color: #007bff;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,123,255,0.15);
+}
+
+.reward-card.available {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.05);
+}
+
+.reward-card.claimed {
+    opacity: 0.7;
+    background-color: #f8f9fa;
+}
+
+/* Filter Button Styles */
+.achievement-filter-btn {
+    margin: 0 0.25rem;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.achievement-filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.achievement-filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .points-display {
+        font-size: 2rem;
+    }
+    
+    .leaderboard-item {
+        padding: 0.75rem;
+    }
+    
+    .leaderboard-rank {
+        font-size: 1.2rem;
+        min-width: 30px;
+    }
+    
+    .leaderboard-avatar {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .timeline {
+        padding-left: 20px;
+    }
+    
+    .timeline-item::before {
+        left: -17px;
+        width: 10px;
+        height: 10px;
+    }
+}
+
+/* Special Effects */
+.achievement-sparkle {
+    position: relative;
+    overflow: hidden;
+}
+
+.achievement-sparkle::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(45deg);
+    animation: sparkle 2s infinite;
+}
+
+@keyframes sparkle {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+}

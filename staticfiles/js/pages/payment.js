@@ -58,37 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
         updateSelectedPlan(defaultOption.value);
     }
 
-    // Form submission
-    const paymentForm = document.getElementById('paymentForm');
-    if (paymentForm) {
-        paymentForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validate form
-            if (validateForm()) {
-                processPayment();
-            }
-        });
-    }
+    // Form submission is now handled in the template
 
-    // Add loading state to submit button
-    const submitButton = document.getElementById('submitPayment');
-    if (submitButton) {
-        submitButton.addEventListener('click', function() {
-            this.classList.add('loading');
-            this.disabled = true;
-            
-            const originalContent = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-            
-            // Reset after 3 seconds (in real app, this would be handled by server response)
-            setTimeout(() => {
-                this.classList.remove('loading');
-                this.disabled = false;
-                this.innerHTML = originalContent;
-            }, 3000);
-        });
-    }
 
     // Add hover effects to plan options
     const planOptionsElements = document.querySelectorAll('.plan-option');
@@ -161,7 +132,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Functions
     function updateSelectedPlan(planId) {
         // In a real application, this would update the form with plan details
-        console.log('Selected plan:', planId);
+        console.log('=== PLAN SELECTION DEBUG ===');
+        console.log('Selected plan ID:', planId);
+        
+        // Update the hidden field
+        const selectedPlanIdInput = document.getElementById('selected_plan_id');
+        if (selectedPlanIdInput) {
+            selectedPlanIdInput.value = planId;
+            console.log('Updated selected_plan_id field to:', selectedPlanIdInput.value);
+        } else {
+            console.error('selected_plan_id field not found!');
+        }
         
         // Update any hidden fields or display selected plan info
         const selectedPlan = document.querySelector(`input[value="${planId}"]`);
@@ -182,6 +163,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const billingAddress = document.getElementById('billingAddress').value;
         const termsCheck = document.getElementById('termsCheck').checked;
         const selectedPlan = document.querySelector('input[name="plan_selection"]:checked');
+        const selectedPlanId = document.getElementById('selected_plan_id').value;
+
+        console.log('=== FORM VALIDATION DEBUG ===');
+        console.log('Card Number:', cardNumber);
+        console.log('Cardholder Name:', cardholderName);
+        console.log('Expiry Date:', expiryDate);
+        console.log('CVV:', cvv);
+        console.log('Billing Address:', billingAddress);
+        console.log('Terms Checked:', termsCheck);
+        console.log('Selected Plan Radio:', selectedPlan ? selectedPlan.value : 'None');
+        console.log('Selected Plan ID Field:', selectedPlanId);
 
         let isValid = true;
         let errorMessage = '';
@@ -236,15 +228,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function processPayment() {
-        // In a real application, this would send the payment data to a secure server
-        // For demo purposes, we'll simulate a successful payment
+        // Submit the form to Django backend for processing
+        console.log('Processing payment...');
         
-        showNotification('Payment processed successfully! Starting your free trial...', 'success');
-        
-        // Redirect to dashboard after successful payment
-        setTimeout(() => {
-            window.location.href = '/dashboard/';
-        }, 2000);
+        // Get the form element
+        const form = document.getElementById('paymentForm');
+        if (form) {
+            // Submit the form to Django backend
+            form.submit();
+        } else {
+            console.error('Payment form not found');
+            showNotification('Payment form not found. Please refresh the page and try again.', 'error');
+        }
     }
 
     function showNotification(message, type = 'info') {

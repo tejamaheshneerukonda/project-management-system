@@ -1,0 +1,341 @@
+/**
+ * Employee Shortcuts CSS
+ * Styles for keyboard shortcuts help and accessibility features
+ */
+
+/* Keyboard Key Styles */
+kbd {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    color: #495057;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+kbd:hover {
+    background-color: #e9ecef;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Shortcut Item Styles */
+.shortcut-item {
+    transition: all 0.2s ease-in-out;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.shortcut-item:hover {
+    transform: translateX(5px);
+    background-color: #f8f9fa;
+}
+
+/* Shortcut Category Styles */
+.shortcut-category .shortcut-item {
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease-in-out;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+}
+
+.shortcut-category .shortcut-item:hover {
+    border-left-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Shortcut Description Styles */
+.shortcut-description {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.shortcut-action {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Shortcut Keys Container */
+.shortcut-keys {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    margin-left: auto;
+}
+
+.shortcut-key-combo {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.shortcut-key-separator {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+/* Category Header Styles */
+.shortcut-category-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.shortcut-category-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.shortcut-category-description {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+/* Shortcut Grid Styles */
+.shortcut-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.shortcut-category {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+.shortcut-category:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Search Shortcuts Styles */
+.shortcut-search {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.shortcut-search-input {
+    border: 2px solid #e9ecef;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    width: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+.shortcut-search-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Shortcut Legend */
+.shortcut-legend {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.shortcut-legend-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.75rem;
+}
+
+.shortcut-legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.shortcut-legend-key {
+    margin-right: 0.75rem;
+}
+
+.shortcut-legend-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Accessibility Features */
+.accessibility-feature {
+    background-color: #fff;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.accessibility-feature:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.15);
+}
+
+.accessibility-feature i {
+    font-size: 1.5rem;
+    color: #007bff;
+    margin-right: 0.75rem;
+}
+
+.accessibility-feature-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.accessibility-feature-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Keyboard Navigation Styles */
+.keyboard-nav-active {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.keyboard-nav-active kbd {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+
+/* Shortcut Practice Area */
+.shortcut-practice {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.shortcut-practice-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.shortcut-practice-area {
+    background-color: #fff;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.shortcut-practice-area.active {
+    border-color: #007bff;
+    background-color: rgba(0,123,255,0.05);
+}
+
+.shortcut-practice-instruction {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .shortcut-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .shortcut-category {
+        padding: 0.75rem;
+    }
+    
+    .shortcut-item {
+        padding: 0.5rem;
+    }
+    
+    .shortcut-keys {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .shortcut-key-combo {
+        justify-content: center;
+    }
+    
+    .shortcut-category-header {
+        padding: 0.75rem;
+    }
+    
+    .shortcut-category-title {
+        font-size: 1.1rem;
+    }
+    
+    .accessibility-feature {
+        padding: 0.75rem;
+    }
+    
+    .accessibility-feature i {
+        font-size: 1.2rem;
+    }
+}
+
+/* Animation for shortcut discovery */
+@keyframes shortcutHighlight {
+    0% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(0,123,255,0.1);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+.shortcut-item.highlighted {
+    animation: shortcutHighlight 1s ease-in-out;
+}
+
+/* Keyboard focus styles */
+.shortcut-item:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .shortcut-category {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    kbd {
+        background-color: #fff;
+        border: 1px solid #000;
+        color: #000;
+    }
+}

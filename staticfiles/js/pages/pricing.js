@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Plan selection function
-    window.selectPlan = function(planType) {
+    window.selectPlan = function(planType, isAuthenticated) {
         const card = event.target.closest('.pricing-card');
         const activeOption = card.querySelector('.toggle-option.active');
 
@@ -62,7 +62,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const planPeriod = activePriceSection.querySelector('.price-period').textContent;
 
             // Show selection confirmation
-            const confirmation = confirm(`Select ${planType} plan?\n\nPrice: $${planPrice} ${planPeriod}\n\nThis will redirect to registration.`);
+            const redirectText = isAuthenticated ? 'payment' : 'registration';
+            const confirmation = confirm(`Select ${planType} plan?\n\nPrice: $${planPrice} ${planPeriod}\n\nThis will redirect to ${redirectText}.`);
 
             if (confirmation) {
                 // Add loading state
@@ -72,8 +73,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Simulate API call
                 setTimeout(() => {
-                    // Redirect to company admin registration with plan info
-                    window.location.href = `/company-admin-register/?plan=${planId}`;
+                    if (isAuthenticated) {
+                        // Redirect to payment page for logged-in users
+                        window.location.href = `/payment/?plan=${planId}`;
+                    } else {
+                        // Redirect to company admin registration for new users
+                        window.location.href = `/company-admin-register/?plan=${planId}`;
+                    }
 
                     // Remove loading state
                     button.classList.remove('loading');
@@ -81,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 1000);
             }
         } else {
-            alert('Please select a billing cycle first.');
+            showWarningToast('Please select a billing cycle first.');
         }
     };
 

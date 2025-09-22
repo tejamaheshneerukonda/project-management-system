@@ -1,3 +1,189 @@
+/* Button Loading States */
+.btn-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Cost Breakdown Styles */
+.cost-breakdown {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+}
+
+.cost-breakdown .row {
+    margin-bottom: 0.25rem;
+}
+
+.cost-breakdown .row:last-child {
+    margin-bottom: 0;
+}
+
+.cost-breakdown span {
+    font-size: 0.9rem;
+}
+
+/* Payment Summary Enhanced Styles */
+.payment-summary .card-body {
+    padding: 1.5rem;
+}
+
+.payment-summary .row {
+    margin-bottom: 0.5rem;
+}
+
+.payment-summary .row:last-child {
+    margin-bottom: 0;
+}
+
+.payment-summary hr {
+    margin: 1rem 0;
+    border-color: #e9ecef;
+}
+
+.payment-summary .h5 {
+    font-weight: 700;
+    margin: 0;
+}
+
+.payment-summary .h6 {
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Payment Summary Styles */
+.payment-summary .card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+}
+
+.payment-summary .card-header {
+    border-radius: 12px 12px 0 0;
+    background: linear-gradient(135deg, #007bff, #0056b3) !important;
+}
+
+.payment-summary .card-body {
+    padding: 1.5rem;
+}
+
+.payment-summary .row {
+    margin-bottom: 0.5rem;
+}
+
+.payment-summary .row:last-child {
+    margin-bottom: 0;
+}
+
+.payment-summary hr {
+    margin: 1rem 0;
+    border-color: #e9ecef;
+}
+
+.payment-summary .h5 {
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Plan Selection Styles */
+.plan-option {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.plan-option:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.plan-option.active {
+    border-color: #007bff;
+    background-color: #f8f9ff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.plan-option.popular {
+    border-color: #28a745;
+}
+
+.plan-option.popular:hover {
+    border-color: #28a745;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+}
+
+.plan-option.popular.active {
+    border-color: #28a745;
+    background-color: #f8fff9;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+/* Form Checkbox Styles */
+.form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #dee2e6;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    position: relative;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+    position: relative;
+}
+
+.form-check-input:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.form-check-input:focus {
+    border-color: #007bff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-check-input:hover {
+    border-color: #007bff;
+}
+
+.form-check-label {
+    cursor: pointer;
+    user-select: none;
+}
+
 /* Payment Page Styles */
 
 /* Payment Cards */

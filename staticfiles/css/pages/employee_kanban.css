@@ -1,0 +1,193 @@
+/**
+ * Employee Kanban Board CSS
+ * Styles for drag and drop task management functionality
+ */
+
+/* Task Card Styles */
+.task-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: move;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.task-card.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+/* Drag and Drop Styles */
+.drag-over {
+    background-color: rgba(0, 123, 255, 0.1);
+    border: 2px dashed #007bff;
+}
+
+/* Card Border Styles */
+.card.border-left-primary {
+    border-left: 4px solid #4e73df !important;
+}
+
+.card.border-left-success {
+    border-left: 4px solid #1cc88a !important;
+}
+
+.card.border-left-warning {
+    border-left: 4px solid #f6c23e !important;
+}
+
+.card.border-left-info {
+    border-left: 4px solid #36b9cc !important;
+}
+
+/* Priority Badge Styles */
+.badge.bg-high {
+    background-color: #dc3545 !important;
+}
+
+.badge.bg-medium {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge.bg-low {
+    background-color: #28a745 !important;
+}
+
+/* Kanban Column Styles */
+.kanban-column {
+    min-height: 500px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.kanban-column-header {
+    background-color: #fff;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Task Status Styles */
+.task-status-todo {
+    border-left: 4px solid #6c757d;
+}
+
+.task-status-in-progress {
+    border-left: 4px solid #007bff;
+}
+
+.task-status-review {
+    border-left: 4px solid #ffc107;
+}
+
+.task-status-done {
+    border-left: 4px solid #28a745;
+}
+
+/* Statistics Styles */
+.kanban-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.5rem;
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+/* Filter Button Styles */
+.filter-btn {
+    margin: 0 0.25rem;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Task Actions Styles */
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.task-action-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+}
+
+.task-action-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .kanban-column {
+        min-height: 300px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .kanban-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .stat-item {
+        padding: 0.25rem;
+    }
+    
+    .task-actions {
+        flex-direction: column;
+    }
+}
+
+/* Animation for task movement */
+@keyframes taskMove {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.task-card.moving {
+    animation: taskMove 0.3s ease-in-out;
+}

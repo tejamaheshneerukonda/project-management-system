@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Simulate API call
                 setTimeout(() => {
-                    alert(`Selected ${planType} plan!\n\nPrice: $${planPrice} ${planPeriod}\n\nPlan ID: ${planId}\n\nIn a real implementation, this would redirect to subscription assignment.`);
+                    showSuccessToast(`Selected ${planType} plan!\n\nPrice: $${planPrice} ${planPeriod}\n\nPlan ID: ${planId}\n\nIn a real implementation, this would redirect to subscription assignment.`);
                     
                     // Remove loading state
                     button.classList.remove('loading');
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 1000);
             }
         } else {
-            alert('Please select a billing cycle first.');
+            showWarningToast('Please select a billing cycle first.');
         }
     };
 

@@ -1,0 +1,324 @@
+/**
+ * Employee Calendar CSS
+ * Styles for calendar functionality and event management
+ */
+
+/* FullCalendar Customization */
+.fc {
+    font-family: inherit;
+}
+
+.fc-toolbar {
+    display: none;
+}
+
+.fc-event {
+    border-radius: 4px;
+    border: none;
+    padding: 2px 4px;
+    font-size: 0.8rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.fc-event:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.fc-daygrid-event {
+    margin: 1px 0;
+}
+
+.fc-daygrid-day-number {
+    padding: 4px;
+    font-weight: 500;
+}
+
+.fc-daygrid-day-number:hover {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+/* Calendar Navigation Styles */
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.nav-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    color: #495057;
+    transition: all 0.2s ease-in-out;
+}
+
+.nav-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+    transform: translateY(-1px);
+}
+
+.nav-btn:active {
+    transform: translateY(0);
+}
+
+/* View Toggle Styles */
+.view-toggle {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.view-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    color: #495057;
+    transition: all 0.2s ease-in-out;
+}
+
+.view-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.view-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+    color: #007bff;
+}
+
+/* Event Type Styles */
+.event-task {
+    background-color: #007bff;
+    color: white;
+}
+
+.event-project {
+    background-color: #6f42c1;
+    color: white;
+}
+
+.event-meeting {
+    background-color: #20c997;
+    color: white;
+}
+
+.event-deadline {
+    background-color: #dc3545;
+    color: white;
+}
+
+.event-leave {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.event-personal {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Filter Button Styles */
+.filter-btn {
+    margin: 0 0.25rem;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Calendar Container Styles */
+.calendar-container {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Event Modal Styles */
+.event-modal .modal-content {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.event-modal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+.event-modal .modal-body {
+    padding: 2rem;
+}
+
+/* Quick Add Event Styles */
+.quick-add-event {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.quick-add-event:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.quick-add-event i {
+    font-size: 1.5rem;
+}
+
+/* Calendar Stats Styles */
+.calendar-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .calendar-nav {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .calendar-title {
+        font-size: 1.2rem;
+    }
+    
+    .view-toggle {
+        justify-content: center;
+    }
+    
+    .calendar-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .stat-item {
+        padding: 0.5rem;
+    }
+    
+    .quick-add-event {
+        bottom: 15px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+    }
+    
+    .quick-add-event i {
+        font-size: 1.2rem;
+    }
+}
+
+/* Calendar Loading State */
+.calendar-loading {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.calendar-loading .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Event Tooltip Styles */
+.fc-event-tooltip {
+    background-color: rgba(0,0,0,0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    z-index: 1000;
+}
+
+/* Today Highlight */
+.fc-day-today {
+    background-color: rgba(0,123,255,0.1) !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+/* Weekend Styles */
+.fc-day-sat,
+.fc-day-sun {
+    background-color: rgba(108,117,125,0.05);
+}
+
+/* Event Drag Styles */
+.fc-event-dragging {
+    opacity: 0.7;
+    transform: rotate(5deg);
+}
+
+.fc-event-resizing {
+    opacity: 0.8;
+}

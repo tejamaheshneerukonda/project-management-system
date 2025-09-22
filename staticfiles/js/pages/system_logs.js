@@ -43,14 +43,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (dateFromInput && dateToInput) {
         dateFromInput.addEventListener('change', function() {
             if (dateToInput.value && dateFromInput.value > dateToInput.value) {
-                alert('From date cannot be after To date');
+                showErrorToast('From date cannot be after To date');
                 dateFromInput.value = '';
             }
         });
         
         dateToInput.addEventListener('change', function() {
             if (dateFromInput.value && dateToInput.value < dateFromInput.value) {
-                alert('To date cannot be before From date');
+                showErrorToast('To date cannot be before From date');
                 dateToInput.value = '';
             }
         });
@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // This would typically make an AJAX request to clear old logs
             // For now, we'll just show a message
             setTimeout(function() {
-                alert('Clear old logs functionality will be implemented in the next update.');
+                showInfoToast('Clear old logs functionality will be implemented in the next update.');
                 if (clearBtn) {
                     clearBtn.innerHTML = '<i class="fas fa-trash me-1"></i>Clear Old';
                     clearBtn.disabled = false;
