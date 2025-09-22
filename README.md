@@ -56,8 +56,20 @@ A comprehensive Django-based project management system with real-time features, 
    ```
 
 3. **Install dependencies**
+
+   **For Production (Full Installation):**
    ```bash
    pip install -r requirements.txt
+   ```
+
+   **For Development (Includes Testing Tools):**
+   ```bash
+   pip install -r requirements-dev.txt
+   ```
+
+   **For Minimal Installation (Core Only):**
+   ```bash
+   pip install -r requirements-minimal.txt
    ```
 
 4. **Run migrations**
@@ -125,8 +137,27 @@ project-management-system/
 ├── templates/              # HTML templates
 ├── static/                 # Static files (CSS, JS, images)
 ├── project_manager/        # Django project settings
-└── requirements.txt        # Python dependencies
+├── requirements.txt        # Complete Python dependencies
+├── requirements-dev.txt    # Development-specific packages
+└── requirements-minimal.txt # Core packages only
 ```
+
+## 📦 Requirements Files
+
+### `requirements.txt` (Complete Installation)
+- **Purpose**: Full production installation with all features
+- **Includes**: Django, WebSocket, Database drivers, Payment processing, Analytics, ML libraries
+- **Use Case**: Production deployment, full feature development
+
+### `requirements-dev.txt` (Development)
+- **Purpose**: Development environment with testing and debugging tools
+- **Includes**: All production requirements + testing frameworks, code quality tools, debugging utilities
+- **Use Case**: Local development, testing, code quality checks
+
+### `requirements-minimal.txt` (Core Only)
+- **Purpose**: Minimal installation with core functionality only
+- **Includes**: Django core, WebSocket, basic database support, essential utilities
+- **Use Case**: Quick setup, limited environments, core functionality testing
 
 ## 🧪 Testing
 
