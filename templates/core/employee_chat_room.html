@@ -57,7 +57,7 @@
                                         <!-- Image Preview -->
                                         <div class="image-attachment">
                                             <img src="{{ message.attachment.url }}" alt="{{ message.attachment.name }}" 
-                                                 class="img-thumbnail attachment-image" style="max-width: 200px; max-height: 200px; cursor: pointer;"
+                                                 class="img-thumbnail attachment-image"
                                                  onclick="openImageModal('{{ message.attachment.url }}', '{{ message.attachment.name }}')">
                                             <div class="attachment-actions mt-2">
                                                 <a href="{{ message.attachment.url }}" download="{{ message.attachment.name }}" 
@@ -344,7 +344,7 @@ function addNewMessage(message, sender, timestamp) {
                 <div class="attachment mt-2">
                     <div class="image-attachment">
                         <img src="${message.attachment}" alt="${fileName}" 
-                             class="img-thumbnail attachment-image" style="max-width: 200px; max-height: 200px; cursor: pointer;"
+                             class="img-thumbnail attachment-image"
                              onclick="openImageModal('${message.attachment}', '${fileName}')">
                         <div class="attachment-actions mt-2">
                             <a href="${message.attachment}" download="${fileName}" 
@@ -743,6 +743,8 @@ function showToast(message, type = 'info') {
 .message-item {
     background-color: white;
     margin-bottom: 1px;
+    overflow: hidden; /* Prevent content from overflowing */
+    word-wrap: break-word; /* Break long words */
 }
 
 .avatar {
@@ -752,6 +754,8 @@ function showToast(message, type = 'info') {
 
 .attachment {
     margin-top: 0.5rem;
+    overflow: hidden; /* Prevent attachment overflow */
+    max-width: 100%; /* Ensure attachment doesn't exceed container */
 }
 
 /* Enhanced Attachment Styling */
@@ -759,6 +763,13 @@ function showToast(message, type = 'info') {
     border: 2px solid #e9ecef;
     transition: all 0.3s ease;
     border-radius: 8px;
+    max-width: 100% !important; /* Override inline styles to ensure containment */
+    max-height: 200px !important; /* Keep reasonable height */
+    width: auto !important; /* Maintain aspect ratio */
+    height: auto !important; /* Maintain aspect ratio */
+    object-fit: contain; /* Ensure image fits within bounds */
+    display: block; /* Remove inline spacing issues */
+    margin: 0 auto; /* Center the image */
 }
 
 .attachment-image:hover {
@@ -769,6 +780,7 @@ function showToast(message, type = 'info') {
 
 .file-attachment {
     transition: all 0.3s ease;
+    max-width: 100%; /* Ensure file attachment doesn't overflow */
 }
 
 .file-attachment:hover {
@@ -779,10 +791,37 @@ function showToast(message, type = 'info') {
 .attachment-actions {
     opacity: 0;
     transition: opacity 0.3s ease;
+    margin-top: 0.5rem;
+    text-align: center; /* Center the action buttons */
 }
 
 .image-attachment:hover .attachment-actions {
     opacity: 1;
+}
+
+/* Ensure message content area properly contains all content */
+.message-item .flex-grow-1 {
+    max-width: calc(100% - 60px); /* Account for avatar width */
+    overflow: hidden; /* Prevent content overflow */
+}
+
+.message-item .flex-grow-1 p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+/* Ensure the entire message container is properly bounded */
+.message-item .d-flex {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Ensure image attachment container doesn't overflow */
+.image-attachment {
+    max-width: 100%;
+    overflow: hidden;
+    text-align: center; /* Center content */
 }
 
 /* File type specific styling */
@@ -806,11 +845,14 @@ function showToast(message, type = 'info') {
     border-radius: 6px;
     padding: 0.75rem;
     margin-top: 0.5rem;
+    max-width: 100%; /* Prevent preview overflow */
+    overflow: hidden;
 }
 
 #filePreview img {
     border-radius: 4px;
     border: 1px solid #dee2e6;
+    max-width: 100%; /* Ensure preview images don't overflow */
 }
 
 /* Responsive attachment styling */
