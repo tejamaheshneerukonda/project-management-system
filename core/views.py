@@ -4870,7 +4870,7 @@ def employee_notifications(request):
     
     # Get notifications
     notifications = Notification.objects.filter(
-        Q(user=request.user) | Q(company=company),
+        Q(user=request.user) | Q(company=company, user__isnull=True),
         is_read=False
     ).order_by('-created_at')[:50]
     
@@ -8460,33 +8460,93 @@ def create_notification(request):
     company = request.user.company_admin_profile.company
     
     if request.method == 'POST':
-        # Create notification
-        notification = Notification.objects.create(
-            company=company,
-            notification_type=request.POST.get('notification_type'),
-            title=request.POST.get('title'),
-            message=request.POST.get('message'),
-            priority=request.POST.get('priority', 'MEDIUM'),
-            channel=request.POST.get('channel', 'IN_APP'),
-            action_url=request.POST.get('action_url', ''),
-            action_text=request.POST.get('action_text', ''),
-            scheduled_at=request.POST.get('scheduled_at') or None,
-            expires_at=request.POST.get('expires_at') or None,
-        )
-        
-        # Add metadata
-        metadata = {}
+        # Get target employees
+        target_employee_ids = []
         if request.POST.get('target_employees'):
-            employee_ids = request.POST.get('target_employees').split(',')
-            metadata['target_employees'] = employee_ids
+            target_employee_ids = [int(id) for id in request.POST.get('target_employees').split(',') if id.strip()]
+        
+        # Get target departments
+        target_departments = []
         if request.POST.get('target_departments'):
-            departments = request.POST.get('target_departments').split(',')
-            metadata['target_departments'] = departments
+            target_departments = [dept.strip() for dept in request.POST.get('target_departments').split(',') if dept.strip()]
         
-        notification.metadata = metadata
-        notification.save()
+        # If specific employees are targeted, create individual notifications for each
+        if target_employee_ids:
+            created_count = 0
+            for employee_id in target_employee_ids:
+                try:
+                    employee = Employee.objects.get(id=employee_id, company=company)
+                    if employee.user_account:  # Only create notification if employee has a user account
+                        notification = Notification.objects.create(
+                            company=company,
+                            user=employee.user_account,
+                            employee=employee,
+                            notification_type=request.POST.get('notification_type'),
+                            title=request.POST.get('title'),
+                            message=request.POST.get('message'),
+                            priority=request.POST.get('priority', 'MEDIUM'),
+                            channel=request.POST.get('channel', 'IN_APP'),
+                            action_url=request.POST.get('action_url', ''),
+                            action_text=request.POST.get('action_text', ''),
+                            scheduled_at=request.POST.get('scheduled_at') or None,
+                            expires_at=request.POST.get('expires_at') or None,
+                        )
+                        created_count += 1
+                except Employee.DoesNotExist:
+                    continue
+            
+            if created_count > 0:
+                messages.success(request, f'Notification created successfully for {created_count} employee(s)!')
+            else:
+                messages.warning(request, 'No notifications were created. Make sure the selected employees have user accounts.')
         
-        messages.success(request, 'Notification created successfully!')
+        # If departments are targeted, create notifications for all employees in those departments
+        elif target_departments:
+            employees_in_departments = Employee.objects.filter(
+                company=company,
+                department__in=target_departments,
+                user_account__isnull=False
+            )
+            
+            created_count = 0
+            for employee in employees_in_departments:
+                notification = Notification.objects.create(
+                    company=company,
+                    user=employee.user_account,
+                    employee=employee,
+                    notification_type=request.POST.get('notification_type'),
+                    title=request.POST.get('title'),
+                    message=request.POST.get('message'),
+                    priority=request.POST.get('priority', 'MEDIUM'),
+                    channel=request.POST.get('channel', 'IN_APP'),
+                    action_url=request.POST.get('action_url', ''),
+                    action_text=request.POST.get('action_text', ''),
+                    scheduled_at=request.POST.get('scheduled_at') or None,
+                    expires_at=request.POST.get('expires_at') or None,
+                )
+                created_count += 1
+            
+            if created_count > 0:
+                messages.success(request, f'Notification created successfully for {created_count} employee(s) in selected departments!')
+            else:
+                messages.warning(request, 'No notifications were created. Make sure employees in the selected departments have user accounts.')
+        
+        # If no specific targets, create a company-wide notification
+        else:
+            notification = Notification.objects.create(
+                company=company,
+                notification_type=request.POST.get('notification_type'),
+                title=request.POST.get('title'),
+                message=request.POST.get('message'),
+                priority=request.POST.get('priority', 'MEDIUM'),
+                channel=request.POST.get('channel', 'IN_APP'),
+                action_url=request.POST.get('action_url', ''),
+                action_text=request.POST.get('action_text', ''),
+                scheduled_at=request.POST.get('scheduled_at') or None,
+                expires_at=request.POST.get('expires_at') or None,
+            )
+            messages.success(request, 'Company-wide notification created successfully!')
+        
         return redirect('core:notification_center')
     
     # Get employees and departments for targeting
