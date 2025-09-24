@@ -1,0 +1,284 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Chat - {{ room.name }}{% endblock %}
+
+{% block page_title %}Chat - {{ room.name }}{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <a href="{% url 'core:employee_chat' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Chat
+    </a>
+    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#roomInfoModal">
+        <i class="fas fa-info-circle me-2"></i>Room Info
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Chat Messages -->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-comments me-2"></i>
+                    {{ room.name }}
+                </h5>
+                <span class="badge bg-light text-dark">{{ room.participants.count }} members</span>
+            </div>
+            <div class="card-body p-0">
+                <!-- Messages Container -->
+                <div id="messagesContainer" class="messages-container" style="height: 500px; overflow-y: auto;">
+                    {% for message in messages %}
+                    <div class="message-item p-3 border-bottom">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 40px; height: 40px;">
+                                    {{ message.sender.first_name|first }}{{ message.sender.last_name|first }}
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="mb-1">
+                                        {{ message.sender.first_name }} {{ message.sender.last_name }}
+                                        {% if message.is_edited %}
+                                        <small class="text-muted">(edited)</small>
+                                        {% endif %}
+                                    </h6>
+                                    <small class="text-muted">{{ message.created_at|date:"M d, H:i" }}</small>
+                                </div>
+                                <p class="mb-1">{{ message.content }}</p>
+                                {% if message.attachment %}
+                                <div class="attachment">
+                                    <a href="{{ message.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-paperclip me-1"></i>{{ message.attachment.name|slice:"20:" }}
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center p-4">
+                        <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No messages yet</h5>
+                        <p class="text-muted">Be the first to send a message in this room!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Message Input -->
+            <div class="card-footer">
+                <form id="messageForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="messageInput" name="content" 
+                               placeholder="Type your message..." required>
+                        <input type="file" class="form-control" id="fileInput" name="attachment" 
+                               accept="image/*,.pdf,.doc,.docx,.txt" style="display: none;">
+                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div id="filePreview" class="mt-2" style="display: none;">
+                        <small class="text-muted">File selected: <span id="fileName"></span></small>
+                        <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearFile()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Room Participants -->
+        <div class="card shadow">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Participants ({{ room.participants.count }})
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for participant in room.participants.all %}
+                    <div class="list-group-item d-flex align-items-center">
+                        <div class="avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 35px; height: 35px;">
+                            {{ participant.first_name|first }}{{ participant.last_name|first }}
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ participant.first_name }} {{ participant.last_name }}</h6>
+                            <small class="text-muted">{{ participant.position|default:"Employee" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Room Info -->
+        <div class="card shadow mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Room Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Created:</strong> {{ room.created_at|date:"M d, Y" }}</p>
+                <p class="mb-2"><strong>Created by:</strong> {{ room.created_by.first_name }} {{ room.created_by.last_name }}</p>
+                {% if room.description %}
+                <p class="mb-0"><strong>Description:</strong> {{ room.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Room Info Modal -->
+<div class="modal fade" id="roomInfoModal" tabindex="-1" aria-labelledby="roomInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="roomInfoModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>Room Information
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>{{ room.name }}</h6>
+                {% if room.description %}
+                <p>{{ room.description }}</p>
+                {% endif %}
+                <hr>
+                <h6>Participants ({{ room.participants.count }})</h6>
+                <div class="row">
+                    {% for participant in room.participants.all %}
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                 style="width: 30px; height: 30px;">
+                                {{ participant.first_name|first }}{{ participant.last_name|first }}
+                            </div>
+                            <span>{{ participant.first_name }} {{ participant.last_name }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <hr>
+                <small class="text-muted">
+                    Created by {{ room.created_by.first_name }} {{ room.created_by.last_name }} 
+                    on {{ room.created_at|date:"M d, Y H:i" }}
+                </small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-scroll to bottom of messages
+function scrollToBottom() {
+    const container = document.getElementById('messagesContainer');
+    container.scrollTop = container.scrollHeight;
+}
+
+// Scroll to bottom on page load
+document.addEventListener('DOMContentLoaded', function() {
+    scrollToBottom();
+});
+
+// File input handling
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('filePreview').style.display = 'block';
+    }
+});
+
+function clearFile() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('filePreview').style.display = 'none';
+}
+
+// Message form submission
+document.getElementById('messageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const messageInput = document.getElementById('messageInput');
+    const content = messageInput.value.trim();
+    
+    if (!content && !formData.get('attachment')) {
+        return;
+    }
+    
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            messageInput.value = '';
+            clearFile();
+            location.reload();
+        } else {
+            alert('Error sending message: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error sending message');
+    });
+});
+
+// Auto-refresh messages every 30 seconds
+setInterval(function() {
+    // Only refresh if user is at the bottom of the chat
+    const container = document.getElementById('messagesContainer');
+    const isAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+    
+    if (isAtBottom) {
+        location.reload();
+    }
+}, 30000);
+</script>
+
+<style>
+.messages-container {
+    background-color: #f8f9fa;
+}
+
+.message-item {
+    background-color: white;
+    margin-bottom: 1px;
+}
+
+.avatar {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.attachment {
+    margin-top: 5px;
+}
+</style>
+{% endblock %}

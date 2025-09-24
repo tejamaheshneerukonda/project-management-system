@@ -18,7 +18,8 @@ from .models import (
     ActivityLog, PerformanceMetric, Project, Task, Notification, NotificationTemplate, 
     NotificationPreference, NotificationDigest, Announcement, CompanyMetric, 
     CompanySetting, UserPreference, WorkflowTemplate, WorkflowInstance, PerformanceReview, 
-    PerformanceGoal, Feedback, PerformanceReport, Attendance, LeaveRequest, Timesheet, 
+    PerformanceGoal, Feedback, PerformanceReport, Attendance, LeaveRequest, Timesheet,
+    ChatRoom, ChatMessage, ChatParticipant, 
     Shift, EmployeeShift, OnboardingWorkflow, OnboardingTask, OnboardingAssignment,
     OnboardingTaskAssignment, OnboardingDocument, OnboardingDocumentSubmission,
     DocumentCategory, Document, DocumentVersion, DocumentShare, DocumentEmployeeShare,
@@ -4394,6 +4395,138 @@ def employee_edit_timesheet(request, timesheet_id):
         'timesheet': timesheet,
     }
     return render(request, 'core/employee_edit_timesheet.html', context)
+
+@login_required
+def employee_chat(request):
+    """Employee chat system"""
+    if not hasattr(request.user, 'employee_profile'):
+        messages.error(request, 'Access denied. You are not authorized to view this page.')
+        return redirect('core:home')
+    
+    employee = request.user.employee_profile
+    company = employee.company
+    
+    # Handle POST request for creating new room
+    if request.method == 'POST':
+        try:
+            room_name = request.POST.get('name')
+            room_description = request.POST.get('description', '')
+            add_all_employees = request.POST.get('add_all_employees') == 'true'
+            
+            if not room_name:
+                return JsonResponse({'success': False, 'message': 'Room name is required'})
+            
+            # Create new chat room
+            room = ChatRoom.objects.create(
+                name=room_name,
+                description=room_description,
+                company=company,
+                created_by=employee
+            )
+            
+            # Add creator as participant
+            room.participants.add(employee)
+            
+            # Add all employees if requested
+            if add_all_employees:
+                all_employees = Employee.objects.filter(company=company)
+                room.participants.set(all_employees)
+            
+            return JsonResponse({'success': True, 'message': 'Room created successfully', 'room_id': room.id})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Error creating room: {str(e)}'})
+    
+    # Get chat rooms the employee is part of
+    chat_rooms = ChatRoom.objects.filter(
+        company=company,
+        participants=employee,
+        is_active=True
+    ).order_by('-updated_at')
+    
+    # Get recent messages for each room
+    for room in chat_rooms:
+        room.recent_message = ChatMessage.objects.filter(room=room).last()
+        try:
+            participant = ChatParticipant.objects.get(room=room, employee=employee)
+            room.unread_count = ChatMessage.objects.filter(
+                room=room,
+                created_at__gt=participant.last_seen
+            ).count()
+        except ChatParticipant.DoesNotExist:
+            room.unread_count = 0
+    
+    context = {
+        'title': 'Team Chat',
+        'employee': employee,
+        'company': company,
+        'chat_rooms': chat_rooms,
+    }
+    return render(request, 'core/employee_chat.html', context)
+
+@login_required
+def employee_chat_room(request, room_id):
+    """Individual chat room view"""
+    if not hasattr(request.user, 'employee_profile'):
+        messages.error(request, 'Access denied. You are not authorized to view this page.')
+        return redirect('core:home')
+    
+    employee = request.user.employee_profile
+    
+    try:
+        room = ChatRoom.objects.get(
+            id=room_id,
+            participants=employee,
+            is_active=True
+        )
+    except ChatRoom.DoesNotExist:
+        messages.error(request, 'Chat room not found or access denied.')
+        return redirect('core:employee_chat')
+    
+    # Handle POST request for sending messages
+    if request.method == 'POST':
+        try:
+            content = request.POST.get('content', '').strip()
+            attachment = request.FILES.get('attachment')
+            
+            if not content and not attachment:
+                return JsonResponse({'success': False, 'message': 'Message content or attachment is required'})
+            
+            # Create new message
+            message = ChatMessage.objects.create(
+                room=room,
+                sender=employee,
+                content=content,
+                attachment=attachment
+            )
+            
+            # Update room's updated_at timestamp
+            room.updated_at = timezone.now()
+            room.save()
+            
+            return JsonResponse({'success': True, 'message': 'Message sent successfully', 'message_id': message.id})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Error sending message: {str(e)}'})
+    
+    # Get messages for this room
+    messages_list = ChatMessage.objects.filter(room=room).order_by('created_at')[:50]
+    
+    # Update last read time
+    participant, created = ChatParticipant.objects.get_or_create(
+        room=room,
+        employee=employee
+    )
+    participant.last_seen = timezone.now()
+    participant.save()
+    
+    context = {
+        'title': f'Chat - {room.name}',
+        'employee': employee,
+        'room': room,
+        'messages': messages_list,
+    }
+    return render(request, 'core/employee_chat_room.html', context)
 
 @login_required
 def employee_goals(request):

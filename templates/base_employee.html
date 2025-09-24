@@ -284,6 +284,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_chat' or request.resolver_match.url_name == 'employee_chat_room' %}active{% endif %}" href="{% url 'core:employee_chat' %}">
+                                <i class="fas fa-comments me-2"></i>Team Chat
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link employee-nav-link {% if request.resolver_match.url_name == 'employee_goals' %}active{% endif %}" href="{% url 'core:employee_goals' %}">
                                 <i class="fas fa-bullseye me-2"></i>My Goals
                             </a>
