@@ -1,6 +1,6 @@
 """
-Management command to start the server with WebSocket support using Daphne.
-This ensures that WebSocket connections work properly for the chat system.
+Management command to start the server with WebSocket support using channels development server.
+This is much simpler than using Daphne directly.
 """
 from django.core.management.base import BaseCommand
 import subprocess
@@ -9,7 +9,7 @@ import os
 
 
 class Command(BaseCommand):
-    help = 'Start the Django server with WebSocket support using Daphne'
+    help = 'Start the Django server with WebSocket support using channels development server'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -41,19 +41,19 @@ class Command(BaseCommand):
                 f'🔄 Auto-reload: {"Enabled" if reload else "Disabled"}\n'
                 f'🌐 WebSocket URL: ws://{host}:{port}/ws/chat/room/ROOM_ID/\n'
                 f'📱 Access URL: http://{host}:{port}/\n'
+                f'💡 Using channels development server (much simpler than Daphne!)\n'
             )
         )
         
-        # Build daphne command
+        # Build channels development server command
         cmd = [
-            'daphne',
-            '-b', host,
-            '-p', port,
-            'project_manager.asgi:application'
+            'python', 'manage.py', 'runserver',
+            f'{host}:{port}'
         ]
         
         if reload:
-            cmd.append('--reload')
+            # runserver has auto-reload by default, so we don't need extra flags
+            pass
         
         try:
             # Start the server

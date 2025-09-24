@@ -161,3 +161,6 @@ CHANNEL_LAYERS = {
         } if not DEBUG else {},
     },
 }
+
+# Ensure channels works with runserver
+CHANNELS_WS_PROTOCOLS = ["websocket"]
