@@ -251,10 +251,26 @@ function initChatWebSocket() {
 }
 
 // Add new message to the chat
+let processedMessageIds = new Set(); // Track processed message IDs to prevent duplicates
+
 function addNewMessage(message, sender, timestamp) {
+    // Check if message already exists to prevent duplicates
+    const messageId = message.id || message.message?.id;
+    if (messageId && processedMessageIds.has(messageId)) {
+        console.log('Message already processed, skipping duplicate:', messageId);
+        return;
+    }
+    
+    if (messageId) {
+        processedMessageIds.add(messageId);
+    }
+    
     const messagesContainer = document.getElementById('messagesContainer');
     const messageElement = document.createElement('div');
     messageElement.className = 'message-item p-3 border-bottom';
+    if (messageId) {
+        messageElement.setAttribute('data-message-id', messageId);
+    }
     
     const senderInitials = sender.first_name.charAt(0) + sender.last_name.charAt(0);
     const formattedTime = new Date(timestamp).toLocaleString('en-US', {
@@ -300,8 +316,12 @@ function addNewMessage(message, sender, timestamp) {
     messagesContainer.appendChild(messageElement);
     scrollToBottom();
     
-    // Show success toast
-    showToast('New message received!', 'info');
+    // Show success toast only for new messages (not our own)
+    const currentUser = '{{ user.employee_profile.first_name }} {{ user.employee_profile.last_name }}';
+    const senderName = `${sender.first_name} ${sender.last_name}`;
+    if (senderName !== currentUser.trim()) {
+        showToast('New message received!', 'info');
+    }
 }
 
 // Handle typing indicators
@@ -313,9 +333,20 @@ function handleTypingIndicator(user, isTyping) {
 // Polling fallback for when WebSocket is not available
 function startPollingFallback() {
     if (pollingInterval) return; // Already polling
+    if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+        console.log('WebSocket is connected, skipping polling fallback');
+        return; // Don't start polling if WebSocket is connected
+    }
     
     console.log('Starting polling fallback for chat messages');
     pollingInterval = setInterval(() => {
+        // Double-check WebSocket status before polling
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            console.log('WebSocket connected during polling, stopping fallback');
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+            return;
+        }
         checkForNewMessages();
     }, 3000); // Check every 3 seconds
 }
@@ -376,8 +407,16 @@ function clearFile() {
 }
 
 // Message form submission
+let isSubmitting = false; // Prevent duplicate submissions
+
 document.getElementById('messageForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    
+    // Prevent duplicate submissions
+    if (isSubmitting) {
+        console.log('Message submission already in progress, ignoring duplicate');
+        return;
+    }
     
     const formData = new FormData(this);
     const messageInput = document.getElementById('messageInput');
@@ -388,6 +427,9 @@ document.getElementById('messageForm').addEventListener('submit', function(e) {
         showToast('Please enter a message or attach a file', 'warning');
         return;
     }
+    
+    // Set submitting flag
+    isSubmitting = true;
     
     // Disable submit button and show loading state
     submitButton.disabled = true;
@@ -410,8 +452,8 @@ document.getElementById('messageForm').addEventListener('submit', function(e) {
         if (data.success) {
             messageInput.value = '';
             clearFile();
-            showToast('Message sent successfully!', 'success');
-            // Don't reload page - WebSocket will handle new message display
+            // Don't show success toast here - WebSocket will handle it
+            console.log('Message sent successfully via form submission');
         } else {
             showToast('Error sending message: ' + data.message, 'error');
         }
@@ -421,9 +463,10 @@ document.getElementById('messageForm').addEventListener('submit', function(e) {
         showToast('Error sending message. Please try again.', 'error');
     })
     .finally(() => {
-        // Re-enable submit button
+        // Re-enable submit button and reset flag
         submitButton.disabled = false;
         submitButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        isSubmitting = false;
     });
 });
 
