@@ -517,3 +517,115 @@ document.getElementById('createRoomForm').addEventListener('submit', function(e)
 });
 </script>
 {% endblock %}
+
+{% block extra_css %}
+<style>
+/* Ensure chat room list items are properly contained */
+.list-group-item {
+    overflow: hidden;
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+.list-group-item p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    margin-bottom: 0.25rem !important;
+}
+
+.list-group-item .text-muted {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+/* Ensure the room list container doesn't overflow */
+#roomList {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* Ensure room items are properly contained */
+.room-item {
+    overflow: hidden;
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+.room-item .flex-grow-1 {
+    overflow: hidden;
+    max-width: calc(100% - 40px); /* Account for badge width */
+}
+
+/* Ensure the entire chat page is properly contained */
+.row {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.col-lg-4, .col-lg-8 {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* Ensure cards don't overflow */
+.card {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.card-body {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* Ensure the main content area is properly bounded */
+.container-fluid, .container {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Ensure the chat page content is properly contained */
+.content-wrapper {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Additional containment for chat interface */
+.list-group {
+    contain: layout style; /* CSS containment for better performance */
+}
+
+/* Ensure text content doesn't overflow */
+.text-muted, .small {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+/* Ensure badges don't cause overflow */
+.badge {
+    flex-shrink: 0;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .room-item .flex-grow-1 {
+        max-width: calc(100% - 30px); /* Smaller badge on mobile */
+    }
+    
+    .list-group-item p {
+        font-size: 0.8rem;
+    }
+    
+    .text-muted {
+        font-size: 0.7rem;
+    }
+}
+</style>
+{% endblock %}
