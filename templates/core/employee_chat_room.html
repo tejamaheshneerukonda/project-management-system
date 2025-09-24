@@ -219,18 +219,10 @@ function clearFile() {
 document.getElementById('messageForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    console.log('Form submitted');
-    
     const formData = new FormData(this);
     const messageInput = document.getElementById('messageInput');
     const submitButton = this.querySelector('button[type="submit"]');
     const content = messageInput.value.trim();
-    
-    console.log('Content:', content);
-    console.log('FormData entries:');
-    for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-    }
     
     if (!content && !formData.get('attachment')) {
         showToast('Please enter a message or attach a file', 'warning');
@@ -241,8 +233,6 @@ document.getElementById('messageForm').addEventListener('submit', function(e) {
     submitButton.disabled = true;
     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     
-    console.log('Sending request to:', window.location.href);
-    
     fetch(window.location.href, {
         method: 'POST',
         body: formData,
@@ -251,14 +241,12 @@ document.getElementById('messageForm').addEventListener('submit', function(e) {
         }
     })
     .then(response => {
-        console.log('Response status:', response.status);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        console.log('Response data:', data);
         if (data.success) {
             messageInput.value = '';
             clearFile();
