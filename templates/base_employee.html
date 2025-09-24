@@ -460,9 +460,14 @@
     <script src="{% static 'js/pages/employee.js' %}"></script>
     
     <script>
+        // Store URLs in a global object to avoid template tag issues
+        window.employeeUrls = {
+            shortcuts: "{% url 'core:employee_shortcuts' %}"
+        };
+        
         function showHelp() {
             // Show help modal or redirect to help page
-            window.location.href = "{% url 'core:employee_shortcuts' %}";
+            window.location.href = window.employeeUrls.shortcuts;
         }
     </script>
     
