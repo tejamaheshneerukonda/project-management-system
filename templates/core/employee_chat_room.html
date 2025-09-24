@@ -73,7 +73,7 @@
             
             <!-- Message Input -->
             <div class="card-footer">
-                <form id="messageForm" enctype="multipart/form-data">
+                <form id="messageForm" enctype="multipart/form-data" method="post">
                     {% csrf_token %}
                     <div class="input-group">
                         <input type="text" class="form-control" id="messageInput" name="content" 
@@ -219,13 +219,29 @@ function clearFile() {
 document.getElementById('messageForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    console.log('Form submitted');
+    
     const formData = new FormData(this);
     const messageInput = document.getElementById('messageInput');
+    const submitButton = this.querySelector('button[type="submit"]');
     const content = messageInput.value.trim();
     
+    console.log('Content:', content);
+    console.log('FormData entries:');
+    for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+    }
+    
     if (!content && !formData.get('attachment')) {
+        showToast('Please enter a message or attach a file', 'warning');
         return;
     }
+    
+    // Disable submit button and show loading state
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    console.log('Sending request to:', window.location.href);
     
     fetch(window.location.href, {
         method: 'POST',
@@ -234,21 +250,77 @@ document.getElementById('messageForm').addEventListener('submit', function(e) {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
             messageInput.value = '';
             clearFile();
-            location.reload();
+            showToast('Message sent successfully!', 'success');
+            // Reload page to show new message
+            setTimeout(() => {
+                location.reload();
+            }, 500);
         } else {
-            alert('Error sending message: ' + data.message);
+            showToast('Error sending message: ' + data.message, 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error sending message');
+        showToast('Error sending message. Please try again.', 'error');
+    })
+    .finally(() => {
+        // Re-enable submit button
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
     });
 });
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    
+    // Add to page
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+    
+    toastContainer.appendChild(toast);
+    
+    // Show toast
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    
+    // Remove toast element after it's hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
 
 // Auto-refresh messages every 30 seconds
 setInterval(function() {

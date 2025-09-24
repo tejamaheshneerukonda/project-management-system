@@ -4536,6 +4536,9 @@ def employee_chat_room(request, room_id):
             content = request.POST.get('content', '').strip()
             attachment = request.FILES.get('attachment')
             
+            # Debug logging
+            print(f"DEBUG: Received POST request with content='{content}', attachment={attachment}")
+            
             if not content and not attachment:
                 return JsonResponse({'success': False, 'message': 'Message content or attachment is required'})
             
@@ -4547,6 +4550,8 @@ def employee_chat_room(request, room_id):
                 attachment=attachment
             )
             
+            print(f"DEBUG: Created message with ID {message.id}")
+            
             # Update room's updated_at timestamp
             room.updated_at = timezone.now()
             room.save()
@@ -4554,6 +4559,7 @@ def employee_chat_room(request, room_id):
             return JsonResponse({'success': True, 'message': 'Message sent successfully', 'message_id': message.id})
             
         except Exception as e:
+            print(f"DEBUG: Error sending message: {str(e)}")
             return JsonResponse({'success': False, 'message': f'Error sending message: {str(e)}'})
     
     # Get messages for this room
