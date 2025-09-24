@@ -4406,12 +4406,28 @@ def employee_chat(request):
     employee = request.user.employee_profile
     company = employee.company
     
+    # Handle GET requests for loading data
+    if request.method == 'GET':
+        action = request.GET.get('action')
+        
+        if action == 'get_employees':
+            employees = Employee.objects.filter(company=company).values('id', 'first_name', 'last_name', 'position')
+            return JsonResponse({'success': True, 'employees': list(employees)})
+        
+        elif action == 'get_projects':
+            from .models import Project
+            projects = Project.objects.filter(company=company).values('id', 'name')
+            return JsonResponse({'success': True, 'projects': list(projects)})
+    
     # Handle POST request for creating new room
     if request.method == 'POST':
         try:
             room_name = request.POST.get('name')
             room_description = request.POST.get('description', '')
-            add_all_employees = request.POST.get('add_all_employees') == 'true'
+            room_type = request.POST.get('room_type', 'GROUP')
+            department = request.POST.get('department', '')
+            project_id = request.POST.get('project', '')
+            participants = request.POST.getlist('participants')
             
             if not room_name:
                 return JsonResponse({'success': False, 'message': 'Room name is required'})
@@ -4420,6 +4436,7 @@ def employee_chat(request):
             room = ChatRoom.objects.create(
                 name=room_name,
                 description=room_description,
+                room_type=room_type,
                 company=company,
                 created_by=employee
             )
@@ -4427,10 +4444,33 @@ def employee_chat(request):
             # Add creator as participant
             room.participants.add(employee)
             
-            # Add all employees if requested
-            if add_all_employees:
-                all_employees = Employee.objects.filter(company=company)
-                room.participants.set(all_employees)
+            # Add selected participants
+            if participants:
+                participant_employees = Employee.objects.filter(
+                    id__in=participants,
+                    company=company
+                )
+                room.participants.add(*participant_employees)
+            
+            # Handle department-specific rooms
+            if room_type == 'DEPARTMENT' and department:
+                department_employees = Employee.objects.filter(
+                    company=company,
+                    department=department
+                )
+                room.participants.add(*department_employees)
+                room.description = f"Department chat for {department}"
+            
+            # Handle project-specific rooms
+            if room_type == 'PROJECT' and project_id:
+                from .models import Project
+                try:
+                    project = Project.objects.get(id=project_id, company=company)
+                    project_employees = project.team_members.all()
+                    room.participants.add(*project_employees)
+                    room.description = f"Project chat for {project.name}"
+                except Project.DoesNotExist:
+                    pass
             
             return JsonResponse({'success': True, 'message': 'Room created successfully', 'room_id': room.id})
             

@@ -29,15 +29,48 @@
             </div>
             <div class="card-body p-0">
                 {% if chat_rooms %}
-                    <div class="list-group list-group-flush">
+                    <!-- Room Type Filters -->
+                    <div class="p-3 border-bottom">
+                        <div class="btn-group w-100" role="group">
+                            <button type="button" class="btn btn-outline-primary btn-sm active" data-filter="all">
+                                All Rooms
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-filter="GROUP">
+                                <i class="fas fa-users me-1"></i>Groups
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-filter="DIRECT">
+                                <i class="fas fa-user-friends me-1"></i>Direct
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-filter="DEPARTMENT">
+                                <i class="fas fa-building me-1"></i>Dept
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-filter="PROJECT">
+                                <i class="fas fa-project-diagram me-1"></i>Projects
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group list-group-flush" id="roomList">
                         {% for room in chat_rooms %}
                         <a href="{% url 'core:employee_chat_room' room.id %}" 
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center room-item"
+                           data-room-type="{{ room.room_type }}">
                             <div class="flex-grow-1">
-                                <h6 class="mb-1">{{ room.name }}</h6>
+                                <div class="d-flex align-items-center mb-1">
+                                    <h6 class="mb-0 me-2">{{ room.name }}</h6>
+                                    {% if room.room_type == 'DIRECT' %}
+                                        <span class="badge bg-info">Direct</span>
+                                    {% elif room.room_type == 'DEPARTMENT' %}
+                                        <span class="badge bg-warning">Department</span>
+                                    {% elif room.room_type == 'PROJECT' %}
+                                        <span class="badge bg-success">Project</span>
+                                    {% else %}
+                                        <span class="badge bg-primary">Group</span>
+                                    {% endif %}
+                                </div>
                                 <p class="mb-1 text-muted small">
                                     {% if room.recent_message %}
-                                        {{ room.recent_message.sender.first_name }}: {{ room.recent_message.content|truncatechars:30 }}
+                                        <strong>{{ room.recent_message.sender.first_name }}:</strong> {{ room.recent_message.content|truncatechars:30 }}
                                     {% else %}
                                         No messages yet
                                     {% endif %}
@@ -48,6 +81,7 @@
                                     {% else %}
                                         Created {{ room.created_at|timesince }} ago
                                     {% endif %}
+                                    • {{ room.participants.count }} members
                                 </small>
                             </div>
                             {% if room.unread_count > 0 %}
@@ -130,7 +164,7 @@
 
 <!-- Create Room Modal -->
 <div class="modal fade" id="createRoomModal" tabindex="-1" aria-labelledby="createRoomModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="createRoomModalLabel">
@@ -141,22 +175,119 @@
             <form id="createRoomForm">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <!-- Room Type Selection -->
+                    <div class="mb-3">
+                        <label class="form-label">Room Type *</label>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="room_type" id="roomTypeGroup" value="GROUP" checked>
+                                    <label class="form-check-label" for="roomTypeGroup">
+                                        <i class="fas fa-users me-1"></i>Group Chat
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="room_type" id="roomTypeDirect" value="DIRECT">
+                                    <label class="form-check-label" for="roomTypeDirect">
+                                        <i class="fas fa-user-friends me-1"></i>Direct Message
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="room_type" id="roomTypeDepartment" value="DEPARTMENT">
+                                    <label class="form-check-label" for="roomTypeDepartment">
+                                        <i class="fas fa-building me-1"></i>Department
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="room_type" id="roomTypeProject" value="PROJECT">
+                                    <label class="form-check-label" for="roomTypeProject">
+                                        <i class="fas fa-project-diagram me-1"></i>Project
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Room Name -->
                     <div class="mb-3">
                         <label for="roomName" class="form-label">Room Name *</label>
                         <input type="text" class="form-control" id="roomName" name="name" required>
+                        <div class="form-text">For direct messages, this will be auto-generated</div>
                     </div>
+
+                    <!-- Room Description -->
                     <div class="mb-3">
                         <label for="roomDescription" class="form-label">Description</label>
-                        <textarea class="form-control" id="roomDescription" name="description" rows="3"></textarea>
+                        <textarea class="form-control" id="roomDescription" name="description" rows="2"></textarea>
                     </div>
-                    <div class="mb-3">
+
+                    <!-- Department Selection (for Department rooms) -->
+                    <div class="mb-3" id="departmentSelection" style="display: none;">
+                        <label for="departmentSelect" class="form-label">Select Department</label>
+                        <select class="form-select" id="departmentSelect" name="department">
+                            <option value="">Choose a department...</option>
+                            <option value="IT">IT Department</option>
+                            <option value="HR">Human Resources</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Operations">Operations</option>
+                            <option value="Support">Customer Support</option>
+                        </select>
+                    </div>
+
+                    <!-- Project Selection (for Project rooms) -->
+                    <div class="mb-3" id="projectSelection" style="display: none;">
+                        <label for="projectSelect" class="form-label">Select Project</label>
+                        <select class="form-select" id="projectSelect" name="project">
+                            <option value="">Choose a project...</option>
+                            <!-- Projects will be loaded dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Participant Selection -->
+                    <div class="mb-3" id="participantSelection">
                         <label class="form-label">Add Participants</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="all" id="addAllEmployees">
-                            <label class="form-check-label" for="addAllEmployees">
-                                Add all company employees
-                            </label>
+                        
+                        <!-- Quick Selection Options -->
+                        <div class="mb-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" value="all" id="addAllEmployees">
+                                <label class="form-check-label" for="addAllEmployees">
+                                    All Employees
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" value="online" id="addOnlineEmployees">
+                                <label class="form-check-label" for="addOnlineEmployees">
+                                    Online Only
+                                </label>
+                            </div>
                         </div>
+
+                        <!-- Individual Employee Selection -->
+                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                            <div class="row" id="employeeList">
+                                <!-- Employees will be loaded dynamically -->
+                            </div>
+                        </div>
+                        
+                        <small class="text-muted">Select specific employees or use quick options above</small>
+                    </div>
+
+                    <!-- Direct Message Selection -->
+                    <div class="mb-3" id="directMessageSelection" style="display: none;">
+                        <label for="directMessageUser" class="form-label">Select Employee</label>
+                        <select class="form-select" id="directMessageUser" name="direct_user">
+                            <option value="">Choose an employee...</option>
+                            <!-- Employees will be loaded dynamically -->
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -177,15 +308,190 @@ function refreshChatRooms() {
     location.reload();
 }
 
+// Load employees and projects when modal opens
+document.getElementById('createRoomModal').addEventListener('show.bs.modal', function() {
+    loadEmployees();
+    loadProjects();
+});
+
+// Handle room type changes
+document.querySelectorAll('input[name="room_type"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        const roomType = this.value;
+        
+        // Hide all conditional sections
+        document.getElementById('departmentSelection').style.display = 'none';
+        document.getElementById('projectSelection').style.display = 'none';
+        document.getElementById('participantSelection').style.display = 'none';
+        document.getElementById('directMessageSelection').style.display = 'none';
+        
+        // Show relevant sections based on room type
+        if (roomType === 'DEPARTMENT') {
+            document.getElementById('departmentSelection').style.display = 'block';
+            document.getElementById('participantSelection').style.display = 'block';
+        } else if (roomType === 'PROJECT') {
+            document.getElementById('projectSelection').style.display = 'block';
+            document.getElementById('participantSelection').style.display = 'block';
+        } else if (roomType === 'DIRECT') {
+            document.getElementById('directMessageSelection').style.display = 'block';
+            document.getElementById('roomName').disabled = true;
+            document.getElementById('roomName').placeholder = 'Auto-generated from participants';
+        } else {
+            document.getElementById('participantSelection').style.display = 'block';
+            document.getElementById('roomName').disabled = false;
+            document.getElementById('roomName').placeholder = 'Enter room name';
+        }
+    });
+});
+
+// Load employees for selection
+function loadEmployees() {
+    fetch('{% url "core:employee_chat" %}?action=get_employees')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const employeeList = document.getElementById('employeeList');
+            const directUserSelect = document.getElementById('directMessageUser');
+            
+            employeeList.innerHTML = '';
+            directUserSelect.innerHTML = '<option value="">Choose an employee...</option>';
+            
+            data.employees.forEach(function(employee) {
+                // Add to employee list for group selection
+                const employeeDiv = document.createElement('div');
+                employeeDiv.className = 'col-md-6 mb-2';
+                employeeDiv.innerHTML = `
+                    <div class="form-check">
+                        <input class="form-check-input employee-checkbox" type="checkbox" value="${employee.id}" id="emp_${employee.id}">
+                        <label class="form-check-label" for="emp_${employee.id}">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 25px; height: 25px; font-size: 10px;">
+                                    ${employee.first_name.charAt(0)}${employee.last_name.charAt(0)}
+                                </div>
+                                <span>${employee.first_name} ${employee.last_name}</span>
+                            </div>
+                        </label>
+                    </div>
+                `;
+                employeeList.appendChild(employeeDiv);
+                
+                // Add to direct message select
+                const option = document.createElement('option');
+                option.value = employee.id;
+                option.textContent = `${employee.first_name} ${employee.last_name}`;
+                directUserSelect.appendChild(option);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error loading employees:', error);
+    });
+}
+
+// Load projects for selection
+function loadProjects() {
+    fetch('{% url "core:employee_chat" %}?action=get_projects')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const projectSelect = document.getElementById('projectSelect');
+            projectSelect.innerHTML = '<option value="">Choose a project...</option>';
+            
+            data.projects.forEach(function(project) {
+                const option = document.createElement('option');
+                option.value = project.id;
+                option.textContent = project.name;
+                projectSelect.appendChild(option);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error loading projects:', error);
+    });
+}
+
+// Handle quick selection options
+document.getElementById('addAllEmployees').addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.employee-checkbox');
+    checkboxes.forEach(function(checkbox) {
+        checkbox.checked = this.checked;
+    }.bind(this));
+});
+
+// Room filtering
+document.querySelectorAll('[data-filter]').forEach(function(button) {
+    button.addEventListener('click', function() {
+        const filter = this.getAttribute('data-filter');
+        
+        // Update active button
+        document.querySelectorAll('[data-filter]').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        // Filter rooms
+        const roomItems = document.querySelectorAll('.room-item');
+        roomItems.forEach(function(item) {
+            const roomType = item.getAttribute('data-room-type');
+            if (filter === 'all' || roomType === filter) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+
 // Create room form submission
 document.getElementById('createRoomForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
-    const addAllEmployees = document.getElementById('addAllEmployees').checked;
+    const roomType = formData.get('room_type');
     
-    if (addAllEmployees) {
-        formData.append('add_all_employees', 'true');
+    // Validate based on room type
+    if (roomType === 'DIRECT') {
+        const directUser = formData.get('direct_user');
+        if (!directUser) {
+            alert('Please select an employee for direct message');
+            return;
+        }
+        // Auto-generate room name for direct messages
+        const selectedUser = document.getElementById('directMessageUser').selectedOptions[0].textContent;
+        formData.set('name', `Direct Message with ${selectedUser}`);
+    } else if (roomType === 'DEPARTMENT') {
+        const department = formData.get('department');
+        if (!department) {
+            alert('Please select a department');
+            return;
+        }
+    } else if (roomType === 'PROJECT') {
+        const project = formData.get('project');
+        if (!project) {
+            alert('Please select a project');
+            return;
+        }
+    }
+    
+    // Add selected employees
+    const selectedEmployees = [];
+    document.querySelectorAll('.employee-checkbox:checked').forEach(function(checkbox) {
+        selectedEmployees.push(checkbox.value);
+    });
+    
+    if (selectedEmployees.length === 0 && roomType !== 'DIRECT') {
+        alert('Please select at least one participant');
+        return;
+    }
+    
+    // Add selected employees to form data
+    selectedEmployees.forEach(function(empId) {
+        formData.append('participants', empId);
+    });
+    
+    // Add direct user if it's a direct message
+    if (roomType === 'DIRECT') {
+        formData.append('participants', formData.get('direct_user'));
     }
     
     fetch('{% url "core:employee_chat" %}', {
