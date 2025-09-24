@@ -4526,6 +4526,39 @@ def employee_chat_room(request, room_id):
         messages.error(request, 'Chat room not found or access denied.')
         return redirect('core:employee_chat')
     
+    # Handle AJAX requests for polling new messages
+    if request.GET.get('ajax') == '1':
+        last_message_id = int(request.GET.get('last_message', 0))
+        new_messages = ChatMessage.objects.filter(
+            room=room,
+            id__gt=last_message_id
+        ).order_by('created_at')[:10]
+        
+        messages_data = []
+        for msg in new_messages:
+            messages_data.append({
+                'message': {
+                    'id': msg.id,
+                    'content': msg.content,
+                    'attachment': msg.attachment.url if msg.attachment else None,
+                    'attachment_name': msg.attachment.name if msg.attachment else None,
+                    'is_edited': msg.is_edited,
+                    'created_at': msg.created_at.isoformat()
+                },
+                'sender': {
+                    'id': msg.sender.id,
+                    'first_name': msg.sender.first_name,
+                    'last_name': msg.sender.last_name,
+                    'position': msg.sender.position or 'Employee'
+                },
+                'timestamp': msg.created_at.isoformat()
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'new_messages': messages_data
+        })
+    
     # Handle POST request for sending messages
     if request.method == 'POST':
         try:
@@ -4546,6 +4579,50 @@ def employee_chat_room(request, room_id):
             # Update room's updated_at timestamp
             room.updated_at = timezone.now()
             room.save()
+            
+            # Send WebSocket notification to room participants
+            from channels.layers import get_channel_layer
+            from asgiref.sync import async_to_sync
+            
+            channel_layer = get_channel_layer()
+            if channel_layer:
+                async_to_sync(channel_layer.group_send)(
+                    f'chat_room_{room.id}',
+                    {
+                        'type': 'chat_message',
+                        'message': {
+                            'id': message.id,
+                            'content': message.content,
+                            'attachment': message.attachment.url if message.attachment else None,
+                            'attachment_name': message.attachment.name if message.attachment else None,
+                            'is_edited': message.is_edited,
+                            'created_at': message.created_at.isoformat()
+                        },
+                        'sender': {
+                            'id': employee.id,
+                            'first_name': employee.first_name,
+                            'last_name': employee.last_name,
+                            'position': employee.position or 'Employee'
+                        },
+                        'timestamp': message.created_at.isoformat()
+                    }
+                )
+                
+                # Send notifications to offline participants
+                for participant in room.participants.exclude(id=employee.id):
+                    async_to_sync(channel_layer.group_send)(
+                        f'chat_notifications_{participant.user_account.id}',
+                        {
+                            'type': 'chat_notification',
+                            'title': f'New message in {room.name}',
+                            'message': f'{employee.first_name}: {content[:100]}{"..." if len(content) > 100 else ""}',
+                            'room_id': room.id,
+                            'sender': {
+                                'first_name': employee.first_name,
+                                'last_name': employee.last_name
+                            }
+                        }
+                    )
             
             return JsonResponse({'success': True, 'message': 'Message sent successfully', 'message_id': message.id})
             
