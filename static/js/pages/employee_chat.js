@@ -66,93 +66,46 @@ function initChatWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws/chat/room/${roomId}/`;
     
-    console.log('Attempting to connect to WebSocket:', wsUrl);
-    
     try {
         chatSocket = new WebSocket(wsUrl);
         
         chatSocket.onopen = function(e) {
-            console.log('✅ Chat WebSocket connected successfully');
+            console.log('Chat WebSocket connected');
             reconnectAttempts = 0;
             if (pollingInterval) {
                 clearInterval(pollingInterval);
                 pollingInterval = null;
             }
-            // Show connection status to user
-            showConnectionStatus('Connected', 'success');
         };
         
         chatSocket.onmessage = function(e) {
-            try {
-                const data = JSON.parse(e.data);
-                if (data.type === 'new_message') {
-                    addNewMessage(data.message, data.sender, data.timestamp);
-                } else if (data.type === 'pong') {
-                    // Handle ping-pong for connection keep-alive
-                    console.log('WebSocket ping-pong successful');
-                }
-            } catch (error) {
-                console.error('Error parsing WebSocket message:', error);
+            const data = JSON.parse(e.data);
+            if (data.type === 'new_message') {
+                addNewMessage(data.message, data.sender, data.timestamp);
             }
         };
         
         chatSocket.onclose = function(e) {
-            console.log('❌ Chat WebSocket disconnected. Code:', e.code, 'Reason:', e.reason);
-            showConnectionStatus('Disconnected - Using polling', 'warning');
+            console.log('Chat WebSocket disconnected');
             startPolling();
             
-            // Attempt to reconnect only if it wasn't a manual close
-            if (e.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
-                console.log(`Attempting to reconnect... (${reconnectAttempts + 1}/${maxReconnectAttempts})`);
+            // Attempt to reconnect
+            if (reconnectAttempts < maxReconnectAttempts) {
                 setTimeout(() => {
                     reconnectAttempts++;
                     initChatWebSocket();
                 }, 3000);
-            } else if (reconnectAttempts >= maxReconnectAttempts) {
-                console.log('Max reconnection attempts reached. Using polling only.');
-                showConnectionStatus('Connection failed - Using polling', 'danger');
             }
         };
         
         chatSocket.onerror = function(e) {
-            console.error('❌ Chat WebSocket error:', e);
-            showConnectionStatus('Connection error - Using polling', 'danger');
+            console.error('Chat WebSocket error:', e);
             startPolling();
         };
     } catch (error) {
         console.error('Error initializing WebSocket:', error);
-        showConnectionStatus('WebSocket not supported - Using polling', 'info');
         startPolling();
     }
-}
-
-// Show connection status to user
-function showConnectionStatus(message, type) {
-    // Remove existing status if any
-    const existingStatus = document.getElementById('connectionStatus');
-    if (existingStatus) {
-        existingStatus.remove();
-    }
-    
-    // Create status indicator
-    const statusDiv = document.createElement('div');
-    statusDiv.id = 'connectionStatus';
-    statusDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    statusDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
-    statusDiv.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'danger' ? 'times-circle' : 'info-circle'} me-2"></i>
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(statusDiv);
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        if (statusDiv && statusDiv.parentNode) {
-            statusDiv.remove();
-        }
-    }, 5000);
 }
 
 // Add new message to the chat

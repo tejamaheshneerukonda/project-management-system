@@ -165,7 +165,7 @@ function initEmployeeDashboard() {
 }
 
 /**
- * Initialize notification dropdown
+ * Initialize notification dropdown (DISABLED - No auto-fetching)
  */
 function initNotifications() {
     const notificationDropdown = document.getElementById('notificationDropdown');
@@ -180,11 +180,11 @@ function initNotifications() {
             });
         });
         
-        // Fetch new notifications when page loads
-        fetchNewNotifications();
+        // DISABLED: Fetch new notifications when page loads
+        // fetchNewNotifications();
         
-        // Check for new notifications every 30 seconds
-        setInterval(checkForNewNotifications, 30000);
+        // DISABLED: Check for new notifications every 30 seconds
+        // setInterval(checkForNewNotifications, 30000);
     }
 }
 
@@ -635,8 +635,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize dashboard
     initEmployeeDashboard();
     
-    // Initialize notifications
-    initNotifications();
+    // DISABLED: Initialize notifications (no auto-fetching)
+    // initNotifications();
     
     // Initialize notification preferences
     initNotificationPreferences();

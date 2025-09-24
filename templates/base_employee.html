@@ -169,47 +169,20 @@
                             <a class="nav-link dropdown-toggle position-relative notification-bell" href="#" role="button" data-bs-toggle="dropdown" id="notificationDropdown">
                                 <i class="fas fa-bell text-white"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle notification-badge rounded-pill">
-                                    {% if unread_notifications_count %}{{ unread_notifications_count }}{% else %}3{% endif %}
+                                    {% if unread_notifications_count %}{{ unread_notifications_count }}{% else %}0{% endif %}
                                     <span class="visually-hidden">unread notifications</span>
                                 </span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
                                 <li class="notification-header">Notifications</li>
-                                <li class="notification-item unread">
-                                    <div class="notification-content">
-                                        <div class="notification-icon task">
-                                            <i class="fas fa-tasks"></i>
-                                        </div>
-                                        <div class="notification-text">
-                                            <div class="notification-title">New Task Assigned</div>
-                                            <div class="notification-description">You've been assigned to a new task: UI Improvements</div>
-                                            <div class="notification-time">10 minutes ago</div>
-                                        </div>
-                                    </div>
-                                    <div class="notification-unread-indicator"></div>
-                                </li>
-                                <li class="notification-item unread">
-                                    <div class="notification-content">
-                                        <div class="notification-icon meeting">
-                                            <i class="fas fa-calendar-alt"></i>
-                                        </div>
-                                        <div class="notification-text">
-                                            <div class="notification-title">Meeting Reminder</div>
-                                            <div class="notification-description">Project kickoff meeting in 1 hour</div>
-                                            <div class="notification-time">30 minutes ago</div>
-                                        </div>
-                                    </div>
-                                    <div class="notification-unread-indicator"></div>
-                                </li>
                                 <li class="notification-item">
                                     <div class="notification-content">
-                                        <div class="notification-icon document">
-                                            <i class="fas fa-file-alt"></i>
+                                        <div class="notification-icon">
+                                            <i class="fas fa-bell-slash"></i>
                                         </div>
                                         <div class="notification-text">
-                                            <div class="notification-title">Document Updated</div>
-                                            <div class="notification-description">The project requirements document has been updated</div>
-                                            <div class="notification-time">2 hours ago</div>
+                                            <div class="notification-title">No notifications</div>
+                                            <div class="notification-description">You're all caught up!</div>
                                         </div>
                                     </div>
                                 </li>
