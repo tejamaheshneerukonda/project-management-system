@@ -819,6 +819,49 @@ def company_dashboard(request):
         status='ACTIVE'
     ).order_by('-created_at')[:5]
     
+    # Leave statistics for company dashboard
+    from django.db.models import Sum
+    all_leave_requests = LeaveRequest.objects.filter(employee__company=company)
+    
+    # Leave request statistics
+    total_leave_requests = all_leave_requests.count()
+    pending_leave_requests = all_leave_requests.filter(status='PENDING').count()
+    approved_leave_requests = all_leave_requests.filter(status='APPROVED').count()
+    rejected_leave_requests = all_leave_requests.filter(status='REJECTED').count()
+    
+    # Calculate total leave days used by type
+    total_annual_used = all_leave_requests.filter(
+        leave_type='VACATION',
+        status='APPROVED'
+    ).aggregate(total=Sum('total_days'))['total'] or 0
+    
+    total_sick_used = all_leave_requests.filter(
+        leave_type='SICK_LEAVE',
+        status='APPROVED'
+    ).aggregate(total=Sum('total_days'))['total'] or 0
+    
+    total_personal_used = all_leave_requests.filter(
+        leave_type='PERSONAL',
+        status='APPROVED'
+    ).aggregate(total=Sum('total_days'))['total'] or 0
+    
+    # Calculate total available leave days (assuming standard allocations)
+    annual_allocation_per_employee = 20
+    sick_allocation_per_employee = 10
+    personal_allocation_per_employee = 5
+    
+    total_annual_available = total_employees * annual_allocation_per_employee
+    total_sick_available = total_employees * sick_allocation_per_employee
+    total_personal_available = total_employees * personal_allocation_per_employee
+    
+    # Calculate remaining balances
+    annual_remaining = total_annual_available - total_annual_used
+    sick_remaining = total_sick_available - total_sick_used
+    personal_remaining = total_personal_available - total_personal_used
+    
+    # Recent leave requests (last 5)
+    recent_leave_requests = all_leave_requests.order_by('-created_at')[:5]
+    
     context = {
         'title': 'Company Dashboard',
         'company': company,
@@ -843,6 +886,21 @@ def company_dashboard(request):
         'is_premium': is_premium,
         'subscription_type': company.subscription_type,
         'warning_threshold': warning_threshold,
+        # Leave statistics
+        'total_leave_requests': total_leave_requests,
+        'pending_leave_requests': pending_leave_requests,
+        'approved_leave_requests': approved_leave_requests,
+        'rejected_leave_requests': rejected_leave_requests,
+        'total_annual_used': total_annual_used,
+        'total_sick_used': total_sick_used,
+        'total_personal_used': total_personal_used,
+        'total_annual_available': total_annual_available,
+        'total_sick_available': total_sick_available,
+        'total_personal_available': total_personal_available,
+        'annual_remaining': annual_remaining,
+        'sick_remaining': sick_remaining,
+        'personal_remaining': personal_remaining,
+        'recent_leave_requests': recent_leave_requests,
     }
     return render(request, 'core/company_dashboard.html', context)
 
