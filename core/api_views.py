@@ -14,7 +14,7 @@ from .models import (
     Company, Employee, Project, Task, Notification, Announcement,
     PerformanceMetric, CompanyMetric, CompanySetting, UserPreference,
     WorkflowTemplate, WorkflowInstance, ActivityLog, PaymentMethod,
-    LeaveRequest
+    LeaveRequest, Timesheet
 )
 from .decorators import audit_log
 
@@ -3157,7 +3157,6 @@ def create_timesheet(request):
             return JsonResponse({'success': False, 'message': 'End time must be after start time'}, status=400)
         
         # Create timesheet entry - let the model's save method calculate total_hours
-        from core.models import Timesheet
         timesheet = Timesheet.objects.create(
             employee=employee,
             date=entry_date,
@@ -3290,7 +3289,6 @@ def submit_timesheet(request, timesheet_id):
         timesheet.save()
         
         # Log activity
-        from core.models import ActivityLog
         ActivityLog.objects.create(
             user=request.user,
             company=employee.company,
