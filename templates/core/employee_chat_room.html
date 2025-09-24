@@ -30,9 +30,9 @@
             </div>
             <div class="card-body p-0">
                 <!-- Messages Container -->
-                <div id="messagesContainer" class="messages-container" style="height: 500px; overflow-y: auto;">
+                <div id="messagesContainer" class="messages-container" style="height: 500px; overflow-y: auto; padding: 15px;">
                     {% for message in messages %}
-                    <div class="message-item p-3 border-bottom" data-message-id="{{ message.id }}">
+                    <div class="message-item mb-3" data-message-id="{{ message.id }}">
                         <div class="d-flex align-items-start">
                             <div class="flex-shrink-0">
                                 <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
@@ -57,7 +57,7 @@
                                         <!-- Image Preview -->
                                         <div class="image-attachment">
                                             <img src="{{ message.attachment.url }}" alt="{{ message.attachment.name }}" 
-                                                 class="img-thumbnail attachment-image"
+                                                 class="img-thumbnail attachment-image" style="max-width: 200px; max-height: 200px; cursor: pointer;"
                                                  onclick="openImageModal('{{ message.attachment.url }}', '{{ message.attachment.name }}')">
                                             <div class="attachment-actions mt-2">
                                                 <a href="{{ message.attachment.url }}" download="{{ message.attachment.name }}" 
@@ -242,16 +242,16 @@
 
 {% block extra_js %}
 <script>
-// WebSocket connection for real-time chat
+// Simple WebSocket connection for real-time chat
 let chatSocket = null;
-let reconnectAttempts = 0;
-const maxReconnectAttempts = 5;
 let pollingInterval = null;
 
 // Auto-scroll to bottom of messages
 function scrollToBottom() {
     const container = document.getElementById('messagesContainer');
-    container.scrollTop = container.scrollHeight;
+    if (container) {
+        container.scrollTop = container.scrollHeight;
+    }
 }
 
 // Initialize WebSocket connection
@@ -260,69 +260,47 @@ function initChatWebSocket() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws/chat/room/${roomId}/`;
     
-    chatSocket = new WebSocket(wsUrl);
-    
-    chatSocket.onopen = function(e) {
-        console.log('Chat WebSocket connected');
-        reconnectAttempts = 0;
-        // Stop polling if WebSocket is connected
-        if (pollingInterval) {
-            clearInterval(pollingInterval);
-            pollingInterval = null;
-        }
-    };
-    
-    chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
+    try {
+        chatSocket = new WebSocket(wsUrl);
         
-        if (data.type === 'new_message') {
-            addNewMessage(data.message, data.sender, data.timestamp);
-        } else if (data.type === 'typing') {
-            handleTypingIndicator(data.user, data.is_typing);
-        } else if (data.type === 'pong') {
-            // Handle pong response for keep-alive
-        }
-    };
-    
-    chatSocket.onclose = function(e) {
-        console.log('Chat WebSocket disconnected');
-        // Start polling fallback
-        startPollingFallback();
-        // Attempt to reconnect
-        if (reconnectAttempts < maxReconnectAttempts) {
-            setTimeout(() => {
-                reconnectAttempts++;
-                initChatWebSocket();
-            }, 3000);
-        }
-    };
-    
-    chatSocket.onerror = function(e) {
-        console.error('Chat WebSocket error:', e);
-    };
+        chatSocket.onopen = function(e) {
+            console.log('Chat WebSocket connected');
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        };
+        
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'new_message') {
+                addNewMessage(data.message, data.sender, data.timestamp);
+            }
+        };
+        
+        chatSocket.onclose = function(e) {
+            console.log('Chat WebSocket disconnected');
+            startPolling();
+        };
+        
+        chatSocket.onerror = function(e) {
+            console.error('Chat WebSocket error:', e);
+            startPolling();
+        };
+    } catch (error) {
+        console.error('Error initializing WebSocket:', error);
+        startPolling();
+    }
 }
 
 // Add new message to the chat
-let processedMessageIds = new Set(); // Track processed message IDs to prevent duplicates
-
 function addNewMessage(message, sender, timestamp) {
-    // Check if message already exists to prevent duplicates
-    const messageId = message.id || message.message?.id;
-    if (messageId && processedMessageIds.has(messageId)) {
-        console.log('Message already processed, skipping duplicate:', messageId);
-        return;
-    }
-    
-    if (messageId) {
-        processedMessageIds.add(messageId);
-    }
-    
     const messagesContainer = document.getElementById('messagesContainer');
+    if (!messagesContainer) return;
+    
     const messageElement = document.createElement('div');
-    messageElement.className = 'message-item p-3 border-bottom';
-    if (messageId) {
-        messageElement.setAttribute('data-message-id', messageId);
-    }
+    messageElement.className = 'message-item mb-3';
+    messageElement.setAttribute('data-message-id', message.id);
     
     const senderInitials = sender.first_name.charAt(0) + sender.last_name.charAt(0);
     const formattedTime = new Date(timestamp).toLocaleString('en-US', {
@@ -339,12 +317,11 @@ function addNewMessage(message, sender, timestamp) {
         const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileExtension);
         
         if (isImage) {
-            // Image Preview
             attachmentHtml = `
                 <div class="attachment mt-2">
                     <div class="image-attachment">
                         <img src="${message.attachment}" alt="${fileName}" 
-                             class="img-thumbnail attachment-image"
+                             class="img-thumbnail attachment-image" style="max-width: 200px; max-height: 200px; cursor: pointer;"
                              onclick="openImageModal('${message.attachment}', '${fileName}')">
                         <div class="attachment-actions mt-2">
                             <a href="${message.attachment}" download="${fileName}" 
@@ -360,7 +337,6 @@ function addNewMessage(message, sender, timestamp) {
                 </div>
             `;
         } else {
-            // Document/File Attachment
             let fileIcon = 'fas fa-file';
             let iconColor = 'text-muted';
             
@@ -436,144 +412,43 @@ function addNewMessage(message, sender, timestamp) {
     
     messagesContainer.appendChild(messageElement);
     scrollToBottom();
-    
-    // Show success toast only for new messages (not our own)
-    const currentUser = '{{ user.employee_profile.first_name }} {{ user.employee_profile.last_name }}';
-    const senderName = `${sender.first_name} ${sender.last_name}`;
-    if (senderName !== currentUser.trim()) {
-        showToast('New message received!', 'info');
-    }
 }
 
-// Handle typing indicators
-function handleTypingIndicator(user, isTyping) {
-    // You can implement typing indicators here if needed
-    console.log(`${user} is ${isTyping ? 'typing' : 'not typing'}`);
-}
-
-// Polling fallback for when WebSocket is not available
-function startPollingFallback() {
-    if (pollingInterval) return; // Already polling
-    if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-        console.log('WebSocket is connected, skipping polling fallback');
-        return; // Don't start polling if WebSocket is connected
-    }
+// Start polling for new messages
+function startPolling() {
+    if (pollingInterval) return;
     
-    console.log('Starting polling fallback for chat messages');
     pollingInterval = setInterval(() => {
-        // Double-check WebSocket status before polling
-        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-            console.log('WebSocket connected during polling, stopping fallback');
-            clearInterval(pollingInterval);
-            pollingInterval = null;
-            return;
-        }
-        checkForNewMessages();
-    }, 3000); // Check every 3 seconds
+        fetch(window.location.href + '?ajax=1&last_message=' + getLastMessageId())
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.new_messages) {
+                    data.new_messages.forEach(msg => {
+                        addNewMessage(msg.message, msg.sender, msg.timestamp);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error checking for new messages:', error);
+            });
+    }, 3000);
 }
 
-// Check for new messages via AJAX
-function checkForNewMessages() {
-    fetch(window.location.href + '?ajax=1&last_message=' + getLastMessageId())
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.new_messages && data.new_messages.length > 0) {
-                data.new_messages.forEach(msg => {
-                    addNewMessage(msg.message, msg.sender, msg.timestamp);
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error checking for new messages:', error);
-        });
-}
-
-// Get the ID of the last message in the chat
+// Get the ID of the last message
 function getLastMessageId() {
     const messages = document.querySelectorAll('.message-item');
     if (messages.length === 0) return 0;
     
     const lastMessage = messages[messages.length - 1];
-    const messageId = lastMessage.getAttribute('data-message-id');
-    return messageId || 0;
+    return lastMessage.getAttribute('data-message-id') || 0;
 }
-
-// Scroll to bottom on page load
-document.addEventListener('DOMContentLoaded', function() {
-    scrollToBottom();
-    
-    // Initialize WebSocket connection
-    initChatWebSocket();
-    
-    // Send periodic ping to keep connection alive
-    setInterval(() => {
-        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-            chatSocket.send(JSON.stringify({type: 'ping'}));
-        }
-    }, 30000); // Ping every 30 seconds
-});
 
 // File input handling
 document.getElementById('fileInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
-        const filePreview = document.getElementById('filePreview');
-        const fileName = file.name;
-        const fileExtension = fileName.split('.').pop().toLowerCase();
-        const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileExtension);
-        
-        if (isImage) {
-            // Show image preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                filePreview.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <img src="${e.target.result}" alt="${fileName}" style="width: 50px; height: 50px; object-fit: cover;" class="me-2 rounded">
-                        <span class="flex-grow-1">${fileName}</span>
-                        <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearFile()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            // Show file icon preview
-            let fileIcon = 'fas fa-file';
-            let iconColor = 'text-muted';
-            
-            if (fileExtension === 'pdf') {
-                fileIcon = 'fas fa-file-pdf';
-                iconColor = 'text-danger';
-            } else if (['doc', 'docx'].includes(fileExtension)) {
-                fileIcon = 'fas fa-file-word';
-                iconColor = 'text-primary';
-            } else if (['xls', 'xlsx'].includes(fileExtension)) {
-                fileIcon = 'fas fa-file-excel';
-                iconColor = 'text-success';
-            } else if (['ppt', 'pptx'].includes(fileExtension)) {
-                fileIcon = 'fas fa-file-powerpoint';
-                iconColor = 'text-warning';
-            } else if (fileExtension === 'txt') {
-                fileIcon = 'fas fa-file-alt';
-                iconColor = 'text-info';
-            } else if (['zip', 'rar', '7z'].includes(fileExtension)) {
-                fileIcon = 'fas fa-file-archive';
-                iconColor = 'text-secondary';
-            }
-            
-            filePreview.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="${fileIcon} fa-2x ${iconColor} me-2"></i>
-                    <span class="flex-grow-1">${fileName}</span>
-                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearFile()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-        }
-        
-        filePreview.style.display = 'block';
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('filePreview').style.display = 'block';
     }
 });
 
@@ -584,7 +459,6 @@ function clearFile() {
 
 // Image modal functionality
 function openImageModal(imageUrl, fileName) {
-    // Create modal if it doesn't exist
     let modal = document.getElementById('imageModal');
     if (!modal) {
         modal = document.createElement('div');
@@ -614,7 +488,6 @@ function openImageModal(imageUrl, fileName) {
         `;
         document.body.appendChild(modal);
     } else {
-        // Update existing modal
         modal.querySelector('.modal-title').textContent = fileName;
         modal.querySelector('.modal-body img').src = imageUrl;
         modal.querySelector('.modal-body img').alt = fileName;
@@ -623,37 +496,23 @@ function openImageModal(imageUrl, fileName) {
         modal.querySelector('a[target="_blank"]').href = imageUrl;
     }
     
-    // Show modal
     const bsModal = new bootstrap.Modal(modal);
     bsModal.show();
 }
 
 // Message form submission
-let isSubmitting = false; // Prevent duplicate submissions
-
 document.getElementById('messageForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
-    // Prevent duplicate submissions
-    if (isSubmitting) {
-        console.log('Message submission already in progress, ignoring duplicate');
-        return;
-    }
     
     const formData = new FormData(this);
     const messageInput = document.getElementById('messageInput');
     const submitButton = this.querySelector('button[type="submit"]');
-    const content = messageInput.value.trim();
     
-    if (!content && !formData.get('attachment')) {
-        showToast('Please enter a message or attach a file', 'warning');
+    if (!messageInput.value.trim() && !formData.get('attachment')) {
+        alert('Please enter a message or attach a file');
         return;
     }
     
-    // Set submitting flag
-    isSubmitting = true;
-    
-    // Disable submit button and show loading state
     submitButton.disabled = true;
     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     
@@ -664,127 +523,50 @@ document.getElementById('messageForm').addEventListener('submit', function(e) {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         }
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
             messageInput.value = '';
             clearFile();
-            // Don't show success toast here - WebSocket will handle it
-            console.log('Message sent successfully via form submission');
         } else {
-            showToast('Error sending message: ' + data.message, 'error');
+            alert('Error sending message: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('Error sending message. Please try again.', 'error');
+        alert('Error sending message. Please try again.');
     })
     .finally(() => {
-        // Re-enable submit button and reset flag
         submitButton.disabled = false;
         submitButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
-        isSubmitting = false;
     });
 });
 
-// Toast notification function
-function showToast(message, type = 'info') {
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'assertive');
-    toast.setAttribute('aria-atomic', 'true');
+// Initialize chat on page load
+document.addEventListener('DOMContentLoaded', function() {
+    scrollToBottom();
+    initChatWebSocket();
     
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">
-                ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    `;
-    
-    // Add to page
-    let toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-        toastContainer.style.zIndex = '9999';
-        document.body.appendChild(toastContainer);
-    }
-    
-    toastContainer.appendChild(toast);
-    
-    // Show toast
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-    
-    // Remove toast element after it's hidden
-    toast.addEventListener('hidden.bs.toast', () => {
-        toast.remove();
-    });
-}
-
-// Auto-refresh removed - now using real-time WebSocket updates
+    // Keep WebSocket alive
+    setInterval(() => {
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({type: 'ping'}));
+        }
+    }, 30000);
+});
 </script>
 
 <style>
-/* Ensure the entire page is properly contained */
-body {
-    overflow-x: hidden; /* Prevent horizontal scroll */
-}
-
-.container-fluid, .container {
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-.content-wrapper {
-    max-width: 100%;
-    overflow: hidden;
-}
-
-/* Ensure the main chat page layout is properly bounded */
-.row {
-    max-width: 100%;
-    overflow: hidden;
-}
-
-.col-lg-8, .col-lg-4 {
-    overflow: hidden;
-    max-width: 100%;
-}
-
-/* Ensure cards don't overflow */
-.card {
-    overflow: hidden;
-    max-width: 100%;
-}
-
-.card-body {
-    overflow: hidden;
-    max-width: 100%;
-}
-
 .messages-container {
     background-color: #f8f9fa;
-    position: relative; /* Ensure proper positioning context */
-    overflow: hidden; /* Prevent any content from overflowing */
-    max-width: 100%; /* Ensure container doesn't exceed bounds */
 }
 
 .message-item {
     background-color: white;
-    margin-bottom: 1px;
-    overflow: hidden; /* Prevent content from overflowing */
-    word-wrap: break-word; /* Break long words */
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .avatar {
@@ -792,24 +574,10 @@ body {
     font-weight: bold;
 }
 
-.attachment {
-    margin-top: 0.5rem;
-    overflow: hidden; /* Prevent attachment overflow */
-    max-width: 100%; /* Ensure attachment doesn't exceed container */
-}
-
-/* Enhanced Attachment Styling */
 .attachment-image {
     border: 2px solid #e9ecef;
-    transition: all 0.3s ease;
     border-radius: 8px;
-    max-width: 100% !important; /* Override inline styles to ensure containment */
-    max-height: 200px !important; /* Keep reasonable height */
-    width: auto !important; /* Maintain aspect ratio */
-    height: auto !important; /* Maintain aspect ratio */
-    object-fit: contain; /* Ensure image fits within bounds */
-    display: block; /* Remove inline spacing issues */
-    margin: 0 auto; /* Center the image */
+    transition: all 0.3s ease;
 }
 
 .attachment-image:hover {
@@ -818,50 +586,13 @@ body {
     box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
 }
 
-.file-attachment {
-    transition: all 0.3s ease;
-    max-width: 100%; /* Ensure file attachment doesn't overflow */
-}
-
 .file-attachment:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .attachment-actions {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    margin-top: 0.5rem;
-    text-align: center; /* Center the action buttons */
-}
-
-.image-attachment:hover .attachment-actions {
-    opacity: 1;
-}
-
-/* Ensure message content area properly contains all content */
-.message-item .flex-grow-1 {
-    max-width: calc(100% - 60px); /* Account for avatar width */
-    overflow: hidden; /* Prevent content overflow */
-}
-
-.message-item .flex-grow-1 p {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    max-width: 100%;
-}
-
-/* Ensure the entire message container is properly bounded */
-.message-item .d-flex {
-    max-width: 100%;
-    overflow: hidden;
-}
-
-/* Ensure image attachment container doesn't overflow */
-.image-attachment {
-    max-width: 100%;
-    overflow: hidden;
-    text-align: center; /* Center content */
+    text-align: center;
 }
 
 /* File type specific styling */
@@ -885,17 +616,9 @@ body {
     border-radius: 6px;
     padding: 0.75rem;
     margin-top: 0.5rem;
-    max-width: 100%; /* Prevent preview overflow */
-    overflow: hidden;
 }
 
-#filePreview img {
-    border-radius: 4px;
-    border: 1px solid #dee2e6;
-    max-width: 100%; /* Ensure preview images don't overflow */
-}
-
-/* Responsive attachment styling */
+/* Responsive styling */
 @media (max-width: 768px) {
     .attachment-image {
         max-width: 150px !important;
@@ -909,10 +632,6 @@ body {
     
     .file-attachment .flex-shrink-0 {
         margin-bottom: 0.5rem;
-    }
-    
-    .attachment-actions {
-        opacity: 1; /* Always show on mobile */
     }
 }
 </style>
