@@ -717,10 +717,15 @@ function showToast(message, type = 'info') {
         toastContainer.id = 'toast-container';
         toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
         toastContainer.style.zIndex = '9999';
+        toastContainer.style.maxWidth = '350px';
+        toastContainer.style.pointerEvents = 'none';
         document.body.appendChild(toastContainer);
     }
     
     toastContainer.appendChild(toast);
+    
+    // Ensure toast has proper pointer events
+    toast.style.pointerEvents = 'auto';
     
     // Show toast
     const bsToast = new bootstrap.Toast(toast);
@@ -738,6 +743,62 @@ function showToast(message, type = 'info') {
 <style>
 .messages-container {
     background-color: #f8f9fa;
+    position: relative; /* Ensure proper positioning context */
+    overflow: hidden; /* Prevent any content from overflowing */
+    max-width: 100%; /* Ensure container doesn't exceed bounds */
+}
+
+/* Ensure the main chat card doesn't overflow */
+.card {
+    overflow: hidden; /* Prevent card content from overflowing */
+    max-width: 100%;
+}
+
+/* Ensure the chat body doesn't overflow */
+.card-body {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+/* Toast container positioning - ensure it doesn't interfere with chat */
+.toast-container {
+    z-index: 9999 !important;
+    max-width: 350px; /* Limit toast width */
+    pointer-events: none; /* Allow clicks to pass through when not active */
+}
+
+.toast-container .toast {
+    pointer-events: auto; /* Re-enable pointer events for active toasts */
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+/* Ensure row and column containers don't overflow */
+.row {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Ensure the entire page content is properly contained */
+body {
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* Ensure main content area is properly bounded */
+.container-fluid, .container {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Ensure the chat page content is properly contained */
+.content-wrapper {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Additional containment for chat interface */
+#messagesContainer {
+    contain: layout style; /* CSS containment for better performance */
 }
 
 .message-item {
