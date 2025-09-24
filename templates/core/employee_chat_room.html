@@ -52,10 +52,62 @@
                                 </div>
                                 <p class="mb-1">{{ message.content }}</p>
                                 {% if message.attachment %}
-                                <div class="attachment">
-                                    <a href="{{ message.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-paperclip me-1"></i>{{ message.attachment.name|slice:"20:" }}
-                                    </a>
+                                <div class="attachment mt-2">
+                                    {% if message.attachment.name|slice:"-4:"|lower in ".jpg,.jpeg,.png,.gif,.webp,.bmp" %}
+                                        <!-- Image Preview -->
+                                        <div class="image-attachment">
+                                            <img src="{{ message.attachment.url }}" alt="{{ message.attachment.name }}" 
+                                                 class="img-thumbnail attachment-image" style="max-width: 200px; max-height: 200px; cursor: pointer;"
+                                                 onclick="openImageModal('{{ message.attachment.url }}', '{{ message.attachment.name }}')">
+                                            <div class="attachment-actions mt-2">
+                                                <a href="{{ message.attachment.url }}" download="{{ message.attachment.name }}" 
+                                                   class="btn btn-sm btn-outline-primary me-2">
+                                                    <i class="fas fa-download me-1"></i>Download
+                                                </a>
+                                                <a href="{{ message.attachment.url }}" target="_blank" 
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-external-link-alt me-1"></i>View Full Size
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <!-- Document/File Attachment -->
+                                        <div class="file-attachment">
+                                            <div class="d-flex align-items-center p-2 border rounded bg-light">
+                                                <div class="flex-shrink-0 me-3">
+                                                    {% if message.attachment.name|slice:"-4:"|lower in ".pdf" %}
+                                                        <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                                    {% elif message.attachment.name|slice:"-4:"|lower in ".doc,.docx" %}
+                                                        <i class="fas fa-file-word fa-2x text-primary"></i>
+                                                    {% elif message.attachment.name|slice:"-4:"|lower in ".xls,.xlsx" %}
+                                                        <i class="fas fa-file-excel fa-2x text-success"></i>
+                                                    {% elif message.attachment.name|slice:"-4:"|lower in ".ppt,.pptx" %}
+                                                        <i class="fas fa-file-powerpoint fa-2x text-warning"></i>
+                                                    {% elif message.attachment.name|slice:"-4:"|lower in ".txt" %}
+                                                        <i class="fas fa-file-alt fa-2x text-info"></i>
+                                                    {% elif message.attachment.name|slice:"-4:"|lower in ".zip,.rar,.7z" %}
+                                                        <i class="fas fa-file-archive fa-2x text-secondary"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-file fa-2x text-muted"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="fw-bold">{{ message.attachment.name|slice:"30:" }}</div>
+                                                    <small class="text-muted">{{ message.attachment.size|filesizeformat }}</small>
+                                                </div>
+                                                <div class="flex-shrink-0">
+                                                    <a href="{{ message.attachment.url }}" download="{{ message.attachment.name }}" 
+                                                       class="btn btn-sm btn-primary me-2">
+                                                        <i class="fas fa-download me-1"></i>Download
+                                                    </a>
+                                                    <a href="{{ message.attachment.url }}" target="_blank" 
+                                                       class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-external-link-alt me-1"></i>Open
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 {% endif %}
                             </div>
@@ -282,13 +334,82 @@ function addNewMessage(message, sender, timestamp) {
     
     let attachmentHtml = '';
     if (message.attachment) {
-        attachmentHtml = `
-            <div class="attachment">
-                <a href="${message.attachment}" target="_blank" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-paperclip me-1"></i>${message.attachment_name}
-                </a>
-            </div>
-        `;
+        const fileName = message.attachment_name || message.attachment.split('/').pop();
+        const fileExtension = fileName.split('.').pop().toLowerCase();
+        const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileExtension);
+        
+        if (isImage) {
+            // Image Preview
+            attachmentHtml = `
+                <div class="attachment mt-2">
+                    <div class="image-attachment">
+                        <img src="${message.attachment}" alt="${fileName}" 
+                             class="img-thumbnail attachment-image" style="max-width: 200px; max-height: 200px; cursor: pointer;"
+                             onclick="openImageModal('${message.attachment}', '${fileName}')">
+                        <div class="attachment-actions mt-2">
+                            <a href="${message.attachment}" download="${fileName}" 
+                               class="btn btn-sm btn-outline-primary me-2">
+                                <i class="fas fa-download me-1"></i>Download
+                            </a>
+                            <a href="${message.attachment}" target="_blank" 
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-external-link-alt me-1"></i>View Full Size
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Document/File Attachment
+            let fileIcon = 'fas fa-file';
+            let iconColor = 'text-muted';
+            
+            if (fileExtension === 'pdf') {
+                fileIcon = 'fas fa-file-pdf';
+                iconColor = 'text-danger';
+            } else if (['doc', 'docx'].includes(fileExtension)) {
+                fileIcon = 'fas fa-file-word';
+                iconColor = 'text-primary';
+            } else if (['xls', 'xlsx'].includes(fileExtension)) {
+                fileIcon = 'fas fa-file-excel';
+                iconColor = 'text-success';
+            } else if (['ppt', 'pptx'].includes(fileExtension)) {
+                fileIcon = 'fas fa-file-powerpoint';
+                iconColor = 'text-warning';
+            } else if (fileExtension === 'txt') {
+                fileIcon = 'fas fa-file-alt';
+                iconColor = 'text-info';
+            } else if (['zip', 'rar', '7z'].includes(fileExtension)) {
+                fileIcon = 'fas fa-file-archive';
+                iconColor = 'text-secondary';
+            }
+            
+            attachmentHtml = `
+                <div class="attachment mt-2">
+                    <div class="file-attachment">
+                        <div class="d-flex align-items-center p-2 border rounded bg-light">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="${fileIcon} fa-2x ${iconColor}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">${fileName.length > 30 ? fileName.substring(0, 30) + '...' : fileName}</div>
+                                <small class="text-muted">File attachment</small>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <a href="${message.attachment}" download="${fileName}" 
+                                   class="btn btn-sm btn-primary me-2">
+                                    <i class="fas fa-download me-1"></i>Download
+                                </a>
+                                <a href="${message.attachment}" target="_blank" 
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-external-link-alt me-1"></i>Open
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
     }
     
     messageElement.innerHTML = `
@@ -396,14 +517,115 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('fileInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
-        document.getElementById('fileName').textContent = file.name;
-        document.getElementById('filePreview').style.display = 'block';
+        const filePreview = document.getElementById('filePreview');
+        const fileName = file.name;
+        const fileExtension = fileName.split('.').pop().toLowerCase();
+        const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileExtension);
+        
+        if (isImage) {
+            // Show image preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                filePreview.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <img src="${e.target.result}" alt="${fileName}" style="width: 50px; height: 50px; object-fit: cover;" class="me-2 rounded">
+                        <span class="flex-grow-1">${fileName}</span>
+                        <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearFile()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // Show file icon preview
+            let fileIcon = 'fas fa-file';
+            let iconColor = 'text-muted';
+            
+            if (fileExtension === 'pdf') {
+                fileIcon = 'fas fa-file-pdf';
+                iconColor = 'text-danger';
+            } else if (['doc', 'docx'].includes(fileExtension)) {
+                fileIcon = 'fas fa-file-word';
+                iconColor = 'text-primary';
+            } else if (['xls', 'xlsx'].includes(fileExtension)) {
+                fileIcon = 'fas fa-file-excel';
+                iconColor = 'text-success';
+            } else if (['ppt', 'pptx'].includes(fileExtension)) {
+                fileIcon = 'fas fa-file-powerpoint';
+                iconColor = 'text-warning';
+            } else if (fileExtension === 'txt') {
+                fileIcon = 'fas fa-file-alt';
+                iconColor = 'text-info';
+            } else if (['zip', 'rar', '7z'].includes(fileExtension)) {
+                fileIcon = 'fas fa-file-archive';
+                iconColor = 'text-secondary';
+            }
+            
+            filePreview.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="${fileIcon} fa-2x ${iconColor} me-2"></i>
+                    <span class="flex-grow-1">${fileName}</span>
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearFile()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        }
+        
+        filePreview.style.display = 'block';
     }
 });
 
 function clearFile() {
     document.getElementById('fileInput').value = '';
     document.getElementById('filePreview').style.display = 'none';
+}
+
+// Image modal functionality
+function openImageModal(imageUrl, fileName) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('imageModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'imageModal';
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${fileName}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img src="${imageUrl}" alt="${fileName}" class="img-fluid" style="max-height: 70vh;">
+                    </div>
+                    <div class="modal-footer">
+                        <a href="${imageUrl}" download="${fileName}" class="btn btn-primary">
+                            <i class="fas fa-download me-1"></i>Download
+                        </a>
+                        <a href="${imageUrl}" target="_blank" class="btn btn-outline-secondary">
+                            <i class="fas fa-external-link-alt me-1"></i>Open in New Tab
+                        </a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    } else {
+        // Update existing modal
+        modal.querySelector('.modal-title').textContent = fileName;
+        modal.querySelector('.modal-body img').src = imageUrl;
+        modal.querySelector('.modal-body img').alt = fileName;
+        modal.querySelector('a[download]').href = imageUrl;
+        modal.querySelector('a[download]').download = fileName;
+        modal.querySelector('a[target="_blank"]').href = imageUrl;
+    }
+    
+    // Show modal
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
 }
 
 // Message form submission
@@ -529,7 +751,87 @@ function showToast(message, type = 'info') {
 }
 
 .attachment {
-    margin-top: 5px;
+    margin-top: 0.5rem;
+}
+
+/* Enhanced Attachment Styling */
+.attachment-image {
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.attachment-image:hover {
+    border-color: #007bff;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.file-attachment {
+    transition: all 0.3s ease;
+}
+
+.file-attachment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.attachment-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-attachment:hover .attachment-actions {
+    opacity: 1;
+}
+
+/* File type specific styling */
+.fa-file-pdf { color: #dc3545 !important; }
+.fa-file-word { color: #007bff !important; }
+.fa-file-excel { color: #28a745 !important; }
+.fa-file-powerpoint { color: #ffc107 !important; }
+.fa-file-alt { color: #17a2b8 !important; }
+.fa-file-archive { color: #6c757d !important; }
+
+/* Image modal styling */
+#imageModal .modal-body img {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* File preview styling */
+#filePreview {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+#filePreview img {
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+/* Responsive attachment styling */
+@media (max-width: 768px) {
+    .attachment-image {
+        max-width: 150px !important;
+        max-height: 150px !important;
+    }
+    
+    .file-attachment .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .file-attachment .flex-shrink-0 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .attachment-actions {
+        opacity: 1; /* Always show on mobile */
+    }
 }
 </style>
 {% endblock %}
