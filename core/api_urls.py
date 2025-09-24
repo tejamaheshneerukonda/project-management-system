@@ -18,6 +18,10 @@ urlpatterns = [
     # Notifications API
     path('notifications/unread/', api_views.unread_notifications, name='unread_notifications'),
     path('notifications/<int:notification_id>/mark-read/', api_views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/<int:notification_id>/delete/', api_views.delete_notification, name='delete_notification'),
+    path('notifications/<int:notification_id>/archive/', api_views.archive_notification, name='archive_notification'),
+    path('notifications/mark-all-read/', api_views.mark_all_notifications_read, name='mark_all_notifications_read'),
+    path('notifications/bulk-archive/', api_views.bulk_archive_notifications, name='bulk_archive_notifications'),
     
     # Announcements API
     path('announcements/create/', api_views.create_announcement, name='create_announcement'),

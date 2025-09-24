@@ -298,11 +298,111 @@ def unread_notifications(request):
 def mark_notification_read(request, notification_id):
     """Mark a notification as read"""
     try:
-        notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+        # Handle both user and company admin cases
+        if hasattr(request.user, 'company_admin_profile'):
+            notification = get_object_or_404(Notification, id=notification_id, company=request.user.company_admin_profile.company)
+        else:
+            notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+        
         notification.is_read = True
+        notification.read_at = timezone.now()
         notification.save()
         
         return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+@login_required
+@require_http_methods(["DELETE"])
+def delete_notification(request, notification_id):
+    """Delete a notification"""
+    try:
+        # Handle both user and company admin cases
+        if hasattr(request.user, 'company_admin_profile'):
+            notification = get_object_or_404(Notification, id=notification_id, company=request.user.company_admin_profile.company)
+        else:
+            notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+        
+        notification.delete()
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def archive_notification(request, notification_id):
+    """Archive a notification"""
+    try:
+        # Handle both user and company admin cases
+        if hasattr(request.user, 'company_admin_profile'):
+            notification = get_object_or_404(Notification, id=notification_id, company=request.user.company_admin_profile.company)
+        else:
+            notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+        
+        notification.is_archived = True
+        notification.archived_at = timezone.now()
+        notification.save()
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def mark_all_notifications_read(request):
+    """Mark all notifications as read"""
+    try:
+        # Handle both user and company admin cases
+        if hasattr(request.user, 'company_admin_profile'):
+            notifications = Notification.objects.filter(company=request.user.company_admin_profile.company, is_read=False)
+        else:
+            notifications = Notification.objects.filter(user=request.user, is_read=False)
+        
+        count = notifications.count()
+        notifications.update(is_read=True, read_at=timezone.now())
+        
+        return JsonResponse({'success': True, 'count': count})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def bulk_archive_notifications(request):
+    """Archive multiple notifications"""
+    try:
+        data = json.loads(request.body)
+        notification_ids = data.get('notification_ids', [])
+        
+        if not notification_ids:
+            return JsonResponse({'success': False, 'error': 'No notification IDs provided'})
+        
+        # Handle both user and company admin cases
+        if hasattr(request.user, 'company_admin_profile'):
+            notifications = Notification.objects.filter(
+                id__in=notification_ids, 
+                company=request.user.company_admin_profile.company,
+                is_archived=False
+            )
+        else:
+            notifications = Notification.objects.filter(
+                id__in=notification_ids, 
+                user=request.user,
+                is_archived=False
+            )
+        
+        count = notifications.count()
+        notifications.update(is_archived=True, archived_at=timezone.now())
+        
+        return JsonResponse({'success': True, 'count': count})
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
