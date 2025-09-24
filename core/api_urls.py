@@ -69,6 +69,7 @@ urlpatterns = [
     path('attendance/create/', api_views.create_attendance, name='create_attendance'),
     path('benefits/create/', api_views.create_benefit, name='create_benefit'),
     path('leave/create/', api_views.create_leave, name='create_leave'),
+    path('timesheets/create/', api_views.create_timesheet, name='create_timesheet'),
     path('assets/create/', api_views.create_asset, name='create_asset'),
     path('security-settings/create/', api_views.create_security_setting, name='create_security_setting'),
     path('integrations/create/', api_views.create_integration, name='create_integration'),

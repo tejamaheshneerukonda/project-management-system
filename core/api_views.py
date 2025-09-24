@@ -3111,3 +3111,72 @@ def get_payment_methods(request):
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def create_timesheet(request):
+    """Create a timesheet entry"""
+    try:
+        # Parse JSON data from request body
+        import json
+        data = json.loads(request.body)
+        
+        # Get employee profile
+        if not hasattr(request.user, 'employee_profile'):
+            return JsonResponse({'success': False, 'message': 'Employee profile not found'}, status=400)
+        
+        employee = request.user.employee_profile
+        
+        # Extract form data
+        date_str = data.get('date')
+        start_time_str = data.get('start_time')
+        end_time_str = data.get('end_time')
+        task_description = data.get('task_description', '')
+        work_performed = data.get('work_performed', '')
+        
+        # Validate required fields
+        if not all([date_str, start_time_str, end_time_str]):
+            return JsonResponse({'success': False, 'message': 'Date, start time, and end time are required'}, status=400)
+        
+        # Parse date and times
+        from datetime import datetime, date, time
+        
+        try:
+            entry_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+        except ValueError as e:
+            return JsonResponse({'success': False, 'message': f'Invalid date/time format: {str(e)}'}, status=400)
+        
+        # Calculate total hours
+        start_datetime = datetime.combine(entry_date, start_time)
+        end_datetime = datetime.combine(entry_date, end_time)
+        
+        if end_datetime <= start_datetime:
+            return JsonResponse({'success': False, 'message': 'End time must be after start time'}, status=400)
+        
+        duration = end_datetime - start_datetime
+        total_hours = duration.total_seconds() / 3600  # Convert to hours
+        
+        # Create timesheet entry
+        from core.models import Timesheet
+        timesheet = Timesheet.objects.create(
+            employee=employee,
+            date=entry_date,
+            start_time=start_time,
+            end_time=end_time,
+            total_hours=total_hours,
+            task_description=task_description,
+            work_performed=work_performed,
+            status='DRAFT'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Timesheet entry created successfully',
+            'timesheet_id': timesheet.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error creating timesheet: {str(e)}'}, status=500)
