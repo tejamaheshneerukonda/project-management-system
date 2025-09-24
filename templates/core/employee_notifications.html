@@ -65,7 +65,9 @@
                 <div class="list-group list-group-flush">
                     {% for notification in notifications %}
                     <div class="list-group-item list-group-item-action notification-item {% if not notification.is_read %}unread{% endif %}" 
-                         data-notification-id="{{ notification.id }}">
+                         data-notification-id="{{ notification.id }}"
+                         data-action-url="{{ notification.action_url|default:'' }}"
+                         style="cursor: pointer;">
                         <div class="row align-items-center">
                             <div class="col-auto">
                                 <div class="notification-icon">
@@ -99,13 +101,13 @@
                             <div class="col-auto">
                                 <div class="btn-group-vertical" role="group">
                                     {% if not notification.is_read %}
-                                    <button type="button" class="btn btn-sm btn-outline-primary" 
-                                            onclick="markAsRead({{ notification.id }})">
+                                    <button type="button" class="btn btn-sm btn-outline-primary mark-read-btn" 
+                                            data-notification-id="{{ notification.id }}">
                                         <i class="fas fa-check"></i>
                                     </button>
                                     {% endif %}
-                                    <button type="button" class="btn btn-sm btn-outline-danger" 
-                                            onclick="deleteNotification({{ notification.id }})">
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-btn" 
+                                            data-notification-id="{{ notification.id }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -212,6 +214,38 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="notificationFilter"]').forEach(radio => {
         radio.addEventListener('change', function() {
             filterNotifications(this.id);
+        });
+    });
+    
+    // Notification click handlers
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Don't trigger if clicking on buttons
+            if (e.target.closest('.btn-group-vertical')) {
+                return;
+            }
+            
+            const notificationId = this.dataset.notificationId;
+            const actionUrl = this.dataset.actionUrl;
+            handleNotificationClick(notificationId, actionUrl);
+        });
+    });
+    
+    // Mark as read button handlers
+    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const notificationId = this.dataset.notificationId;
+            markAsRead(notificationId);
+        });
+    });
+    
+    // Delete button handlers
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const notificationId = this.dataset.notificationId;
+            deleteNotification(notificationId);
         });
     });
 });
@@ -353,9 +387,127 @@ function showAlert(message, type) {
         alertDiv.remove();
     }, 5000);
 }
+
+function handleNotificationClick(notificationId, actionUrl) {
+    // Mark notification as read when clicked
+    if (notificationId) {
+        markAsRead(notificationId);
+    }
+    
+    // Navigate to the action URL if it exists
+    if (actionUrl && actionUrl.trim() !== '') {
+        // Check if it's a relative URL or absolute URL
+        if (actionUrl.startsWith('http://') || actionUrl.startsWith('https://')) {
+            window.open(actionUrl, '_blank');
+        } else {
+            window.location.href = actionUrl;
+        }
+    } else {
+        // If no action URL, show a modal with notification details
+        showNotificationDetails(notificationId);
+    }
+}
+
+function showNotificationDetails(notificationId) {
+    // Find the notification element
+    const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+    if (!notificationElement) return;
+    
+    // Extract notification details
+    const title = notificationElement.querySelector('.notification-title').textContent;
+    const message = notificationElement.querySelector('.notification-message').textContent;
+    const time = notificationElement.querySelector('.text-muted').textContent;
+    
+    // Create and show modal
+    const modalHtml = `
+        <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="notificationModalLabel">
+                            <i class="fas fa-bell me-2"></i>Notification Details
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h6 class="text-primary mb-3">${title}</h6>
+                        <p class="mb-3">${message}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>${time}
+                        </small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="markAsRead(${notificationId}); $('#notificationModal').modal('hide');">
+                            <i class="fas fa-check me-1"></i>Mark as Read
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('notificationModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+    modal.show();
+    
+    // Clean up modal when hidden
+    document.getElementById('notificationModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
 </script>
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/pages/employee_notifications.css' %}">
+<style>
+    .notification-item {
+        transition: all 0.2s ease-in-out;
+        border-left: 4px solid transparent;
+    }
+    
+    .notification-item:hover {
+        background-color: #f8f9fa !important;
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left-color: #007bff;
+    }
+    
+    .notification-item.unread:hover {
+        background-color: #e3f2fd !important;
+        border-left-color: #2196f3;
+    }
+    
+    .notification-item:active {
+        transform: translateX(2px);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    
+    .notification-item .btn-group-vertical {
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+    }
+    
+    .notification-item:hover .btn-group-vertical {
+        opacity: 1;
+    }
+    
+    .notification-item .btn-group-vertical .btn {
+        transition: all 0.2s ease;
+    }
+    
+    .notification-item .btn-group-vertical .btn:hover {
+        transform: scale(1.05);
+    }
+</style>
 {% endblock %}
 {% endblock %}

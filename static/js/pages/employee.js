@@ -1,7 +1,7 @@
 // Employee Dashboard JavaScript Functionality
 
 // Time Tracking Functions
-let timerInterval;
+let employeeTimerInterval;
 let startTime;
 let isRunning = false;
 
@@ -19,7 +19,7 @@ function startTimeTracking() {
         document.getElementById('pauseBtn').style.display = 'inline-block';
         
         // Start timer interval
-        timerInterval = setInterval(updateTimer, 1000);
+        employeeTimerInterval = setInterval(updateTimer, 1000);
     }
 }
 
@@ -28,7 +28,7 @@ function startTimeTracking() {
  */
 function stopTimeTracking() {
     if (isRunning) {
-        clearInterval(timerInterval);
+        clearInterval(employeeTimerInterval);
         isRunning = false;
         
         // Hide/show buttons
@@ -157,15 +157,19 @@ function initEmployeeDashboard() {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
             
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
+            const href = this.getAttribute('href');
+            // Only scroll if href is not just '#' and is a valid selector
+            if (href !== '#' && document.querySelector(href)) {
+                document.querySelector(href).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
         });
     });
 }
 
 /**
- * Initialize notification dropdown (DISABLED - No auto-fetching)
+ * Initialize notification dropdown
  */
 function initNotifications() {
     const notificationDropdown = document.getElementById('notificationDropdown');
@@ -180,11 +184,11 @@ function initNotifications() {
             });
         });
         
-        // DISABLED: Fetch new notifications when page loads
-        // fetchNewNotifications();
+        // Fetch new notifications when page loads
+        fetchNewNotifications();
         
-        // DISABLED: Check for new notifications every 30 seconds
-        // setInterval(checkForNewNotifications, 30000);
+        // Check for new notifications every 30 seconds
+        setInterval(checkForNewNotifications, 30000);
     }
 }
 
@@ -635,8 +639,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize dashboard
     initEmployeeDashboard();
     
-    // DISABLED: Initialize notifications (no auto-fetching)
-    // initNotifications();
+    // Initialize notifications
+    initNotifications();
     
     // Initialize notification preferences
     initNotificationPreferences();

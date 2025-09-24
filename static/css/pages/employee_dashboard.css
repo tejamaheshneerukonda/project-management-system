@@ -346,8 +346,8 @@
     border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
 }
 
-/* Notification Dropdown Styling */
-.notification-dropdown {
+/* Notification Dropdown Styling - High Specificity */
+.employee-header .navbar-nav .nav-item.dropdown #headerNotificationDropdown {
     min-width: 380px;
     max-width: 400px;
     border: none;
@@ -356,6 +356,33 @@
     padding: 0;
     overflow: hidden;
     background: #ffffff;
+    z-index: 9999 !important; /* Very high z-index to ensure visibility above all elements */
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    margin-top: 0.5rem;
+}
+
+/* Profile Dropdown Styling - High Specificity */
+.employee-header .navbar-nav .nav-item.dropdown .employee-user-info + .dropdown-menu {
+    z-index: 9999 !important; /* Very high z-index to ensure visibility above all elements */
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    margin-top: 0.5rem;
+}
+
+/* Ensure dropdowns are not clipped */
+.employee-header {
+    overflow: visible !important;
+}
+
+.employee-header .navbar {
+    overflow: visible !important;
+}
+
+.employee-header .container-fluid {
+    overflow: visible !important;
 }
 
 .notification-header {

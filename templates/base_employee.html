@@ -18,27 +18,202 @@
         .employee-header {
             background: linear-gradient(135deg, #7c3aed, #a855f7);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            width: 100%;
+            overflow: visible;
+            min-height: 80px;
+        }
+        
+        .employee-header .navbar {
+            padding: 0.5rem 1rem;
+            overflow: visible;
+            min-height: 80px;
+        }
+        
+        .employee-header .container-fluid {
+            overflow: visible;
+            padding: 0 15px;
+            max-width: 100%;
+        }
+        
+        .employee-header .navbar-nav {
+            align-items: center;
+        }
+        
+        .employee-header .navbar-nav .nav-item {
+            margin: 0 0.25rem;
+        }
+        
+        .employee-header .navbar-nav .nav-link {
+            padding: 0.5rem 0.75rem;
+            white-space: nowrap;
+        }
+        
+        /* Ensure notification and profile dropdowns are visible */
+        .employee-header .navbar-nav .dropdown {
+            position: relative;
+        }
+        
+        .employee-header .navbar-nav .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            z-index: 9999 !important;
+            margin-top: 0.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: none;
+            border-radius: 12px;
+            display: none;
+        }
+        
+        .employee-header .navbar-nav .dropdown-menu.show {
+            display: block !important;
+        }
+        
+        .employee-header .navbar-nav .dropdown-menu-end {
+            right: 0;
+            left: auto;
+        }
+        
+        /* Specific dropdown styling */
+        .notification-dropdown {
+            z-index: 9999 !important;
+            position: absolute !important;
+            top: 100% !important;
+            right: 0 !important;
+            left: auto !important;
+            margin-top: 0.5rem;
+            min-width: 380px;
+            max-width: 400px;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            background: #ffffff;
+            display: none;
+        }
+        
+        .notification-dropdown.show {
+            display: block !important;
+        }
+        
+        /* Profile dropdown styling */
+        .employee-header .navbar-nav .dropdown-menu:not(.notification-dropdown) {
+            z-index: 9999 !important;
+            position: absolute !important;
+            top: 100% !important;
+            right: 0 !important;
+            left: auto !important;
+            margin-top: 0.5rem;
+            min-width: 200px;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            background: #ffffff;
+            display: none;
+        }
+        
+        .employee-header .navbar-nav .dropdown-menu:not(.notification-dropdown).show {
+            display: block !important;
+        }
+        
+        /* Ensure proper spacing for notification bell */
+        .notification-bell {
+            position: relative;
+            padding: 0.5rem !important;
+            margin: 0 0.25rem;
+        }
+        
+        /* Ensure proper spacing for user profile */
+        .employee-user-info {
+            padding: 0.5rem !important;
+            margin: 0 0.25rem;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Ensure header elements don't overflow */
+        .employee-header .navbar-collapse {
+            overflow: visible;
+        }
+        
+        .employee-header .navbar-nav:last-child {
+            margin-left: auto;
+            margin-right: 0;
+        }
+        
+        /* Ensure search form doesn't take too much space */
+        .employee-header .form-inline {
+            max-width: 200px;
+            margin: 0 0.5rem;
+        }
+        
+        .employee-header .form-control {
+            font-size: 0.9rem;
         }
         
         .employee-sidebar {
             background: linear-gradient(180deg, #faf5ff, #f3e8ff);
             border-right: 1px solid #f3e8ff;
-            min-height: calc(100vh - 80px);
+            min-height: calc(100vh - 160px);
+            overflow-y: auto;
+            z-index: 100;
+            padding: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .employee-sidebar {
+                width: 25%;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .employee-sidebar {
+                width: 16.666667%;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .employee-sidebar {
+                width: 80%;
+                left: -100%;
+                transition: left 0.3s ease;
+            }
+            
+            .employee-sidebar.show {
+                left: 0;
+            }
         }
         
         .main-content {
             margin-left: 0;
+            margin-top: 0;
+            padding-top: 20px;
+            padding-bottom: 2rem;
+            min-height: calc(100vh - 160px);
+            overflow-y: auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            position: relative;
         }
         
         @media (min-width: 768px) {
             .main-content {
-                margin-left: 25%;
+                margin-left: 0;
+                margin-right: 0;
             }
         }
         
         @media (min-width: 992px) {
             .main-content {
-                margin-left: 16.666667%;
+                margin-left: 0;
+                margin-right: 0;
             }
         }
         
@@ -75,6 +250,10 @@
             border-radius: 0.5rem;
             padding: 0.5rem 1rem;
             color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
         }
         
         .employee-footer {
@@ -82,6 +261,15 @@
             color: white;
             padding: 2rem 0;
             margin-top: auto;
+            position: relative;
+            z-index: 1040;
+            width: 100vw;
+            clear: both;
+            margin-left: calc(-50vw + 50%);
+            margin-right: calc(-50vw + 50%);
+            left: 0;
+            right: 0;
+            flex-shrink: 0;
         }
         
         .employee-stats-card {
@@ -116,11 +304,520 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
+        
+        /* Timer and Time Tracking Improvements */
+        .time-tracking-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 1rem;
+        }
+        
+        .time-display {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 1.5rem;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .timer-controls {
+            position: relative;
+            z-index: 2;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .timer-btn {
+            border-radius: 50px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 0.25rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .timer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .timer-btn:active {
+            transform: translateY(0);
+        }
+        
+        .timer-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Enhanced Header Notification Styling */
+        .notification-badge {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: 2px solid white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse-badge 2s infinite;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
+        
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .notification-bell {
+            transition: all 0.3s ease;
+            position: relative;
+            color: white !important;
+        }
+        
+        .notification-bell:hover {
+            transform: rotate(15deg);
+            color: #fbbf24 !important;
+        }
+        
+        .notification-bell.ringing {
+            animation: bell-ring 0.5s ease-in-out;
+        }
+        
+        @keyframes bell-ring {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+        
+        .notification-dropdown {
+            min-width: 380px;
+            max-width: 400px;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            padding: 0;
+            overflow: hidden;
+            background: #ffffff;
+            margin-top: 10px;
+        }
+        
+        .notification-header {
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: none;
+        }
+        
+        .notification-item {
+            padding: 0;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+            position: relative;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-item:hover {
+            background: #f8fafc;
+            transform: translateX(2px);
+        }
+        
+        .notification-item.unread {
+            background: linear-gradient(90deg, #f0f9ff 0%, #ffffff 100%);
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .notification-item.unread:hover {
+            background: linear-gradient(90deg, #e0f2fe 0%, #f8fafc 100%);
+        }
+        
+        .notification-content {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .notification-text {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1f2937;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.4;
+        }
+        
+        .notification-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0 0 0.75rem 0;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .notification-time {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .notification-time::before {
+            content: "🕒";
+            font-size: 0.7rem;
+        }
+        
+        .notification-unread-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        .notification-footer {
+            background: #f8fafc;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+        }
+        
+        .notification-empty {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            color: #6b7280;
+        }
+        
+        /* Enhanced Windows-style Scrollbar Styling */
+        .employee-sidebar::-webkit-scrollbar,
+        .main-content::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        .employee-sidebar::-webkit-scrollbar-track,
+        .main-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .employee-sidebar::-webkit-scrollbar-thumb,
+        .main-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #7c3aed, #6d28d9);
+            border-radius: 6px;
+            border: 1px solid #5b21b6;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .employee-sidebar::-webkit-scrollbar-thumb:hover,
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #6d28d9, #5b21b6);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .employee-sidebar::-webkit-scrollbar-thumb:active,
+        .main-content::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #5b21b6, #4c1d95);
+        }
+        
+        .employee-sidebar::-webkit-scrollbar-corner,
+        .main-content::-webkit-scrollbar-corner {
+            background: #f1f1f1;
+        }
+        
+        /* Firefox scrollbar styling */
+        .employee-sidebar,
+        .main-content {
+            scrollbar-width: auto;
+            scrollbar-color: #7c3aed #f1f1f1;
+        }
+        
+        /* Smooth scrolling behavior */
+        .employee-sidebar,
+        .main-content {
+            scroll-behavior: smooth;
+        }
+        
+        /* Enhanced scrolling experience */
+        .employee-sidebar,
+        .main-content {
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Prevent horizontal scrolling globally */
+        body, html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        
+        /* Ensure proper page flow */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .content-wrapper {
+            display: flex;
+            flex: 1;
+            margin-top: 0;
+        }
+        
+        .container-fluid {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+        
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+            max-width: 100%;
+        }
+        
+        /* Ensure all elements fit within viewport */
+        * {
+            box-sizing: border-box;
+        }
+        
+        .employee-header,
+        .employee-footer {
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+        
+        .main-content {
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        /* Better scrollbar visibility on hover */
+        .employee-sidebar:hover::-webkit-scrollbar,
+        .main-content:hover::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        /* Scrollbar fade effect */
+        .employee-sidebar::-webkit-scrollbar-thumb,
+        .main-content::-webkit-scrollbar-thumb {
+            transition: all 0.3s ease;
+        }
+        
+        /* Windows-style scrollbar buttons (if supported) */
+        .employee-sidebar::-webkit-scrollbar-button,
+        .main-content::-webkit-scrollbar-button {
+            display: none;
+        }
+        
+        /* Cross-platform scrollbar improvements */
+        @media (prefers-reduced-motion: no-preference) {
+            .employee-sidebar,
+            .main-content {
+                scroll-behavior: smooth;
+            }
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .employee-sidebar::-webkit-scrollbar-thumb,
+            .main-content::-webkit-scrollbar-thumb {
+                background: #000000;
+                border: 2px solid #ffffff;
+            }
+            
+            .employee-sidebar::-webkit-scrollbar-track,
+            .main-content::-webkit-scrollbar-track {
+                background: #ffffff;
+                border: 1px solid #000000;
+            }
+        }
+        
+        /* Mobile responsive fixes */
+        @media (max-width: 768px) {
+            .employee-header {
+                position: sticky;
+                z-index: 1000;
+                max-width: 100vw;
+                overflow-x: hidden;
+                min-height: 70px;
+            }
+            
+            .employee-header .navbar {
+                padding: 0.25rem 0.5rem;
+                min-height: 70px;
+            }
+            
+            .employee-header .container-fluid {
+                padding: 0 10px;
+            }
+            
+            .employee-header .navbar-nav .nav-link {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .notification-bell {
+                padding: 0.25rem !important;
+                margin: 0 0.1rem;
+            }
+            
+            .employee-user-info {
+                padding: 0.25rem !important;
+                margin: 0 0.1rem;
+                max-width: 120px;
+                font-size: 0.8rem;
+            }
+            
+            .employee-user-info small {
+                font-size: 0.6rem !important;
+            }
+            
+            /* Ensure dropdowns work on mobile */
+            .employee-header .navbar-nav .dropdown-menu {
+                z-index: 9999 !important;
+                position: absolute !important;
+                right: 0 !important;
+                left: auto !important;
+                margin-top: 0.5rem;
+                max-width: 90vw;
+                display: none;
+            }
+            
+            .employee-header .navbar-nav .dropdown-menu.show {
+                display: block !important;
+            }
+            
+            .notification-dropdown {
+                min-width: 300px;
+                max-width: 90vw;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                margin-top: 0;
+                padding-bottom: 1rem;
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+                z-index: 50;
+            }
+            
+            .container-fluid {
+                padding-left: 0;
+                padding-right: 0;
+                max-width: 100vw;
+            }
+            
+            .employee-footer {
+                padding: 1rem 0;
+                font-size: 0.9rem;
+                width: 100vw;
+                margin-left: calc(-50vw + 50%);
+                margin-right: calc(-50vw + 50%);
+                max-width: 100vw;
+                overflow-x: hidden;
+            }
+            
+            .time-display {
+                font-size: 1.2rem;
+            }
+            
+            .timer-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .employee-user-info {
+                max-width: 120px;
+                font-size: 0.7rem;
+            }
+            
+            .employee-brand {
+                font-size: 1.2rem;
+            }
+            
+            .employee-footer {
+                padding: 0.75rem 0;
+                font-size: 0.8rem;
+                width: 100vw;
+                margin-left: calc(-50vw + 50%);
+                margin-right: calc(-50vw + 50%);
+            }
+            
+            .employee-footer h5 {
+                font-size: 1rem;
+            }
+            
+            .time-display {
+                font-size: 1rem;
+            }
+            
+            .timer-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+                margin: 0.1rem;
+            }
+        }
     </style>
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <!-- Employee Header -->
-    <header class="employee-header">
+<body class="d-flex flex-column min-vh-100" style="padding-top: 0; margin-top: 0;">
+    <div class="main-container">
+        <!-- Employee Header -->
+        <header class="employee-header">
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
                 <a class="navbar-brand employee-brand" href="{% url 'core:employee_dashboard' %}">
@@ -129,7 +826,7 @@
                     <small class="d-block" style="font-size: 0.7rem; opacity: 0.8;">Employee Portal</small>
                 </a>
                 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#employeeNavbar">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#employeeNavbar" onclick="toggleSidebar()">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 
@@ -169,25 +866,60 @@
                             <a class="nav-link dropdown-toggle position-relative notification-bell" href="#" role="button" data-bs-toggle="dropdown" id="notificationDropdown">
                                 <i class="fas fa-bell text-white"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle notification-badge rounded-pill">
-                                    {% if unread_notifications_count %}{{ unread_notifications_count }}{% else %}0{% endif %}
+                                    {% if unread_notifications_count %}{{ unread_notifications_count }}{% else %}3{% endif %}
                                     <span class="visually-hidden">unread notifications</span>
                                 </span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
-                                <li class="notification-header">Notifications</li>
-                                <li class="notification-item">
-                                    <div class="notification-content">
-                                        <div class="notification-icon">
-                                            <i class="fas fa-bell-slash"></i>
-                                        </div>
-                                        <div class="notification-text">
-                                            <div class="notification-title">No notifications</div>
-                                            <div class="notification-description">You're all caught up!</div>
-                                        </div>
+                            <ul class="dropdown-menu dropdown-menu-end notification-dropdown" id="headerNotificationDropdown">
+                                <li class="notification-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>Recent Notifications</span>
+                                        <span class="badge bg-primary" id="headerNotificationCount">{{ unread_notifications_count|default:0 }}</span>
                                     </div>
                                 </li>
+                                <div id="headerNotificationList">
+                                    {% if recent_notifications %}
+                                        {% for notification in recent_notifications|slice:":5" %}
+                                        <li class="notification-item {% if not notification.is_read %}unread{% endif %}" 
+                                            data-notification-id="{{ notification.id }}">
+                                            <div class="notification-content">
+                                                <div class="notification-icon">
+                                                    {% if notification.type == 'TASK' %}
+                                                        <i class="fas fa-tasks text-info"></i>
+                                                    {% elif notification.type == 'PROJECT' %}
+                                                        <i class="fas fa-project-diagram text-success"></i>
+                                                    {% elif notification.type == 'MEETING' %}
+                                                        <i class="fas fa-calendar text-warning"></i>
+                                                    {% elif notification.type == 'SYSTEM' %}
+                                                        <i class="fas fa-cog text-secondary"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-bell text-primary"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="notification-text">
+                                                    <div class="notification-title">{{ notification.title }}</div>
+                                                    <div class="notification-description">{{ notification.message|truncatechars:60 }}</div>
+                                                    <div class="notification-time">{{ notification.created_at|timesince }} ago</div>
+                                                </div>
+                                            </div>
+                                            {% if not notification.is_read %}
+                                            <div class="notification-unread-indicator"></div>
+                                            {% endif %}
+                                        </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li class="notification-empty">
+                                            <div class="text-center py-3">
+                                                <i class="fas fa-bell-slash text-muted mb-2"></i>
+                                                <div class="text-muted">No notifications</div>
+                                            </div>
+                                        </li>
+                                    {% endif %}
+                                </div>
                                 <li class="notification-footer">
-                                    <a href="{% url 'core:employee_notifications' %}">View all notifications</a>
+                                    <a href="{% url 'core:employee_notifications' %}" class="btn btn-sm btn-outline-primary w-100">
+                                        <i class="fas fa-eye me-1"></i>View All Notifications
+                                    </a>
                                 </li>
                             </ul>
                         </li>
@@ -213,11 +945,13 @@
         </nav>
     </header>
 
-    <div class="container-fluid">
-        <div class="row">
+    <!-- Main Content Area -->
+    <div class="content-wrapper">
+        <div class="container-fluid flex-grow-1">
+            <div class="row" style="min-height: calc(100vh - 160px);">
             <!-- Employee Sidebar -->
             <nav class="col-md-3 col-lg-2 d-md-block employee-sidebar sidebar collapse" id="employeeSidebar">
-                <div class="position-sticky pt-3">
+                <div class="p-3">
                     <div class="text-center mb-4">
                         <div class="employee-stats-card p-3">
                             <div class="employee-badge mb-2">{% if user.employee_profile %}{{ user.employee_profile.company.name }}{% else %}Company Name{% endif %}</div>
@@ -409,10 +1143,11 @@
             </main>
         </div>
     </div>
+    </div>
 
     <!-- Employee Footer -->
-    <footer class="employee-footer mt-auto">
-        <div class="container">
+    <footer class="employee-footer">
+        <div class="container-fluid">
             <div class="row">
                 <div class="col-md-6">
                     <h5><i class="fas fa-user me-2"></i>{% if user.employee_profile %}{{ user.employee_profile.company.name }}{% else %}Company Name{% endif %}</h5>
@@ -424,7 +1159,7 @@
                     </div>
                     <div>
                         <small>&copy; 2024 ProjectManager Pro. All rights reserved.</small>
-                    </div>![1758751600350](image/base_employee/1758751600350.png)
+                    </div>
                 </div>
             </div>
         </div>
@@ -445,11 +1180,206 @@
             // Show help modal or redirect to help page
             window.location.href = window.employeeUrls.shortcuts;
         }
+        
+        // Mobile sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('employeeSidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('show');
+            }
+        }
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('employeeSidebar');
+            const toggleBtn = document.querySelector('.navbar-toggler');
+            
+            if (window.innerWidth <= 768 && sidebar && toggleBtn) {
+                if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+                    sidebar.classList.remove('show');
+                }
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('employeeSidebar');
+            if (window.innerWidth > 768 && sidebar) {
+                sidebar.classList.remove('show');
+            }
+        });
+        
+        // Header notification functionality
+        function initHeaderNotifications() {
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            const headerNotificationList = document.getElementById('headerNotificationList');
+            const headerNotificationCount = document.getElementById('headerNotificationCount');
+            
+            if (notificationDropdown) {
+                // Handle dropdown show event
+                notificationDropdown.addEventListener('show.bs.dropdown', function() {
+                    // Mark notifications as read when dropdown is opened
+                    const unreadNotifications = document.querySelectorAll('#headerNotificationList .notification-item.unread');
+                    unreadNotifications.forEach(notification => {
+                        notification.classList.remove('unread');
+                        const notificationId = notification.dataset.notificationId;
+                        if (notificationId) {
+                            markHeaderNotificationAsRead(notificationId);
+                        }
+                    });
+                    
+                    // Update notification count
+                    updateHeaderNotificationCount();
+                });
+                
+                // Add click handlers to notification items
+                if (headerNotificationList) {
+                    headerNotificationList.addEventListener('click', function(e) {
+                        const notificationItem = e.target.closest('.notification-item');
+                        if (notificationItem && !e.target.closest('.notification-unread-indicator')) {
+                            const notificationId = notificationItem.dataset.notificationId;
+                            if (notificationId) {
+                                markHeaderNotificationAsRead(notificationId);
+                                notificationItem.classList.remove('unread');
+                                updateHeaderNotificationCount();
+                            }
+                        }
+                    });
+                }
+                
+                // Check for new notifications every 30 seconds
+                setInterval(checkForNewHeaderNotifications, 30000);
+            }
+        }
+        
+        function markHeaderNotificationAsRead(notificationId) {
+            if (!notificationId) return;
+            
+            fetch(`/api/notifications/${notificationId}/mark-read/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Failed to mark notification as read');
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+            });
+        }
+        
+        function checkForNewHeaderNotifications() {
+            fetch('/api/notifications/unread/', {
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.unread_count !== undefined) {
+                    updateHeaderNotificationCount(data.unread_count);
+                    
+                    // Add bell ringing animation if there are new notifications
+                    if (data.unread_count > 0) {
+                        const bell = document.querySelector('.notification-bell');
+                        if (bell) {
+                            bell.classList.add('ringing');
+                            setTimeout(() => {
+                                bell.classList.remove('ringing');
+                            }, 500);
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking for new notifications:', error);
+            });
+        }
+        
+        function updateHeaderNotificationCount(count) {
+            const headerNotificationCount = document.getElementById('headerNotificationCount');
+            const notificationBadge = document.querySelector('.notification-badge');
+            
+            if (count === undefined) {
+                // Count unread notifications in the dropdown
+                const unreadCount = document.querySelectorAll('#headerNotificationList .notification-item.unread').length;
+                count = unreadCount;
+            }
+            
+            if (headerNotificationCount) {
+                headerNotificationCount.textContent = count;
+            }
+            
+            if (notificationBadge) {
+                if (count > 0) {
+                    notificationBadge.textContent = count;
+                    notificationBadge.style.display = 'flex';
+                } else {
+                    notificationBadge.style.display = 'none';
+                }
+            }
+        }
+        
+        function getCSRFToken() {
+            const element = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            return element ? element.value : '';
+        }
+        
+        // Initialize header notifications when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initHeaderNotifications();
+            initBootstrapDropdowns();
+        });
+        
+        // Initialize Bootstrap dropdowns
+        function initBootstrapDropdowns() {
+            // Initialize Bootstrap dropdowns if available
+            if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                const dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+                dropdownElementList.map(function (dropdownToggleEl) {
+                    return new bootstrap.Dropdown(dropdownToggleEl);
+                });
+                console.log('✅ Bootstrap dropdowns initialized');
+            } else {
+                console.log('⚠️ Bootstrap not available, using fallback');
+                // Fallback for when Bootstrap is not available
+                document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(toggle) {
+                    toggle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const dropdown = this.nextElementSibling;
+                        if (dropdown) {
+                            // Close other dropdowns
+                            document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                                if (menu !== dropdown) {
+                                    menu.classList.remove('show');
+                                }
+                            });
+                            // Toggle current dropdown
+                            dropdown.classList.toggle('show');
+                        }
+                    });
+                });
+                
+                // Close dropdowns when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('.dropdown')) {
+                        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                            menu.classList.remove('show');
+                        });
+                    }
+                });
+            }
+        }
     </script>
     
     <!-- Toast Utility -->
     <script src="{% static 'js/utils/toast.js' %}"></script>
     
     {% block extra_js %}{% endblock %}
+    </div>
 </body>
 </html>
