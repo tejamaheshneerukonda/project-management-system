@@ -10255,12 +10255,48 @@ def employee_leave_details(request, request_id):
         employee=employee
     ).exclude(id=request_id).order_by('-created_at')[:5]
     
+    # Calculate leave balance
+    def calculate_leave_balance():
+        annual_allocation = 20
+        sick_allocation = 10
+        personal_allocation = 5
+        
+        approved_annual = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_type='VACATION',
+            status='APPROVED'
+        ).aggregate(total=Sum('total_days'))['total'] or 0
+        
+        approved_sick = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_type='SICK_LEAVE',
+            status='APPROVED'
+        ).aggregate(total=Sum('total_days'))['total'] or 0
+        
+        approved_personal = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_type='PERSONAL',
+            status='APPROVED'
+        ).aggregate(total=Sum('total_days'))['total'] or 0
+        
+        return {
+            'annual': float(annual_allocation - approved_annual),
+            'sick': float(sick_allocation - approved_sick),
+            'personal': float(personal_allocation - approved_personal),
+            'annual_used': float(approved_annual),
+            'sick_used': float(approved_sick),
+            'personal_used': float(approved_personal),
+        }
+    
+    leave_balance = calculate_leave_balance()
+    
     context = {
         'title': f'Leave Request Details - {leave_request.leave_type}',
         'company': company,
         'employee': employee,
         'leave_request': leave_request,
         'related_requests': related_requests,
+        'leave_balance': leave_balance,
     }
     return render(request, 'core/employee_leave_details.html', context)
 
@@ -10334,12 +10370,48 @@ def employee_edit_leave_request(request, request_id):
         messages.success(request, 'Leave request updated successfully!')
         return redirect('core:employee_leave_details', request_id=request_id)
     
+    # Calculate leave balance
+    def calculate_leave_balance():
+        annual_allocation = 20
+        sick_allocation = 10
+        personal_allocation = 5
+        
+        approved_annual = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_type='VACATION',
+            status='APPROVED'
+        ).aggregate(total=Sum('total_days'))['total'] or 0
+        
+        approved_sick = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_type='SICK_LEAVE',
+            status='APPROVED'
+        ).aggregate(total=Sum('total_days'))['total'] or 0
+        
+        approved_personal = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_type='PERSONAL',
+            status='APPROVED'
+        ).aggregate(total=Sum('total_days'))['total'] or 0
+        
+        return {
+            'annual': float(annual_allocation - approved_annual),
+            'sick': float(sick_allocation - approved_sick),
+            'personal': float(personal_allocation - approved_personal),
+            'annual_used': float(approved_annual),
+            'sick_used': float(approved_sick),
+            'personal_used': float(approved_personal),
+        }
+    
+    leave_balance = calculate_leave_balance()
+    
     context = {
         'title': f'Edit Leave Request - {leave_request.leave_type}',
         'company': company,
         'employee': employee,
         'leave_request': leave_request,
         'leave_types': LeaveRequest.LEAVE_TYPES,
+        'leave_balance': leave_balance,
     }
     return render(request, 'core/employee_edit_leave_request.html', context)
 
