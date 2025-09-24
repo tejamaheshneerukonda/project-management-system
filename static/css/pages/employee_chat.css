@@ -1,0 +1,152 @@
+/* Employee Chat Styling */
+
+.messages-container {
+    background-color: #f8f9fa;
+}
+
+.message-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.avatar {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.attachment-image {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    max-width: 200px;
+    max-height: 200px;
+    cursor: pointer;
+}
+
+.attachment-image:hover {
+    border-color: #007bff;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.file-attachment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.attachment-actions {
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* File type specific styling */
+.fa-file-pdf { color: #dc3545 !important; }
+.fa-file-word { color: #007bff !important; }
+.fa-file-excel { color: #28a745 !important; }
+.fa-file-powerpoint { color: #ffc107 !important; }
+.fa-file-alt { color: #17a2b8 !important; }
+.fa-file-archive { color: #6c757d !important; }
+
+/* Image modal styling */
+#imageModal .modal-body img {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* File preview styling */
+#filePreview {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+    .attachment-image {
+        max-width: 150px !important;
+        max-height: 150px !important;
+    }
+    
+    .file-attachment .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .file-attachment .flex-shrink-0 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .attachment-actions {
+        opacity: 1; /* Always show on mobile */
+    }
+}
+
+/* Chat room list styling */
+.list-group-item {
+    overflow: hidden;
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+.list-group-item p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    margin-bottom: 0.25rem !important;
+}
+
+.list-group-item .text-muted {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+#roomList {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.room-item {
+    overflow: hidden;
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+.room-item .flex-grow-1 {
+    overflow: hidden;
+    max-width: calc(100% - 40px);
+}
+
+.badge {
+    flex-shrink: 0;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Ensure proper containment */
+.row {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.col-lg-4, .col-lg-8 {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.card {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.card-body {
+    overflow: hidden;
+    max-width: 100%;
+}
