@@ -845,19 +845,27 @@ def company_dashboard(request):
         status='APPROVED'
     ).aggregate(total=Sum('total_days'))['total'] or 0
     
-    # Calculate total available leave days (assuming standard allocations)
+    # Calculate realistic leave metrics for company dashboard
+    # Instead of showing total allocations, show usage patterns and trends
+    
+    # Calculate average leave usage per employee
+    avg_annual_per_employee = total_annual_used / total_employees if total_employees > 0 else 0
+    avg_sick_per_employee = total_sick_used / total_employees if total_employees > 0 else 0
+    avg_personal_per_employee = total_personal_used / total_employees if total_employees > 0 else 0
+    
+    # Calculate leave utilization percentages (assuming standard allocations)
     annual_allocation_per_employee = 20
     sick_allocation_per_employee = 10
     personal_allocation_per_employee = 5
     
-    total_annual_available = total_employees * annual_allocation_per_employee
-    total_sick_available = total_employees * sick_allocation_per_employee
-    total_personal_available = total_employees * personal_allocation_per_employee
+    annual_utilization = (avg_annual_per_employee / annual_allocation_per_employee) * 100 if annual_allocation_per_employee > 0 else 0
+    sick_utilization = (avg_sick_per_employee / sick_allocation_per_employee) * 100 if sick_allocation_per_employee > 0 else 0
+    personal_utilization = (avg_personal_per_employee / personal_allocation_per_employee) * 100 if personal_allocation_per_employee > 0 else 0
     
-    # Calculate remaining balances
-    annual_remaining = total_annual_available - total_annual_used
-    sick_remaining = total_sick_available - total_sick_used
-    personal_remaining = total_personal_available - total_personal_used
+    # Calculate remaining balances per employee (for display purposes)
+    annual_remaining_per_employee = annual_allocation_per_employee - avg_annual_per_employee
+    sick_remaining_per_employee = sick_allocation_per_employee - avg_sick_per_employee
+    personal_remaining_per_employee = personal_allocation_per_employee - avg_personal_per_employee
     
     # Recent leave requests (last 5)
     recent_leave_requests = all_leave_requests.order_by('-created_at')[:5]
@@ -894,12 +902,19 @@ def company_dashboard(request):
         'total_annual_used': total_annual_used,
         'total_sick_used': total_sick_used,
         'total_personal_used': total_personal_used,
-        'total_annual_available': total_annual_available,
-        'total_sick_available': total_sick_available,
-        'total_personal_available': total_personal_available,
-        'annual_remaining': annual_remaining,
-        'sick_remaining': sick_remaining,
-        'personal_remaining': personal_remaining,
+        # Realistic leave metrics
+        'avg_annual_per_employee': round(avg_annual_per_employee, 1),
+        'avg_sick_per_employee': round(avg_sick_per_employee, 1),
+        'avg_personal_per_employee': round(avg_personal_per_employee, 1),
+        'annual_utilization': round(annual_utilization, 1),
+        'sick_utilization': round(sick_utilization, 1),
+        'personal_utilization': round(personal_utilization, 1),
+        'annual_remaining_per_employee': round(annual_remaining_per_employee, 1),
+        'sick_remaining_per_employee': round(sick_remaining_per_employee, 1),
+        'personal_remaining_per_employee': round(personal_remaining_per_employee, 1),
+        'annual_allocation_per_employee': annual_allocation_per_employee,
+        'sick_allocation_per_employee': sick_allocation_per_employee,
+        'personal_allocation_per_employee': personal_allocation_per_employee,
         'recent_leave_requests': recent_leave_requests,
     }
     return render(request, 'core/company_dashboard.html', context)

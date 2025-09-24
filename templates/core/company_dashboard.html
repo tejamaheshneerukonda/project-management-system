@@ -179,9 +179,12 @@
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
                                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Annual Leave</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ annual_remaining }}/{{ total_annual_available }}</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ annual_remaining_per_employee }}/{{ annual_allocation_per_employee }}</div>
                                         <div class="text-xs text-info">
-                                            <i class="fas fa-chart-pie me-1"></i>{{ total_annual_used }} days used
+                                            <i class="fas fa-chart-pie me-1"></i>{{ annual_utilization }}% utilized
+                                        </div>
+                                        <div class="text-xs text-muted">
+                                            <i class="fas fa-users me-1"></i>{{ avg_annual_per_employee }} days avg per employee
                                         </div>
                                     </div>
                                     <div class="col-auto">
@@ -197,9 +200,12 @@
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
                                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Sick Leave</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sick_remaining }}/{{ total_sick_available }}</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sick_remaining_per_employee }}/{{ sick_allocation_per_employee }}</div>
                                         <div class="text-xs text-info">
-                                            <i class="fas fa-chart-pie me-1"></i>{{ total_sick_used }} days used
+                                            <i class="fas fa-chart-pie me-1"></i>{{ sick_utilization }}% utilized
+                                        </div>
+                                        <div class="text-xs text-muted">
+                                            <i class="fas fa-users me-1"></i>{{ avg_sick_per_employee }} days avg per employee
                                         </div>
                                     </div>
                                     <div class="col-auto">
@@ -215,9 +221,12 @@
                                 <div class="row no-gutters align-items-center">
                                     <div class="col mr-2">
                                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Personal Leave</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ personal_remaining }}/{{ total_personal_available }}</div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ personal_remaining_per_employee }}/{{ personal_allocation_per_employee }}</div>
                                         <div class="text-xs text-info">
-                                            <i class="fas fa-chart-pie me-1"></i>{{ total_personal_used }} days used
+                                            <i class="fas fa-chart-pie me-1"></i>{{ personal_utilization }}% utilized
+                                        </div>
+                                        <div class="text-xs text-muted">
+                                            <i class="fas fa-users me-1"></i>{{ avg_personal_per_employee }} days avg per employee
                                         </div>
                                     </div>
                                     <div class="col-auto">

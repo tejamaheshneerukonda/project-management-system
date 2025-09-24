@@ -388,26 +388,6 @@
 </div>
 </div>
 
-<!-- Task Details Modal -->
-<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="taskDetailsModalLabel">
-                    <i class="fas fa-info-circle me-2"></i>Task Details
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="taskDetailsContent"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Edit Task Modal -->
 <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -540,125 +520,22 @@ function addTask() {
         }
     })
     .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showSuccessToast('Task created successfully!');
-                location.reload();
-            } else {
-                showErrorToast('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showErrorToast('An error occurred while creating the task.');
-        });
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the task.');
+    });
 }
 
 function viewTask(taskId) {
-    // Get task details
-    fetch(`/api/task/${taskId}/`)
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const task = data.task;
-            
-            // Format dates
-            const formatDate = (dateString) => {
-                if (!dateString) return 'N/A';
-                const date = new Date(dateString);
-                return date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            };
-            
-            // Get status and priority badges
-            const getStatusBadge = (status) => {
-                const statusMap = {
-                    'TODO': '<span class="badge bg-warning text-white">To Do</span>',
-                    'IN_PROGRESS': '<span class="badge bg-info text-white">In Progress</span>',
-                    'REVIEW': '<span class="badge bg-primary text-white">Review</span>',
-                    'DONE': '<span class="badge bg-success text-white">Done</span>'
-                };
-                return statusMap[status] || `<span class="badge bg-secondary">${status}</span>`;
-            };
-            
-            const getPriorityBadge = (priority) => {
-                const priorityMap = {
-                    'LOW': '<span class="badge bg-secondary">Low</span>',
-                    'MEDIUM': '<span class="badge bg-info">Medium</span>',
-                    'HIGH': '<span class="badge bg-warning">High</span>',
-                    'URGENT': '<span class="badge bg-danger">Urgent</span>'
-                };
-                return priorityMap[priority] || `<span class="badge bg-secondary">${priority}</span>`;
-            };
-            
-            // Build task details HTML
-            const detailsHtml = `
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <h3>${task.title}</h3>
-                        <div class="d-flex flex-wrap gap-2 mt-2">
-                            ${getStatusBadge(task.status)}
-                            ${getPriorityBadge(task.priority)}
-                            <span class="badge bg-secondary">Project: ${task.project.name}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                ${task.description ? `
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <h5 class="text-muted">Description</h5>
-                        <p>${task.description}</p>
-                    </div>
-                </div>
-                ` : ''}
-                
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <h5 class="text-muted">Task Information</h5>
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><strong>Assigned To:</strong> ${task.assigned_to ? `${task.assigned_to.first_name} ${task.assigned_to.last_name}` : 'Unassigned'}</li>
-                            <li class="mb-2"><strong>Due Date:</strong> ${formatDate(task.due_date)}</li>
-                            <li class="mb-2"><strong>Estimated Hours:</strong> ${task.estimated_hours || 'N/A'}</li>
-                            <li class="mb-2"><strong>Actual Hours:</strong> ${task.actual_hours || 'N/A'}</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <h5 class="text-muted">Timestamps</h5>
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><strong>Created:</strong> ${formatDate(task.created_at)}</li>
-                            <li class="mb-2"><strong>Last Updated:</strong> ${formatDate(task.updated_at)}</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-12">
-                        <h5 class="text-muted">Project Details</h5>
-                        <p class="mb-2"><strong>Project:</strong> ${task.project.name}</p>
-                        <p class="mb-2"><strong>Project Manager:</strong> ${task.project.project_manager ? `${task.project.project_manager.first_name} ${task.project.project_manager.last_name}` : 'Unassigned'}</p>
-                        <p><strong>Project Status:</strong> ${task.project.status}</p>
-                    </div>
-                </div>
-            `;
-            
-            // Set content and show modal
-            document.getElementById('taskDetailsContent').innerHTML = detailsHtml;
-            const detailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'));
-            detailsModal.show();
-        } else {
-            showErrorToast('Error: ' + data.error);
-        }
-    })
-        .catch(error => {
-            console.error('Error:', error);
-            showErrorToast('An error occurred while fetching task details.');
-        });
+    // TODO: Implement task details view
+    alert('View task details for ID: ' + taskId);
 }
 
 function editTask(taskId) {
@@ -683,13 +560,13 @@ function editTask(taskId) {
             const editModal = new bootstrap.Modal(document.getElementById('editTaskModal'));
             editModal.show();
         } else {
-            showErrorToast('Error: ' + data.error);
+            alert('Error: ' + data.error);
         }
     })
-        .catch(error => {
-            console.error('Error:', error);
-            showErrorToast('An error occurred while fetching task details.');
-        });
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while fetching task details.');
+    });
 }
 
 function submitEditTask() {
@@ -721,13 +598,13 @@ function submitEditTask() {
         if (data.success) {
             location.reload();
         } else {
-            showErrorToast('Error: ' + data.error);
+            alert('Error: ' + data.error);
         }
     })
-        .catch(error => {
-            console.error('Error:', error);
-            showErrorToast('An error occurred while updating the task.');
-        });
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating the task.');
+    });
 }
 
 function deleteTask(taskId) {
@@ -743,12 +620,12 @@ function deleteTask(taskId) {
             if (data.success) {
                 location.reload();
             } else {
-                showErrorToast('Error: ' + data.error);
+                alert('Error: ' + data.error);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showErrorToast('An error occurred while deleting the task.');
+            alert('An error occurred while deleting the task.');
         });
     }
 }
