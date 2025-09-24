@@ -4303,6 +4303,12 @@ def employee_timesheet(request):
     # Calculate week totals
     week_total = timesheets.aggregate(total=Sum('total_hours'))['total'] or 0
     
+    # Calculate today's hours
+    hours_today = Timesheet.objects.filter(
+        employee=employee,
+        date=today
+    ).aggregate(total=Sum('total_hours'))['total'] or 0
+    
     # Get recent timesheets for history
     recent_timesheets = Timesheet.objects.filter(
         employee=employee
@@ -4313,6 +4319,7 @@ def employee_timesheet(request):
         'employee': employee,
         'timesheets': timesheets,
         'week_total': round(float(week_total), 1),
+        'hours_today': round(float(hours_today), 1),
         'week_start': week_start,
         'week_end': week_end,
         'recent_timesheets': recent_timesheets,
