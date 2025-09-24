@@ -4411,7 +4411,11 @@ def employee_chat(request):
         action = request.GET.get('action')
         
         if action == 'get_employees':
-            employees = Employee.objects.filter(company=company).values('id', 'first_name', 'last_name', 'position')
+            # Only show employees who have registered (have user accounts)
+            employees = Employee.objects.filter(
+                company=company,
+                user_account__isnull=False
+            ).values('id', 'first_name', 'last_name', 'position')
             return JsonResponse({'success': True, 'employees': list(employees)})
         
         elif action == 'get_projects':
@@ -4448,7 +4452,8 @@ def employee_chat(request):
             if participants:
                 participant_employees = Employee.objects.filter(
                     id__in=participants,
-                    company=company
+                    company=company,
+                    user_account__isnull=False  # Only registered employees
                 )
                 room.participants.add(*participant_employees)
             
@@ -4456,7 +4461,8 @@ def employee_chat(request):
             if room_type == 'DEPARTMENT' and department:
                 department_employees = Employee.objects.filter(
                     company=company,
-                    department=department
+                    department=department,
+                    user_account__isnull=False  # Only registered employees
                 )
                 room.participants.add(*department_employees)
                 room.description = f"Department chat for {department}"
@@ -4466,7 +4472,8 @@ def employee_chat(request):
                 from .models import Project
                 try:
                     project = Project.objects.get(id=project_id, company=company)
-                    project_employees = project.team_members.all()
+                    # Only include registered team members
+                    project_employees = project.team_members.filter(user_account__isnull=False)
                     room.participants.add(*project_employees)
                     room.description = f"Project chat for {project.name}"
                 except Project.DoesNotExist:

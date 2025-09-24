@@ -8,11 +8,11 @@ class Command(BaseCommand):
         companies = Company.objects.all()
         
         for company in companies:
-            # Get the first employee as the creator, or skip if no employees
-            first_employee = Employee.objects.filter(company=company).first()
+            # Get the first registered employee as the creator, or skip if no registered employees
+            first_employee = Employee.objects.filter(company=company, user_account__isnull=False).first()
             if not first_employee:
                 self.stdout.write(
-                    self.style.WARNING(f'No employees found for {company.name}, skipping...')
+                    self.style.WARNING(f'No registered employees found for {company.name}, skipping...')
                 )
                 continue
             
@@ -29,8 +29,8 @@ class Command(BaseCommand):
             )
             
             if created:
-                # Add all employees to the General room
-                employees = Employee.objects.filter(company=company)
+                # Add all registered employees to the General room
+                employees = Employee.objects.filter(company=company, user_account__isnull=False)
                 general_room.participants.set(employees)
                 
                 self.stdout.write(
