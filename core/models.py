@@ -992,7 +992,9 @@ class Timesheet(models.Model):
                 end_datetime += timedelta(days=1)
             
             total_minutes = (end_datetime - start_datetime).total_seconds() / 60
-            total_hours = (total_minutes - (self.break_duration * 60)) / 60
+            # Convert break_duration to float to avoid Decimal/float type mismatch
+            break_minutes = float(self.break_duration) * 60
+            total_hours = (total_minutes - break_minutes) / 60
             
             self.total_hours = max(0, total_hours)
         
@@ -1044,7 +1046,9 @@ class Shift(models.Model):
             end_datetime += timedelta(days=1)
         
         total_minutes = (end_datetime - start_datetime).total_seconds() / 60
-        return (total_minutes - (self.break_duration * 60)) / 60
+        # Convert break_duration to float to avoid Decimal/float type mismatch
+        break_minutes = float(self.break_duration) * 60
+        return (total_minutes - break_minutes) / 60
 
 class EmployeeShift(models.Model):
     """Employee shift assignments"""

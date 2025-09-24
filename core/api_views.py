@@ -3149,24 +3149,20 @@ def create_timesheet(request):
         except ValueError as e:
             return JsonResponse({'success': False, 'message': f'Invalid date/time format: {str(e)}'}, status=400)
         
-        # Calculate total hours
+        # Validate times
         start_datetime = datetime.combine(entry_date, start_time)
         end_datetime = datetime.combine(entry_date, end_time)
         
         if end_datetime <= start_datetime:
             return JsonResponse({'success': False, 'message': 'End time must be after start time'}, status=400)
         
-        duration = end_datetime - start_datetime
-        total_hours = duration.total_seconds() / 3600  # Convert to hours
-        
-        # Create timesheet entry
+        # Create timesheet entry - let the model's save method calculate total_hours
         from core.models import Timesheet
         timesheet = Timesheet.objects.create(
             employee=employee,
             date=entry_date,
             start_time=start_time,
             end_time=end_time,
-            total_hours=total_hours,
             task_description=task_description,
             work_performed=work_performed,
             status='DRAFT'
@@ -3231,24 +3227,20 @@ def update_timesheet(request, timesheet_id):
         except ValueError as e:
             return JsonResponse({'success': False, 'message': f'Invalid date/time format: {str(e)}'}, status=400)
         
-        # Calculate total hours
+        # Validate times
         start_datetime = datetime.combine(entry_date, start_time)
         end_datetime = datetime.combine(entry_date, end_time)
         
         if end_datetime <= start_datetime:
             return JsonResponse({'success': False, 'message': 'End time must be after start time'}, status=400)
         
-        duration = end_datetime - start_datetime
-        total_hours = duration.total_seconds() / 3600  # Convert to hours
-        
-        # Update timesheet entry
+        # Update timesheet entry - let the model's save method calculate total_hours
         timesheet.date = entry_date
         timesheet.start_time = start_time
         timesheet.end_time = end_time
-        timesheet.total_hours = total_hours
         timesheet.task_description = task_description
         timesheet.work_performed = work_performed
-        timesheet.save()
+        timesheet.save()  # This will trigger the model's save method to calculate total_hours
         
         return JsonResponse({
             'success': True,

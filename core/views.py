@@ -4366,7 +4366,7 @@ def employee_edit_timesheet(request, timesheet_id):
             messages.error(request, 'Invalid date/time format.')
             return redirect('core:employee_edit_timesheet', timesheet_id=timesheet_id)
         
-        # Calculate total hours
+        # Validate times
         start_datetime = datetime.combine(entry_date, start_time)
         end_datetime = datetime.combine(entry_date, end_time)
         
@@ -4374,17 +4374,13 @@ def employee_edit_timesheet(request, timesheet_id):
             messages.error(request, 'End time must be after start time.')
             return redirect('core:employee_edit_timesheet', timesheet_id=timesheet_id)
         
-        duration = end_datetime - start_datetime
-        total_hours = duration.total_seconds() / 3600  # Convert to hours
-        
-        # Update timesheet entry
+        # Update timesheet entry - let the model's save method calculate total_hours
         timesheet.date = entry_date
         timesheet.start_time = start_time
         timesheet.end_time = end_time
-        timesheet.total_hours = total_hours
         timesheet.task_description = task_description
         timesheet.work_performed = work_performed
-        timesheet.save()
+        timesheet.save()  # This will trigger the model's save method to calculate total_hours
         
         messages.success(request, 'Timesheet entry updated successfully!')
         return redirect('core:employee_timesheet')
