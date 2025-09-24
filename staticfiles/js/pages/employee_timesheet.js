@@ -157,15 +157,15 @@ function initTimesheetManagement() {
             .then(data => {
                 if (data.success) {
                     bootstrap.Modal.getInstance(document.getElementById('addTimesheetModal')).hide();
-                    showSuccessToast('Timesheet saved successfully!');
+                    showToast('Timesheet saved successfully!', 'success');
                     location.reload();
                 } else {
-                    showErrorToast('Error saving timesheet: ' + data.message);
+                    showToast('Error saving timesheet: ' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showErrorToast('Error saving timesheet. Please try again.');
+                showToast('Error saving timesheet. Please try again.', 'error');
             });
         });
     }

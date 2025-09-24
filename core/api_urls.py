@@ -93,6 +93,7 @@ urlpatterns = [
     
     # Timesheet Management API
     path('timesheet/export/', api_views.export_timesheet_data, name='export_timesheet_data'),
+    path('timesheets/<int:timesheet_id>/submit/', api_views.submit_timesheet, name='submit_timesheet'),
     
     # Shift Management API
     path('shift/export/', api_views.export_shift_data, name='export_shift_data'),

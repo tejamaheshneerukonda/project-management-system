@@ -18,7 +18,7 @@ from .models import (
     ActivityLog, PerformanceMetric, Project, Task, Notification, NotificationTemplate, 
     NotificationPreference, NotificationDigest, Announcement, CompanyMetric, 
     CompanySetting, UserPreference, WorkflowTemplate, WorkflowInstance, PerformanceReview, 
-    PerformanceGoal, Feedback, PerformanceReport, Attendance, LeaveRequest, Timesheet,
+    PerformanceGoal, Feedback, PerformanceReport, Attendance, LeaveRequest, Timesheet, 
     ChatRoom, ChatMessage, ChatParticipant, 
     Shift, EmployeeShift, OnboardingWorkflow, OnboardingTask, OnboardingAssignment,
     OnboardingTaskAssignment, OnboardingDocument, OnboardingDocumentSubmission,
@@ -3956,6 +3956,7 @@ def employee_verification(request):
         # Clear any existing verification session to prevent showing wrong company
         if 'verification_company_id' in request.session:
             del request.session['verification_company_id']
+        
         if request.method == 'POST':
             email_domain = request.POST.get('email_domain', '').strip()
             if email_domain:

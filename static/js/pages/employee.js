@@ -45,7 +45,7 @@ function stopTimeTracking() {
         // Create a hidden form to submit the time entry
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '{% url 'core:employee_timesheet' %}';
+        form.action = '/employee/timesheet/';
         
         const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
         const csrfInput = document.createElement('input');

@@ -3250,3 +3250,61 @@ def update_timesheet(request, timesheet_id):
         
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Error updating timesheet: {str(e)}'}, status=500)
+
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def submit_timesheet(request, timesheet_id):
+    """Submit a timesheet for approval"""
+    try:
+        # Get employee profile
+        if not hasattr(request.user, 'employee_profile'):
+            return JsonResponse({'success': False, 'message': 'Employee profile not found'}, status=400)
+        
+        employee = request.user.employee_profile
+        
+        # Get the timesheet
+        try:
+            timesheet = Timesheet.objects.get(
+                id=timesheet_id,
+                employee=employee
+            )
+        except Timesheet.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Timesheet not found'}, status=404)
+        
+        # Only allow submitting draft timesheets
+        if timesheet.status != 'DRAFT':
+            return JsonResponse({'success': False, 'message': 'Only draft timesheets can be submitted'}, status=400)
+        
+        # Validate times
+        from datetime import datetime
+        start_datetime = datetime.combine(timesheet.date, timesheet.start_time)
+        end_datetime = datetime.combine(timesheet.date, timesheet.end_time)
+        
+        if end_datetime <= start_datetime:
+            return JsonResponse({'success': False, 'message': 'End time must be after start time'}, status=400)
+        
+        # Submit the timesheet
+        timesheet.status = 'SUBMITTED'
+        timesheet.submitted_at = datetime.now()
+        timesheet.save()
+        
+        # Log activity
+        from core.models import ActivityLog
+        ActivityLog.objects.create(
+            user=request.user,
+            company=employee.company,
+            action='TIMESHEET_SUBMITTED',
+            description=f'Submitted timesheet entry {timesheet.id}',
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Timesheet submitted successfully',
+            'timesheet_id': timesheet.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error submitting timesheet: {str(e)}'}, status=500)
