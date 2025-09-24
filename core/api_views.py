@@ -3180,3 +3180,81 @@ def create_timesheet(request):
         
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Error creating timesheet: {str(e)}'}, status=500)
+
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def update_timesheet(request, timesheet_id):
+    """Update a timesheet entry"""
+    try:
+        # Parse JSON data from request body
+        import json
+        data = json.loads(request.body)
+        
+        # Get employee profile
+        if not hasattr(request.user, 'employee_profile'):
+            return JsonResponse({'success': False, 'message': 'Employee profile not found'}, status=400)
+        
+        employee = request.user.employee_profile
+        
+        # Get the timesheet
+        try:
+            timesheet = Timesheet.objects.get(
+                id=timesheet_id,
+                employee=employee
+            )
+        except Timesheet.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Timesheet not found'}, status=404)
+        
+        # Only allow editing of draft timesheets
+        if timesheet.status != 'DRAFT':
+            return JsonResponse({'success': False, 'message': 'Only draft timesheets can be edited'}, status=400)
+        
+        # Extract form data
+        date_str = data.get('date')
+        start_time_str = data.get('start_time')
+        end_time_str = data.get('end_time')
+        task_description = data.get('task_description', '')
+        work_performed = data.get('work_performed', '')
+        
+        # Validate required fields
+        if not all([date_str, start_time_str, end_time_str]):
+            return JsonResponse({'success': False, 'message': 'Date, start time, and end time are required'}, status=400)
+        
+        # Parse date and times
+        from datetime import datetime
+        
+        try:
+            entry_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+        except ValueError as e:
+            return JsonResponse({'success': False, 'message': f'Invalid date/time format: {str(e)}'}, status=400)
+        
+        # Calculate total hours
+        start_datetime = datetime.combine(entry_date, start_time)
+        end_datetime = datetime.combine(entry_date, end_time)
+        
+        if end_datetime <= start_datetime:
+            return JsonResponse({'success': False, 'message': 'End time must be after start time'}, status=400)
+        
+        duration = end_datetime - start_datetime
+        total_hours = duration.total_seconds() / 3600  # Convert to hours
+        
+        # Update timesheet entry
+        timesheet.date = entry_date
+        timesheet.start_time = start_time
+        timesheet.end_time = end_time
+        timesheet.total_hours = total_hours
+        timesheet.task_description = task_description
+        timesheet.work_performed = work_performed
+        timesheet.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Timesheet entry updated successfully',
+            'timesheet_id': timesheet.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error updating timesheet: {str(e)}'}, status=500)

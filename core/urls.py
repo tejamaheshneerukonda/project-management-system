@@ -191,6 +191,7 @@ urlpatterns = [
     path('employee/tasks/', views.employee_tasks, name='employee_tasks'),
     path('employee/projects/', views.employee_projects, name='employee_projects'),
     path('employee/timesheet/', views.employee_timesheet, name='employee_timesheet'),
+    path('employee/timesheet/<int:timesheet_id>/edit/', views.employee_edit_timesheet, name='employee_edit_timesheet'),
     path('employee/goals/', views.employee_goals, name='employee_goals'),
     path('employee/leave/', views.employee_leave, name='employee_leave'),
     path('employee/leave/<int:request_id>/details/', views.employee_leave_details, name='employee_leave_details'),

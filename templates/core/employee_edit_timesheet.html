@@ -1,0 +1,186 @@
+{% extends 'base_employee.html' %}
+{% load static %}
+
+{% block title %}Edit Timesheet Entry{% endblock %}
+
+{% block page_title %}Edit Timesheet Entry{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <a href="{% url 'core:employee_timesheet' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Timesheet
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    Edit Timesheet Entry
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="date" class="form-label">Date *</label>
+                                <input type="date" class="form-control" id="date" name="date" 
+                                       value="{{ timesheet.date|date:'Y-m-d' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="start_time" class="form-label">Start Time *</label>
+                                <input type="time" class="form-control" id="start_time" name="start_time" 
+                                       value="{{ timesheet.start_time|time:'H:i' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="end_time" class="form-label">End Time *</label>
+                                <input type="time" class="form-control" id="end_time" name="end_time" 
+                                       value="{{ timesheet.end_time|time:'H:i' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="task_description" class="form-label">Task Description *</label>
+                        <textarea class="form-control" id="task_description" name="task_description" 
+                                  rows="3" required>{{ timesheet.task_description }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="work_performed" class="form-label">Work Performed</label>
+                        <textarea class="form-control" id="work_performed" name="work_performed" 
+                                  rows="4">{{ timesheet.work_performed }}</textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'core:employee_timesheet' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Update Entry
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Timesheet Info -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Timesheet Information
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Status:</strong></div>
+                    <div class="col-6">
+                        {% if timesheet.status == 'DRAFT' %}
+                            <span class="badge bg-warning">Draft</span>
+                        {% elif timesheet.status == 'SUBMITTED' %}
+                            <span class="badge bg-info">Submitted</span>
+                        {% elif timesheet.status == 'APPROVED' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif timesheet.status == 'REJECTED' %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Total Hours:</strong></div>
+                    <div class="col-6">{{ timesheet.total_hours }}h</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Created:</strong></div>
+                    <div class="col-6">{{ timesheet.created_at|date:"M d, Y" }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6"><strong>Last Updated:</strong></div>
+                    <div class="col-6">{{ timesheet.updated_at|date:"M d, Y" }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Editing Guidelines -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Editing Guidelines
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Only draft timesheets can be edited
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        End time must be after start time
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Total hours are calculated automatically
+                    </li>
+                    <li class="mb-0">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Changes are saved immediately
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-calculate total hours when times change
+document.addEventListener('DOMContentLoaded', function() {
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+    
+    function calculateHours() {
+        const startTime = startTimeInput.value;
+        const endTime = endTimeInput.value;
+        
+        if (startTime && endTime) {
+            const start = new Date('2000-01-01 ' + startTime);
+            const end = new Date('2000-01-01 ' + endTime);
+            
+            if (end > start) {
+                const diffMs = end - start;
+                const diffHours = diffMs / (1000 * 60 * 60);
+                
+                // Update a display element if needed
+                const hoursDisplay = document.getElementById('hours-display');
+                if (hoursDisplay) {
+                    hoursDisplay.textContent = diffHours.toFixed(2) + ' hours';
+                }
+            }
+        }
+    }
+    
+    startTimeInput.addEventListener('change', calculateHours);
+    endTimeInput.addEventListener('change', calculateHours);
+    
+    // Initial calculation
+    calculateHours();
+});
+</script>
+{% endblock %}

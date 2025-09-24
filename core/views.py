@@ -4304,6 +4304,83 @@ def employee_timesheet(request):
     return render(request, 'core/employee_timesheet.html', context)
 
 @login_required
+def employee_edit_timesheet(request, timesheet_id):
+    """Edit a specific timesheet entry for employees"""
+    if not hasattr(request.user, 'employee_profile'):
+        messages.error(request, 'Access denied. You are not authorized to view this page.')
+        return redirect('core:home')
+    
+    employee = request.user.employee_profile
+    
+    try:
+        timesheet = Timesheet.objects.get(
+            id=timesheet_id,
+            employee=employee
+        )
+    except Timesheet.DoesNotExist:
+        messages.error(request, 'Timesheet entry not found.')
+        return redirect('core:employee_timesheet')
+    
+    # Only allow editing of draft timesheets
+    if timesheet.status != 'DRAFT':
+        messages.error(request, 'Only draft timesheet entries can be edited.')
+        return redirect('core:employee_timesheet')
+    
+    if request.method == 'POST':
+        # Handle form submission
+        date_str = request.POST.get('date')
+        start_time_str = request.POST.get('start_time')
+        end_time_str = request.POST.get('end_time')
+        task_description = request.POST.get('task_description', '')
+        work_performed = request.POST.get('work_performed', '')
+        
+        # Validate required fields
+        if not all([date_str, start_time_str, end_time_str]):
+            messages.error(request, 'Date, start time, and end time are required.')
+            return redirect('core:employee_edit_timesheet', timesheet_id=timesheet_id)
+        
+        # Parse date and times
+        from datetime import datetime
+        
+        try:
+            entry_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time()
+        except ValueError:
+            messages.error(request, 'Invalid date/time format.')
+            return redirect('core:employee_edit_timesheet', timesheet_id=timesheet_id)
+        
+        # Calculate total hours
+        start_datetime = datetime.combine(entry_date, start_time)
+        end_datetime = datetime.combine(entry_date, end_time)
+        
+        if end_datetime <= start_datetime:
+            messages.error(request, 'End time must be after start time.')
+            return redirect('core:employee_edit_timesheet', timesheet_id=timesheet_id)
+        
+        duration = end_datetime - start_datetime
+        total_hours = duration.total_seconds() / 3600  # Convert to hours
+        
+        # Update timesheet entry
+        timesheet.date = entry_date
+        timesheet.start_time = start_time
+        timesheet.end_time = end_time
+        timesheet.total_hours = total_hours
+        timesheet.task_description = task_description
+        timesheet.work_performed = work_performed
+        timesheet.save()
+        
+        messages.success(request, 'Timesheet entry updated successfully!')
+        return redirect('core:employee_timesheet')
+    
+    context = {
+        'title': f'Edit Timesheet Entry - {timesheet.date}',
+        'employee': employee,
+        'timesheet': timesheet,
+    }
+    return render(request, 'core/employee_edit_timesheet.html', context)
+
+@login_required
 def employee_goals(request):
     """Employee performance goals"""
     if not hasattr(request.user, 'employee_profile'):
